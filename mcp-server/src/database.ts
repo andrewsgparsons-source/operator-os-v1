@@ -22,7 +22,7 @@ export async function ensureSchema() {
       text TEXT NOT NULL,
       type TEXT NOT NULL,
       metadata JSONB DEFAULT '{}'::jsonb,
-      embedding VECTOR(1536) NOT NULL,
+      embedding VECTOR(1536),
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
   `);
