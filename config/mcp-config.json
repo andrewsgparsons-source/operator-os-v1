@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "operator-os-memory": {
+      "command": "node",
+      "args": [
+        "/home/andy/.openclaw/workspace/operator-os-v1/mcp-server/dist/index.js"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/operator_os",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "EMBEDDING_MODEL": "text-embedding-3-small"
+      }
+    }
+  }
+}
