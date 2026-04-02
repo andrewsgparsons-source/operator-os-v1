@@ -24,3 +24,6 @@ Phone-first AI Operator System (Dispatch/Deep, async jobs, operator-first UX).
 - `docs/SYSTEM_ARCHITECTURE_V1.md`
 - `docs/ARCHITECTURE.md`
 - `docs/SETUP.md`
+- `docs/CONTACTS.md`
+- `docs/SCHEDULING_PROTOCOL.md`
+- `docs/SCHEDULE.md`
