@@ -43,9 +43,51 @@ Turns tandem architecture into a resilience advantage, not just redundancy.
 
 ---
 
+### AGENT-AWARE-001 — Runtime Self-Awareness Panel
+**Status:** Proposed
+
+**Requirement:**
+Expose per-agent runtime introspection in-session:
+- machine/runtime ID
+- OS/shell context
+- OpenClaw version
+- active repo path
+- config source-of-truth path
+- channel/session binding
+- memory backend connectivity
+
+---
+
+### AGENT-AWARE-002 — Peer Awareness Capability Card
+**Status:** Proposed
+
+**Requirement:**
+Expose minimal peer cards for collaborating agents:
+- agent ID + role
+- runtime location class (local/remote)
+- tool profile summary
+- shared-memory connectivity state
+- last sync timestamp
+
+---
+
+### AGENT-AWARE-003 — Awareness Policy Levels (Parametric)
+**Status:** Proposed
+
+**Requirement:**
+Support configurable awareness depth by context:
+- Minimal
+- Operational
+- Full
+
+**Design intent:** maximize coordination reliability while preserving least-information security.
+
 ## Acceptance Signals (Draft)
 - `✅ DONE: UI-CTX-001 defined and approved`
 - `✅ DONE: UI-CTX-002 defined and approved`
+- `✅ DONE: AGENT-AWARE-001 defined and approved`
+- `✅ DONE: AGENT-AWARE-002 defined and approved`
+- `✅ DONE: AGENT-AWARE-003 defined and approved`
 - `✅ DONE: V3 context telemetry design frozen`
 
 ## Notes
