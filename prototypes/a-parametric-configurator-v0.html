@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>a-parametric-configurator-v0</title>
+  <style>
+    :root { --bg:#0b1020; --panel:#141b34; --muted:#9fb0d9; --text:#eef3ff; --accent:#7aa2ff; --ok:#3ddc97; }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:var(--text)}
+    .wrap{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;min-height:100vh;padding:12px}
+    .panel{background:var(--panel);border:1px solid #22305f;border-radius:12px;padding:12px}
+    h2{margin:0 0 12px;font-size:16px} h3{margin:12px 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    label{display:block;font-size:13px;margin:6px 0;color:#dfe7ff}
+    input,select,textarea{width:100%;background:#0f1530;border:1px solid #2b3e77;color:#eef3ff;border-radius:8px;padding:8px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{padding:6px 8px;border:1px solid #3954a1;border-radius:999px;font-size:12px;cursor:pointer}
+    .chip.active{background:#243b78;border-color:#7aa2ff}
+    .diagram{height:320px;position:relative;background:#0f1530;border:1px solid #2b3e77;border-radius:10px;overflow:hidden}
+    .node{position:absolute;padding:8px 10px;border:1px solid #4f6fca;background:#1a2855;border-radius:8px;font-size:12px}
+    .line{position:absolute;height:2px;background:#6e8fe8;transform-origin:left center}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{background:#223b7a;color:#fff;border:1px solid #5f7fd5;border-radius:8px;padding:8px 10px;cursor:pointer}
+    button.secondary{background:#14244e}
+    .ok{color:var(--ok);font-size:12px}
+    pre{white-space:pre-wrap;background:#0f1530;border:1px solid #2b3e77;border-radius:8px;padding:10px;min-height:280px;max-height:65vh;overflow:auto}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <h2>Andy Prototype v0</h2>
+      <h3>Team Topology</h3>
+      <label>Agent count <input id="agentCount" type="range" min="2" max="6" value="3" /></label>
+      <div class="row">
+        <label>Lead Agent
+          <select id="leadAgent"><option>James</option><option>Andy</option></select>
+        </label>
+        <label>Visibility Mode
+          <select id="visibility"><option value="single_front_door">single_front_door</option><option value="multi_visible">multi_visible</option></select>
+        </label>
+      </div>
+
+      <h3>Operating Policy</h3>
+      <div class="row">
+        <label>Default mode
+          <select id="defaultMode"><option value="direct_execute">direct_execute</option><option value="delegate">delegate</option></select>
+        </label>
+        <label>Delegate threshold (min)
+          <input id="threshold" type="number" min="1" value="15" />
+        </label>
+      </div>
+      <label>Dispatch Behavior
+        <select id="dispatch"><option>rapid_capture_async</option><option>rapid_capture_sync_ack</option></select>
+      </label>
+
+      <h3>Memory + Security</h3>
+      <div class="row">
+        <label>Memory backend
+          <select id="memory"><option>postgres_supabase</option><option>local_files</option><option>hybrid</option></select>
+        </label>
+        <label>Secrets method
+          <select id="secrets"><option>password_manager</option><option>one_time_link</option></select>
+        </label>
+      </div>
+      <label>Safety level
+        <select id="safety"><option>strict</option><option>balanced</option><option>dev</option></select>
+      </label>
+
+      <h3>Validation Gates</h3>
+      <div class="chips" id="gates"></div>
+
+      <div class="btns">
+        <button id="btnRender">Render Config</button>
+        <button class="secondary" id="btnCopy">Copy JSON</button>
+      </div>
+      <p class="ok" id="status">Ready.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Live Architecture Diagram</h2>
+      <div class="diagram" id="diagram"></div>
+      <h3>Deploy Checklist</h3>
+      <ol id="checklist"></ol>
+    </section>
+
+    <section class="panel">
+      <h2>Config Output</h2>
+      <pre id="jsonOut"></pre>
+    </section>
+  </div>
+
+  <script>
+    const gateOptions = ["spec_gate","execution_gate","qa_gate","approval_gate"];
+    const gateState = new Set(gateOptions);
+    const gatesEl = document.getElementById('gates');
+    gateOptions.forEach(g=>{
+      const c=document.createElement('span');c.className='chip active';c.textContent=g;
+      c.onclick=()=>{ if(gateState.has(g)){gateState.delete(g);c.classList.remove('active')} else {gateState.add(g);c.classList.add('active')} render(); };
+      gatesEl.appendChild(c);
+    });
+
+    const ids=["agentCount","leadAgent","visibility","defaultMode","threshold","dispatch","memory","secrets","safety"];
+    ids.forEach(id=>document.getElementById(id).addEventListener('input',render));
+    document.getElementById('btnRender').onclick=render;
+    document.getElementById('btnCopy').onclick=async()=>{
+      await navigator.clipboard.writeText(document.getElementById('jsonOut').textContent);
+      document.getElementById('status').textContent='Copied JSON to clipboard.';
+    }
+
+    function cfg(){
+      const n=+document.getElementById('agentCount').value;
+      const lead=document.getElementById('leadAgent').value;
+      const support = lead === 'James' ? 'Andy' : 'James';
+      const specialists = Array.from({length:Math.max(0,n-2)},(_,i)=>`specialist_${i+1}`);
+      return {
+        system_name:"Tandem FounderOS",
+        prototype:"andy-v0",
+        topology:{
+          agent_count:n,
+          lead_agent:lead,
+          support_agent:support,
+          specialists,
+          visibility_mode:document.getElementById('visibility').value
+        },
+        execution_policy:{
+          default_mode:document.getElementById('defaultMode').value,
+          delegate_threshold_minutes:+document.getElementById('threshold').value,
+          dispatch_behavior:document.getElementById('dispatch').value
+        },
+        memory_security:{
+          memory_backend:document.getElementById('memory').value,
+          secrets_method:document.getElementById('secrets').value,
+          safety_level:document.getElementById('safety').value
+        },
+        validation_gates:Array.from(gateState),
+        generated_at:new Date().toISOString()
+      }
+    }
+
+    function renderDiagram(c){
+      const d=document.getElementById('diagram'); d.innerHTML='';
+      const nodes=[];
+      const lead={name:c.topology.lead_agent,x:30,y:130};
+      const support={name:c.topology.support_agent,x:220,y:130};
+      nodes.push(lead,support);
+      c.topology.specialists.forEach((s,i)=>nodes.push({name:s,x:440,y:40+i*80}));
+      const human={name:'Andrew (front door)',x:30,y:30}; nodes.unshift(human);
+
+      function line(a,b){
+        const dx=b.x-a.x, dy=b.y-a.y, len=Math.hypot(dx,dy), ang=Math.atan2(dy,dx)*180/Math.PI;
+        const l=document.createElement('div');l.className='line';l.style.left=(a.x+65)+'px';l.style.top=(a.y+18)+'px';l.style.width=len+'px';l.style.transform=`rotate(${ang}deg)`; d.appendChild(l);
+      }
+      line(human,lead); line(lead,support);
+      c.topology.specialists.forEach((_,i)=> line(support,{x:440,y:40+i*80}));
+
+      nodes.forEach(n=>{ const el=document.createElement('div'); el.className='node'; el.textContent=n.name; el.style.left=n.x+'px'; el.style.top=n.y+'px'; d.appendChild(el); });
+    }
+
+    function renderChecklist(c){
+      const list=[
+        `Set lead agent to ${c.topology.lead_agent}`,
+        `Apply visibility mode: ${c.topology.visibility_mode}`,
+        `Configure memory backend: ${c.memory_security.memory_backend}`,
+        `Configure secrets method: ${c.memory_security.secrets_method}`,
+        `Enable gates: ${c.validation_gates.join(', ') || 'none'}`,
+        `Save state snapshot as STATE_vN`
+      ];
+      const el=document.getElementById('checklist'); el.innerHTML='';
+      list.forEach(i=>{const li=document.createElement('li');li.textContent=i;el.appendChild(li)});
+    }
+
+    function render(){
+      const c=cfg();
+      document.getElementById('jsonOut').textContent=JSON.stringify(c,null,2);
+      renderDiagram(c); renderChecklist(c);
+      document.getElementById('status').textContent='Rendered.';
+    }
+
+    render();
+  </script>
+</body>
+</html>
