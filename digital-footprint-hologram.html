@@ -342,6 +342,7 @@
     async function ensureVisLoaded() {
       if (window.vis) return;
       const sources = [
+        './assets/vis-network.min.js',
         'https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js',
         'https://unpkg.com/vis-network/standalone/umd/vis-network.min.js'
       ];
