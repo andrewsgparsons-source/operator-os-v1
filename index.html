@@ -362,24 +362,43 @@
       const nodeIds = new Set(filteredNodes.map(n => n.id));
       const filteredEdges = version.edges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
 
-      const nodes = filteredNodes.map(n => ({
-        id: n.id,
-        label: n.label,
-        shape: byTypeShape(n.type),
-        color: { background: byRiskColor(n.risk), border: '#dbe6ff' },
-        font: { color: '#0b1228', face: 'Inter' },
-        title: `${n.type} • ${n.layer} • ${n.environment}`
-      }));
+      const MAIN_NODE_ID = 'agent_main';
 
-      const edges = filteredEdges.map(e => ({
-        id: e.id,
-        from: e.from,
-        to: e.to,
-        label: e.label,
-        color: { color: byRiskColor(e.risk), opacity: 0.9 },
-        arrows: 'to',
-        font: { color: '#a9bbf4', size: 10, strokeWidth: 0 }
-      }));
+      const nodes = filteredNodes.map(n => {
+        const isMain = n.id === MAIN_NODE_ID;
+        return {
+          id: n.id,
+          label: isMain ? `★ ${n.label}` : n.label,
+          shape: byTypeShape(n.type),
+          size: isMain ? 52 : 28,
+          mass: isMain ? 5 : 1,
+          x: isMain ? 0 : undefined,
+          y: isMain ? 0 : undefined,
+          fixed: isMain ? { x: true, y: true } : false,
+          color: isMain
+            ? { background: '#53c3ff', border: '#ffffff', highlight: { background: '#73d2ff', border: '#ffffff' } }
+            : { background: byRiskColor(n.risk), border: '#dbe6ff' },
+          font: { color: '#0b1228', face: 'Inter', size: isMain ? 18 : 14, bold: isMain ? '700' : '500' },
+          shadow: isMain ? { enabled: true, color: 'rgba(83,195,255,.9)', size: 28, x: 0, y: 0 } : true,
+          title: `${n.type} • ${n.layer} • ${n.environment}${isMain ? ' • CENTRAL ORCHESTRATOR' : ''}`
+        };
+      });
+
+      const edges = filteredEdges.map(e => {
+        const touchesMain = e.from === MAIN_NODE_ID || e.to === MAIN_NODE_ID;
+        return {
+          id: e.id,
+          from: e.from,
+          to: e.to,
+          label: e.label,
+          width: touchesMain ? 3.5 : 1.8,
+          color: touchesMain
+            ? { color: '#53c3ff', highlight: '#73d2ff', opacity: 1 }
+            : { color: byRiskColor(e.risk), opacity: 0.9 },
+          arrows: 'to',
+          font: { color: touchesMain ? '#d7e7ff' : '#a9bbf4', size: touchesMain ? 11 : 10, strokeWidth: 0 }
+        };
+      });
 
       const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
       const options = {
@@ -391,6 +410,13 @@
 
       if (network) network.destroy();
       network = new vis.Network(networkEl, data, options);
+
+      // Keep main orchestrator visually central on initial render.
+      if (nodeIds.has('agent_main')) {
+        setTimeout(() => {
+          network.focus('agent_main', { scale: 1.0, animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+        }, 120);
+      }
 
       network.on('selectNode', (params) => {
         const n = version.nodes.find(x => x.id === params.nodes[0]);
