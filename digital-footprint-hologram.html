@@ -323,7 +323,8 @@
           notes: "Agentic sub-runs + policy approval gateway",
           milestones: [
             { id: "v3m1", at: "2026-04-17T18:03:00+01:00", kind: "milestone", title: "Sub-agent runner live", detail: "Delegated complex tasks into isolated sessions", relatedNodeIds: ["agent_spawn"], tags: ["agentic"] },
-            { id: "v3m2", at: "2026-04-17T18:07:00+01:00", kind: "insight", title: "Approval gate reduces blast radius", detail: "Policy checks before high-impact actions", relatedNodeIds: ["policy_gate", "agent_spawn"], tags: ["safety", "governance"] }
+            { id: "v3m2", at: "2026-04-17T18:07:00+01:00", kind: "insight", title: "Approval gate reduces blast radius", detail: "Policy checks before high-impact actions", relatedNodeIds: ["policy_gate", "agent_spawn"], tags: ["safety", "governance"] },
+            { id: "v3m3", at: "2026-04-17T19:14:00+01:00", kind: "decision", title: "Map becomes primary traceability layer", detail: "All meaningful chats/actions should be logged chronologically with node links", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "process"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
