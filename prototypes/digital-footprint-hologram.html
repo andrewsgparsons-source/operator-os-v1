@@ -112,6 +112,14 @@
       background: #0b1328;
     }
     .failure-title { font-size: 12px; font-weight: 600; color: #ffd56b; }
+    .mode-card {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+    }
+    .mode-title { font-size: 12px; font-weight: 700; color: #53c3ff; }
 
     @media (max-width: 980px) {
       body {
@@ -244,6 +252,9 @@
 
     <h2 style="margin-top:12px">Collaboration funnel</h2>
     <div id="funnel" class="small"></div>
+
+    <h2 style="margin-top:12px">Interaction modes</h2>
+    <div id="modes" class="small"></div>
 
     <h2 style="margin-top:12px">Failure modes library</h2>
     <div id="failures" class="small"></div>
@@ -382,7 +393,8 @@
             { id: "v3m8", at: "2026-04-17T19:50:00+01:00", kind: "milestone", title: "Voice narration linked to demo run", detail: "Run demo now speaks each chronology step aloud for selected time period", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["voice", "demo", "accessibility"] },
             { id: "v3m9", at: "2026-04-17T20:00:00+01:00", kind: "idea", title: "Human-agent onboarding funnel vision", detail: "Project direction reframed as a methodology for onboarding humans and agents of any ability into effective collaboration", relatedNodeIds: ["human_andrew", "agent_main", "agent_spawn"], tags: ["vision", "onboarding", "methodology", "collaboration"] },
             { id: "v3m10", at: "2026-04-17T20:02:00+01:00", kind: "decision", title: "Funnel stages formalized with interaction-mapping emphasis", detail: "Added 7-stage onboarding funnel in UI while preserving explicit focus on mapping our interactions and chronology traceability", relatedNodeIds: ["human_andrew", "agent_main", "store_memory"], tags: ["funnel", "traceability", "process"] },
-            { id: "v3m11", at: "2026-04-17T21:20:00+01:00", kind: "milestone", title: "Failure modes library added", detail: "Human-agent interaction failure modes now documented with signals and mitigations for onboarding and demos", relatedNodeIds: ["human_andrew", "agent_main", "policy_gate"], tags: ["risk", "failure-modes", "onboarding"] }
+            { id: "v3m11", at: "2026-04-17T21:20:00+01:00", kind: "milestone", title: "Failure modes library added", detail: "Human-agent interaction failure modes now documented with signals and mitigations for onboarding and demos", relatedNodeIds: ["human_andrew", "agent_main", "policy_gate"], tags: ["risk", "failure-modes", "onboarding"] },
+            { id: "v3m12", at: "2026-04-17T21:22:00+01:00", kind: "decision", title: "Differentiate Agent Mode vs Traditional Chat", detail: "Added explicit interaction-mode split so execution capabilities are distinct from advisory chat behavior", relatedNodeIds: ["agent_main", "agent_spawn", "human_andrew"], tags: ["modes", "onboarding", "governance"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -414,6 +426,7 @@
     const breadcrumbsEl = document.getElementById('breadcrumbs');
     const timelineEl = document.getElementById('timeline');
     const funnelEl = document.getElementById('funnel');
+    const modesEl = document.getElementById('modes');
     const failuresEl = document.getElementById('failures');
     const demoRangeEl = document.getElementById('demoRange');
     const demoStartEl = document.getElementById('demoStart');
@@ -518,6 +531,24 @@
       funnelEl.innerHTML = `
         <div class="small" style="margin-bottom:6px"><b>Current emphasis:</b> mapping interactions + chronology traceability.</div>
         ${FUNNEL_STAGES.map((s, i) => `<div class="stage-item ${i === 4 ? 'active' : ''}"><div class="stage-title">${s.title}</div><div class="small">${s.detail}</div></div>`).join('')}
+      `;
+    }
+
+    function renderModes() {
+      modesEl.innerHTML = `
+        <div class="mode-card">
+          <div class="mode-title">Traditional Chat (advisory mode)</div>
+          <div class="small">- Primary action: explain, suggest, draft.</div>
+          <div class="small">- No external side effects unless explicitly approved.</div>
+          <div class="small">- Best for thinking, planning, and review loops.</div>
+        </div>
+        <div class="mode-card">
+          <div class="mode-title">Agent Mode (execution mode)</div>
+          <div class="small">- Primary action: run tools, change systems, deliver outcomes.</div>
+          <div class="small">- Uses permissions, guardrails, and approvals for high-impact actions.</div>
+          <div class="small">- Best for repeatable workflows, delegation, and automation.</div>
+        </div>
+        <div class="small" style="margin-top:6px"><b>Current process emphasis:</b> map each interaction by mode and record outcomes chronologically for auditability.</div>
       `;
     }
 
@@ -849,6 +880,7 @@
         <div class="stat">Secret nodes: <b>${secretNodes}</b></div>
       `;
       renderFunnel();
+      renderModes();
       renderFailureLibrary();
       renderTimeline(version);
     }
