@@ -92,6 +92,18 @@
     .timeline-item:hover { border-color: rgba(120,155,255,.55); }
     .timeline-time { color: var(--accent); font-size: 11px; }
     .timeline-note { font-size: 12px; color: #d7e3ff; margin-top: 4px; }
+    .stage-item {
+      border: 1px solid rgba(120,155,255,.28);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 6px 0;
+      background: #0b1328;
+    }
+    .stage-item.active {
+      border-color: #53c3ff;
+      box-shadow: 0 0 0 1px rgba(83,195,255,.45) inset;
+    }
+    .stage-title { font-size: 12px; color: #d7e7ff; font-weight: 600; }
 
     @media (max-width: 980px) {
       body {
@@ -221,6 +233,9 @@
 
     <h2 style="margin-top:12px">Quick stats</h2>
     <div id="stats"></div>
+
+    <h2 style="margin-top:12px">Collaboration funnel</h2>
+    <div id="funnel" class="small"></div>
 
     <h2 style="margin-top:12px">Chronology</h2>
     <div id="timeline" class="small"></div>
@@ -354,7 +369,8 @@
             { id: "v3m6", at: "2026-04-17T19:26:30+01:00", kind: "insight", title: "Chronology now has dual role", detail: "Map acts as architecture view + auditable message/action timeline for Andrew collaboration", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "presentation", "audit"] },
             { id: "v3m7", at: "2026-04-17T19:36:00+01:00", kind: "milestone", title: "Demo tour mode added", detail: "Added button-driven time-range walkthrough that auto-plays chronology achievements", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["demo", "onboarding", "timeline"] },
             { id: "v3m8", at: "2026-04-17T19:50:00+01:00", kind: "milestone", title: "Voice narration linked to demo run", detail: "Run demo now speaks each chronology step aloud for selected time period", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["voice", "demo", "accessibility"] },
-            { id: "v3m9", at: "2026-04-17T20:00:00+01:00", kind: "idea", title: "Human-agent onboarding funnel vision", detail: "Project direction reframed as a methodology for onboarding humans and agents of any ability into effective collaboration", relatedNodeIds: ["human_andrew", "agent_main", "agent_spawn"], tags: ["vision", "onboarding", "methodology", "collaboration"] }
+            { id: "v3m9", at: "2026-04-17T20:00:00+01:00", kind: "idea", title: "Human-agent onboarding funnel vision", detail: "Project direction reframed as a methodology for onboarding humans and agents of any ability into effective collaboration", relatedNodeIds: ["human_andrew", "agent_main", "agent_spawn"], tags: ["vision", "onboarding", "methodology", "collaboration"] },
+            { id: "v3m10", at: "2026-04-17T20:02:00+01:00", kind: "decision", title: "Funnel stages formalized with interaction-mapping emphasis", detail: "Added 7-stage onboarding funnel in UI while preserving explicit focus on mapping our interactions and chronology traceability", relatedNodeIds: ["human_andrew", "agent_main", "store_memory"], tags: ["funnel", "traceability", "process"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -385,6 +401,7 @@
     const statsEl = document.getElementById('stats');
     const breadcrumbsEl = document.getElementById('breadcrumbs');
     const timelineEl = document.getElementById('timeline');
+    const funnelEl = document.getElementById('funnel');
     const demoRangeEl = document.getElementById('demoRange');
     const demoStartEl = document.getElementById('demoStart');
     const demoEndEl = document.getElementById('demoEnd');
@@ -459,6 +476,23 @@
       if (filters.autonomy.value !== 'all' && node.autonomy !== filters.autonomy.value) return false;
       if (filters.failure.value !== 'all' && !(node.failureModes || []).includes(filters.failure.value)) return false;
       return true;
+    }
+
+    const FUNNEL_STAGES = [
+      { id: 'discovery', title: '1) Discovery', detail: 'Clarify intent, actors, constraints, outcomes.' },
+      { id: 'orientation', title: '2) Orientation', detail: 'Establish shared language, interfaces, and context.' },
+      { id: 'capability-mapping', title: '3) Capability mapping', detail: 'Map human strengths, agent/tool capacities, and gaps.' },
+      { id: 'trust-safety', title: '4) Trust & safety calibration', detail: 'Define permissions, approvals, and risk boundaries.' },
+      { id: 'assisted-execution', title: '5) Assisted execution', detail: 'Run collaborative tasks with human-in-the-loop.' },
+      { id: 'autonomous-delegation', title: '6) Autonomous delegation', detail: 'Delegate bounded work to agents with guardrails.' },
+      { id: 'continuous-improvement', title: '7) Continuous improvement', detail: 'Capture learnings and refine workflows continuously.' }
+    ];
+
+    function renderFunnel() {
+      funnelEl.innerHTML = `
+        <div class="small" style="margin-bottom:6px"><b>Current emphasis:</b> mapping interactions + chronology traceability.</div>
+        ${FUNNEL_STAGES.map((s, i) => `<div class="stage-item ${i === 4 ? 'active' : ''}"><div class="stage-title">${s.title}</div><div class="small">${s.detail}</div></div>`).join('')}
+      `;
     }
 
     function updateBreadcrumbs(version) {
@@ -778,6 +812,7 @@
         <div class="stat">High-risk edges: <b>${highRiskEdges}</b></div>
         <div class="stat">Secret nodes: <b>${secretNodes}</b></div>
       `;
+      renderFunnel();
       renderTimeline(version);
     }
 
