@@ -120,6 +120,16 @@
       background: #0b1328;
     }
     .mode-title { font-size: 12px; font-weight: 700; color: #53c3ff; }
+    .resource-item {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+      cursor: pointer;
+    }
+    .resource-item:hover { border-color: rgba(120,155,255,.55); }
+    .resource-title { font-size: 12px; font-weight: 700; color: #7dffb3; }
 
     @media (max-width: 980px) {
       body {
@@ -259,6 +269,9 @@
     <h2 style="margin-top:12px">Failure modes library</h2>
     <div id="failures" class="small"></div>
 
+    <h2 style="margin-top:12px">Resources library</h2>
+    <div id="resources" class="small"></div>
+
     <h2 style="margin-top:12px">Chronology</h2>
     <div id="timeline" class="small"></div>
 
@@ -394,7 +407,8 @@
             { id: "v3m9", at: "2026-04-17T20:00:00+01:00", kind: "idea", title: "Human-agent onboarding funnel vision", detail: "Project direction reframed as a methodology for onboarding humans and agents of any ability into effective collaboration", relatedNodeIds: ["human_andrew", "agent_main", "agent_spawn"], tags: ["vision", "onboarding", "methodology", "collaboration"] },
             { id: "v3m10", at: "2026-04-17T20:02:00+01:00", kind: "decision", title: "Funnel stages formalized with interaction-mapping emphasis", detail: "Added 7-stage onboarding funnel in UI while preserving explicit focus on mapping our interactions and chronology traceability", relatedNodeIds: ["human_andrew", "agent_main", "store_memory"], tags: ["funnel", "traceability", "process"] },
             { id: "v3m11", at: "2026-04-17T21:20:00+01:00", kind: "milestone", title: "Failure modes library added", detail: "Human-agent interaction failure modes now documented with signals and mitigations for onboarding and demos", relatedNodeIds: ["human_andrew", "agent_main", "policy_gate"], tags: ["risk", "failure-modes", "onboarding"] },
-            { id: "v3m12", at: "2026-04-17T21:22:00+01:00", kind: "decision", title: "Differentiate Agent Mode vs Traditional Chat", detail: "Added explicit interaction-mode split so execution capabilities are distinct from advisory chat behavior", relatedNodeIds: ["agent_main", "agent_spawn", "human_andrew"], tags: ["modes", "onboarding", "governance"] }
+            { id: "v3m12", at: "2026-04-17T21:22:00+01:00", kind: "decision", title: "Differentiate Agent Mode vs Traditional Chat", detail: "Added explicit interaction-mode split so execution capabilities are distinct from advisory chat behavior", relatedNodeIds: ["agent_main", "agent_spawn", "human_andrew"], tags: ["modes", "onboarding", "governance"] },
+            { id: "v3m13", at: "2026-04-17T21:27:00+01:00", kind: "milestone", title: "Resources library for videos + insights", detail: "Added resource mapping panel to capture YouTube references, key insights, and node links", relatedNodeIds: ["tool_browser", "agent_main", "store_memory"], tags: ["resources", "youtube", "insights"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -428,6 +442,7 @@
     const funnelEl = document.getElementById('funnel');
     const modesEl = document.getElementById('modes');
     const failuresEl = document.getElementById('failures');
+    const resourcesEl = document.getElementById('resources');
     const demoRangeEl = document.getElementById('demoRange');
     const demoStartEl = document.getElementById('demoStart');
     const demoEndEl = document.getElementById('demoEnd');
@@ -527,6 +542,24 @@
       { mode: 'Accountability blur', signal: 'Unclear who decided what', mitigation: 'Timestamp every decision with actor + node links in chronology.' }
     ];
 
+    const RESOURCE_LIBRARY = [
+      {
+        id: 'r1',
+        type: 'youtube',
+        title: 'Agentic Workflow Patterns (example)',
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        creator: 'Example Channel',
+        watchedAt: '2026-04-17T21:27:00+01:00',
+        relatedNodeIds: ['agent_main', 'agent_spawn'],
+        insights: [
+          'Use explicit handoff contracts between planner and executor agents.',
+          'Track autonomy level per task, not per system.',
+          'Log decisions with timestamps for post-run audits.'
+        ],
+        tags: ['youtube', 'agentic', 'workflow']
+      }
+    ];
+
     function renderFunnel() {
       funnelEl.innerHTML = `
         <div class="small" style="margin-bottom:6px"><b>Current emphasis:</b> mapping interactions + chronology traceability.</div>
@@ -560,6 +593,30 @@
           <div class="small"><b>Mitigation:</b> ${f.mitigation}</div>
         </div>
       `).join('');
+    }
+
+    function renderResources() {
+      resourcesEl.innerHTML = RESOURCE_LIBRARY.map(r => `
+        <div class="resource-item" data-res-id="${r.id}" data-related="${(r.relatedNodeIds || []).join(',')}">
+          <div class="resource-title">${r.type.toUpperCase()} — ${r.title}</div>
+          <div class="small"><b>Creator:</b> ${r.creator || 'unknown'}</div>
+          <div class="small"><b>Watched:</b> ${new Date(r.watchedAt).toLocaleString()}</div>
+          <div class="small"><b>Tags:</b> ${(r.tags || []).join(', ')}</div>
+          <div class="small"><b>Insights:</b></div>
+          <ul style="margin:4px 0 0 16px; padding:0">${(r.insights || []).map(i => `<li class="small">${i}</li>`).join('')}</ul>
+        </div>
+      `).join('');
+
+      resourcesEl.querySelectorAll('.resource-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
+          if (related.length) {
+            focusNodeId = related[0];
+            breadcrumbTrail.push(related[0]);
+            render();
+          }
+        });
+      });
     }
 
     function updateBreadcrumbs(version) {
@@ -882,6 +939,7 @@
       renderFunnel();
       renderModes();
       renderFailureLibrary();
+      renderResources();
       renderTimeline(version);
     }
 
