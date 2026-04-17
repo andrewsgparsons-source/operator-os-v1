@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agentic Architecture Hologram (v1)</title>
-  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <!-- vis-network is loaded dynamically with fallbacks for mobile/network blockers -->
   <style>
     :root {
       --bg: #0a0f1d;
@@ -311,6 +311,35 @@
 
     let network;
 
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => resolve(src);
+        s.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function ensureVisLoaded() {
+      if (window.vis) return;
+      const sources = [
+        'https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js',
+        'https://unpkg.com/vis-network/standalone/umd/vis-network.min.js'
+      ];
+      let lastErr;
+      for (const src of sources) {
+        try {
+          await loadScript(src);
+          if (window.vis) return;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error('vis-network failed to load');
+    }
+
     function getCurrentVersion() {
       const v = Number(versionRange.value);
       return model.versions.find(x => x.version === v) || model.versions[model.versions.length - 1];
@@ -405,35 +434,46 @@
     }
 
     // init
-    versionRange.max = Math.max(...model.versions.map(v => v.version));
-    versionRange.value = versionRange.max;
-
-    versionRange.addEventListener('input', render);
-    Object.values(filters).forEach(el => el.addEventListener('change', render));
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      Object.values(filters).forEach(el => el.value = 'all');
-      versionRange.value = versionRange.max;
-      render();
-    });
-
-    document.getElementById('fileInput').addEventListener('change', async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+    async function boot() {
       try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        if (!parsed.versions || !Array.isArray(parsed.versions)) throw new Error('Missing versions[]');
-        model = parsed;
-        versionRange.max = Math.max(...model.versions.map(v => v.version));
+        await ensureVisLoaded();
+      } catch (err) {
+        detailsEl.innerHTML = `<span style="color:#ff6b9a"><b>Could not load graph library.</b><br/>This is usually a mobile/network CDN block.<br/>Try a different network or reload.</span><pre>${String(err.message || err)}</pre>`;
+        return;
+      }
+
+      versionRange.max = Math.max(...model.versions.map(v => v.version));
+      versionRange.value = versionRange.max;
+
+      versionRange.addEventListener('input', render);
+      Object.values(filters).forEach(el => el.addEventListener('change', render));
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        Object.values(filters).forEach(el => el.value = 'all');
         versionRange.value = versionRange.max;
         render();
-      } catch (err) {
-        alert('Invalid JSON: ' + err.message);
-      }
-    });
+      });
 
-    render();
+      document.getElementById('fileInput').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          if (!parsed.versions || !Array.isArray(parsed.versions)) throw new Error('Missing versions[]');
+          model = parsed;
+          versionRange.max = Math.max(...model.versions.map(v => v.version));
+          versionRange.value = versionRange.max;
+          render();
+        } catch (err) {
+          alert('Invalid JSON: ' + err.message);
+        }
+      });
+
+      render();
+    }
+
+    boot();
   </script>
 </body>
 </html>
