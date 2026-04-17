@@ -42,7 +42,7 @@
     .small { font-size: 12px; color: var(--muted); }
     .control { margin: 10px 0; }
     label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
-    select, input[type="range"], input[type="file"], button {
+    select, input[type="range"], input[type="file"], input[type="datetime-local"], button {
       width: 100%;
       background: #0f1630;
       color: var(--ink);
@@ -181,6 +181,29 @@
     <button id="resetBtn">Reset filters</button>
     <button id="focusMainBtn" style="margin-top:8px">Focus Main Agent</button>
     <button id="clearFocusBtn" style="margin-top:8px">Clear focus mode</button>
+
+    <h2 style="margin-top:12px">Demo tour</h2>
+    <div class="control">
+      <label for="demoRange">Time period</label>
+      <select id="demoRange">
+        <option value="all">All history</option>
+        <option value="today">Today</option>
+        <option value="last24h">Last 24 hours</option>
+        <option value="last7d">Last 7 days</option>
+        <option value="custom">Custom range</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="demoStart">Custom start</label>
+      <input id="demoStart" type="datetime-local" />
+    </div>
+    <div class="control">
+      <label for="demoEnd">Custom end</label>
+      <input id="demoEnd" type="datetime-local" />
+    </div>
+    <button id="demoStartBtn">▶ Run demo</button>
+    <button id="demoStopBtn" style="margin-top:8px">■ Stop demo</button>
+    <div id="demoStatus" class="small" style="margin-top:6px">Demo idle.</div>
 
     <h2 style="margin-top:12px">Risk legend</h2>
     <div class="legend-item"><span class="dot" style="background:#7dffb3"></span>Low</div>
@@ -327,7 +350,8 @@
             { id: "v3m3", at: "2026-04-17T19:14:00+01:00", kind: "decision", title: "Map becomes primary traceability layer", detail: "All meaningful chats/actions should be logged chronologically with node links", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "process"] },
             { id: "v3m4", at: "2026-04-17T19:21:00+01:00", kind: "decision", title: "Browser workflow locked to direct CDP", detail: "Use Windows Chrome remote debugging profile=windows by default; stop defaulting to browser relay", relatedNodeIds: ["tool_browser", "agent_main"], tags: ["browser", "cdp", "operating-rule"] },
             { id: "v3m5", at: "2026-04-17T19:26:00+01:00", kind: "milestone", title: "Live map verified over Windows CDP", detail: "Confirmed direct visual load of GitHub Pages map and chronology in remote debugging session", relatedNodeIds: ["tool_browser", "agent_main"], tags: ["verification", "cdp", "map"] },
-            { id: "v3m6", at: "2026-04-17T19:26:30+01:00", kind: "insight", title: "Chronology now has dual role", detail: "Map acts as architecture view + auditable message/action timeline for Andrew collaboration", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "presentation", "audit"] }
+            { id: "v3m6", at: "2026-04-17T19:26:30+01:00", kind: "insight", title: "Chronology now has dual role", detail: "Map acts as architecture view + auditable message/action timeline for Andrew collaboration", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "presentation", "audit"] },
+            { id: "v3m7", at: "2026-04-17T19:36:00+01:00", kind: "milestone", title: "Demo tour mode added", detail: "Added button-driven time-range walkthrough that auto-plays chronology achievements", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["demo", "onboarding", "timeline"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -358,6 +382,10 @@
     const statsEl = document.getElementById('stats');
     const breadcrumbsEl = document.getElementById('breadcrumbs');
     const timelineEl = document.getElementById('timeline');
+    const demoRangeEl = document.getElementById('demoRange');
+    const demoStartEl = document.getElementById('demoStart');
+    const demoEndEl = document.getElementById('demoEnd');
+    const demoStatusEl = document.getElementById('demoStatus');
 
     const versionRange = document.getElementById('versionRange');
     const versionLabel = document.getElementById('versionLabel');
@@ -375,6 +403,8 @@
     let network;
     let focusNodeId = 'agent_main';
     let breadcrumbTrail = ['agent_main'];
+    let demoTimer = null;
+    let demoActiveId = null;
 
     function loadScript(src) {
       return new Promise((resolve, reject) => {
@@ -385,6 +415,12 @@
         s.onerror = () => reject(new Error(`Failed to load ${src}`));
         document.head.appendChild(s);
       });
+    }
+
+    function updateDemoInputState() {
+      const isCustom = demoRangeEl.value === 'custom';
+      demoStartEl.disabled = !isCustom;
+      demoEndEl.disabled = !isCustom;
     }
 
     async function ensureVisLoaded() {
@@ -481,11 +517,96 @@
       return rows;
     }
 
+    function getRangeBounds() {
+      const now = new Date();
+      const mode = demoRangeEl.value;
+      if (mode === 'all') return { start: null, end: null };
+      if (mode === 'today') {
+        const start = new Date(now); start.setHours(0, 0, 0, 0);
+        return { start, end: now };
+      }
+      if (mode === 'last24h') return { start: new Date(now.getTime() - 24 * 60 * 60 * 1000), end: now };
+      if (mode === 'last7d') return { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now };
+      if (mode === 'custom') {
+        const start = demoStartEl.value ? new Date(demoStartEl.value) : null;
+        const end = demoEndEl.value ? new Date(demoEndEl.value) : null;
+        return { start, end };
+      }
+      return { start: null, end: null };
+    }
+
+    function getChronologyForRange() {
+      const rows = getChronology();
+      const { start, end } = getRangeBounds();
+      return rows.filter(r => {
+        const t = new Date(r.at);
+        if (start && t < start) return false;
+        if (end && t > end) return false;
+        return true;
+      });
+    }
+
+    function stopDemo() {
+      if (demoTimer) clearTimeout(demoTimer);
+      demoTimer = null;
+      demoActiveId = null;
+      demoStatusEl.textContent = 'Demo idle.';
+      render();
+    }
+
+    function runDemo() {
+      const rows = getChronologyForRange();
+      if (!rows.length) {
+        demoStatusEl.textContent = 'No chronology entries in selected range.';
+        return;
+      }
+
+      // Reset to clean tour state.
+      Object.values(filters).forEach(el => el.value = 'all');
+      focusNodeId = 'agent_main';
+      breadcrumbTrail = ['agent_main'];
+
+      let i = 0;
+      const step = () => {
+        const row = rows[i];
+        demoActiveId = row.id;
+        if (row.version) versionRange.value = String(row.version);
+        if (row.relatedNodeIds && row.relatedNodeIds.length) {
+          focusNodeId = row.relatedNodeIds[0];
+          if (breadcrumbTrail[breadcrumbTrail.length - 1] !== focusNodeId) breadcrumbTrail.push(focusNodeId);
+        }
+        render();
+        demoStatusEl.textContent = `Demo ${i + 1}/${rows.length}: ${row.kind} — ${row.title}`;
+        detailsEl.innerHTML = `
+          <div><b>Demo step ${i + 1}/${rows.length}</b></div>
+          <div class="stat">Time: <b>${new Date(row.at).toLocaleString()}</b></div>
+          <div class="stat">Type: <b>${row.kind}</b></div>
+          <div class="stat">Title: <b>${row.title}</b></div>
+          <div class="small">${row.detail || ''}</div>
+          <div class="small">Related nodes: ${(row.relatedNodeIds || []).join(', ') || 'none'}</div>
+        `;
+
+        i += 1;
+        if (i < rows.length) {
+          demoTimer = setTimeout(step, 2600);
+        } else {
+          demoTimer = null;
+          demoStatusEl.textContent = `Demo complete (${rows.length} steps).`;
+          demoActiveId = null;
+          render();
+        }
+      };
+
+      step();
+    }
+
     function renderTimeline(currentVersion) {
       const rows = getChronology();
       timelineEl.innerHTML = rows.map(r => {
         const isCurrent = r.version === currentVersion.version;
-        return `<div class="timeline-item" data-at="${r.at}" data-version="${r.version}" data-related="${(r.relatedNodeIds || []).join(',')}" style="${isCurrent ? 'border-color:#53c3ff' : ''}">
+        const isDemo = demoActiveId && demoActiveId === r.id;
+        const border = isDemo ? 'border-color:#ffd56b; box-shadow:0 0 0 1px rgba(255,213,107,.55) inset;' : (isCurrent ? 'border-color:#53c3ff' : '');
+        return `<div class="timeline-item" data-at="${r.at}" data-id="${r.id}" data-version="${r.version}" data-related="${(r.relatedNodeIds || []).join(',')}" style="${border}">
           <div class="timeline-time">${new Date(r.at).toLocaleString()}</div>
           <div class="timeline-note"><b>${r.kind}</b> — ${r.title}</div>
           <div class="small">${r.detail || ''}</div>
@@ -494,6 +615,7 @@
 
       timelineEl.querySelectorAll('.timeline-item').forEach(el => {
         el.addEventListener('click', () => {
+          if (demoTimer) stopDemo();
           const v = Number(el.getAttribute('data-version'));
           const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
           if (v) versionRange.value = String(v);
@@ -639,6 +761,8 @@
 
       versionRange.addEventListener('input', render);
       Object.values(filters).forEach(el => el.addEventListener('change', render));
+      demoRangeEl.addEventListener('change', updateDemoInputState);
+      updateDemoInputState();
 
       document.getElementById('resetBtn').addEventListener('click', () => {
         Object.values(filters).forEach(el => el.value = 'all');
@@ -658,6 +782,16 @@
         focusNodeId = null;
         breadcrumbTrail = [];
         render();
+      });
+
+      document.getElementById('demoStartBtn').addEventListener('click', () => {
+        if (demoTimer) clearTimeout(demoTimer);
+        demoTimer = null;
+        runDemo();
+      });
+
+      document.getElementById('demoStopBtn').addEventListener('click', () => {
+        stopDemo();
       });
 
       document.getElementById('fileInput').addEventListener('change', async (e) => {
