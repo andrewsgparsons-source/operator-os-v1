@@ -203,6 +203,7 @@
     </div>
     <button id="demoStartBtn">▶ Run demo</button>
     <button id="demoStopBtn" style="margin-top:8px">■ Stop demo</button>
+    <label style="margin-top:8px; display:block"><input id="demoVoiceToggle" type="checkbox" checked /> Voice narration</label>
     <div id="demoStatus" class="small" style="margin-top:6px">Demo idle.</div>
 
     <h2 style="margin-top:12px">Risk legend</h2>
@@ -351,7 +352,8 @@
             { id: "v3m4", at: "2026-04-17T19:21:00+01:00", kind: "decision", title: "Browser workflow locked to direct CDP", detail: "Use Windows Chrome remote debugging profile=windows by default; stop defaulting to browser relay", relatedNodeIds: ["tool_browser", "agent_main"], tags: ["browser", "cdp", "operating-rule"] },
             { id: "v3m5", at: "2026-04-17T19:26:00+01:00", kind: "milestone", title: "Live map verified over Windows CDP", detail: "Confirmed direct visual load of GitHub Pages map and chronology in remote debugging session", relatedNodeIds: ["tool_browser", "agent_main"], tags: ["verification", "cdp", "map"] },
             { id: "v3m6", at: "2026-04-17T19:26:30+01:00", kind: "insight", title: "Chronology now has dual role", detail: "Map acts as architecture view + auditable message/action timeline for Andrew collaboration", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "presentation", "audit"] },
-            { id: "v3m7", at: "2026-04-17T19:36:00+01:00", kind: "milestone", title: "Demo tour mode added", detail: "Added button-driven time-range walkthrough that auto-plays chronology achievements", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["demo", "onboarding", "timeline"] }
+            { id: "v3m7", at: "2026-04-17T19:36:00+01:00", kind: "milestone", title: "Demo tour mode added", detail: "Added button-driven time-range walkthrough that auto-plays chronology achievements", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["demo", "onboarding", "timeline"] },
+            { id: "v3m8", at: "2026-04-17T19:50:00+01:00", kind: "milestone", title: "Voice narration linked to demo run", detail: "Run demo now speaks each chronology step aloud for selected time period", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["voice", "demo", "accessibility"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -386,6 +388,7 @@
     const demoStartEl = document.getElementById('demoStart');
     const demoEndEl = document.getElementById('demoEnd');
     const demoStatusEl = document.getElementById('demoStatus');
+    const demoVoiceToggleEl = document.getElementById('demoVoiceToggle');
 
     const versionRange = document.getElementById('versionRange');
     const versionLabel = document.getElementById('versionLabel');
@@ -405,6 +408,7 @@
     let breadcrumbTrail = ['agent_main'];
     let demoTimer = null;
     let demoActiveId = null;
+    let speaking = false;
 
     function loadScript(src) {
       return new Promise((resolve, reject) => {
@@ -546,10 +550,33 @@
       });
     }
 
+    function stopNarration() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      speaking = false;
+    }
+
+    function speak(text, onDone) {
+      if (!demoVoiceToggleEl.checked || !('speechSynthesis' in window)) {
+        onDone?.();
+        return;
+      }
+      stopNarration();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.03;
+      utterance.pitch = 1.0;
+      utterance.onend = () => { speaking = false; onDone?.(); };
+      utterance.onerror = () => { speaking = false; onDone?.(); };
+      speaking = true;
+      window.speechSynthesis.speak(utterance);
+    }
+
     function stopDemo() {
       if (demoTimer) clearTimeout(demoTimer);
       demoTimer = null;
       demoActiveId = null;
+      stopNarration();
       demoStatusEl.textContent = 'Demo idle.';
       render();
     }
@@ -586,15 +613,21 @@
           <div class="small">Related nodes: ${(row.relatedNodeIds || []).join(', ') || 'none'}</div>
         `;
 
+        const narration = `Step ${i + 1} of ${rows.length}. ${row.kind}. ${row.title}. ${row.detail || ''}`;
+
         i += 1;
-        if (i < rows.length) {
-          demoTimer = setTimeout(step, 2600);
-        } else {
-          demoTimer = null;
-          demoStatusEl.textContent = `Demo complete (${rows.length} steps).`;
-          demoActiveId = null;
-          render();
-        }
+        const queueNext = () => {
+          if (i < rows.length) {
+            demoTimer = setTimeout(step, 800);
+          } else {
+            demoTimer = null;
+            demoStatusEl.textContent = `Demo complete (${rows.length} steps).`;
+            demoActiveId = null;
+            render();
+          }
+        };
+
+        speak(narration, queueNext);
       };
 
       step();
