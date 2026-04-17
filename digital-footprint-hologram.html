@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic Architecture Hologram (v1)</title>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0f1d;
+      --panel: #121a30;
+      --ink: #dfe7ff;
+      --muted: #8ea0d8;
+      --accent: #53c3ff;
+      --danger: #ff6b9a;
+      --ok: #7dffb3;
+      --warn: #ffd56b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 20% 0%, #15254f 0%, var(--bg) 45%);
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 330px 1fr 320px;
+      gap: 12px;
+      padding: 12px;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(18,26,48,.9), rgba(11,18,35,.9));
+      border: 1px solid rgba(120, 155, 255, .25);
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      backdrop-filter: blur(6px);
+    }
+    h1,h2,h3 { margin: 0 0 8px; }
+    h1 { font-size: 16px; color: var(--accent); }
+    h2 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .small { font-size: 12px; color: var(--muted); }
+    .control { margin: 10px 0; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+    select, input[type="range"], input[type="file"], button {
+      width: 100%;
+      background: #0f1630;
+      color: var(--ink);
+      border: 1px solid rgba(120,155,255,.35);
+      border-radius: 8px;
+      padding: 8px;
+    }
+    #network {
+      width: 100%;
+      height: calc(100vh - 24px);
+      background: radial-gradient(circle at 30% 20%, rgba(83,195,255,.08), transparent 40%), #070c18;
+      border-radius: 12px;
+      border: 1px solid rgba(120, 155, 255, .25);
+    }
+    .pill {
+      display: inline-block;
+      border: 1px solid rgba(120,155,255,.45);
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin: 2px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .legend-item { display:flex; align-items:center; gap:8px; font-size:12px; margin: 5px 0; }
+    .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+    pre {
+      margin: 8px 0 0;
+      max-height: 320px;
+      overflow: auto;
+      font-size: 11px;
+      background: #0b1124;
+      border: 1px solid rgba(120,155,255,.2);
+      border-radius: 8px;
+      padding: 8px;
+      color: #bbcbff;
+    }
+    .stat { font-size: 12px; margin: 6px 0; }
+    .stat b { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <aside class="panel">
+    <h1>Agentic Architecture Hologram</h1>
+    <div class="small">v1 map of agents, tools, data flows, and trust boundaries</div>
+
+    <div class="control">
+      <label for="versionRange">Architecture timeline version</label>
+      <input id="versionRange" type="range" min="1" max="3" value="3" step="1" />
+      <div id="versionLabel" class="small">Showing: v3</div>
+    </div>
+
+    <div class="control">
+      <label for="layerFilter">Layer</label>
+      <select id="layerFilter">
+        <option value="all">All</option>
+        <option value="execution">Execution</option>
+        <option value="data">Data</option>
+        <option value="control">Control</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="envFilter">Environment</label>
+      <select id="envFilter">
+        <option value="all">All</option>
+        <option value="local">Local</option>
+        <option value="cloud">Cloud</option>
+        <option value="prod">Prod</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="sensFilter">Sensitivity</label>
+      <select id="sensFilter">
+        <option value="all">All</option>
+        <option value="public">Public</option>
+        <option value="internal">Internal</option>
+        <option value="secret">Secret</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="autonomyFilter">Autonomy</label>
+      <select id="autonomyFilter">
+        <option value="all">All</option>
+        <option value="assistive">Assistive</option>
+        <option value="semi-auto">Semi-auto</option>
+        <option value="fully-agentic">Fully-agentic</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="failureFilter">Failure mode</label>
+      <select id="failureFilter">
+        <option value="all">All</option>
+        <option value="silent-fail">Silent fail</option>
+        <option value="hallucination">Hallucination</option>
+        <option value="runaway-loop">Runaway loop</option>
+        <option value="tool-abuse">Tool abuse</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="fileInput">Import your JSON</label>
+      <input id="fileInput" type="file" accept="application/json" />
+    </div>
+
+    <button id="resetBtn">Reset filters</button>
+
+    <h2 style="margin-top:12px">Risk legend</h2>
+    <div class="legend-item"><span class="dot" style="background:#7dffb3"></span>Low</div>
+    <div class="legend-item"><span class="dot" style="background:#ffd56b"></span>Medium</div>
+    <div class="legend-item"><span class="dot" style="background:#ff6b9a"></span>High</div>
+  </aside>
+
+  <main id="network"></main>
+
+  <aside class="panel">
+    <h2>Selection details</h2>
+    <div id="details" class="small">Click a node or edge to inspect metadata.</div>
+
+    <h2 style="margin-top:12px">Quick stats</h2>
+    <div id="stats"></div>
+
+    <h2 style="margin-top:12px">v1 JSON schema</h2>
+    <pre id="schemaPreview"></pre>
+  </aside>
+
+  <script>
+    // ---- v1 schema (reference) ----
+    const V1_SCHEMA = {
+      schemaVersion: "1.0",
+      project: {
+        name: "string",
+        timezone: "Europe/London",
+        owner: "Andrew"
+      },
+      versions: [
+        {
+          version: 1,
+          timestamp: "2026-04-17T18:00:00+01:00",
+          notes: "Initial architecture",
+          nodes: [
+            {
+              id: "agent_main",
+              type: "agent|tool|model|data_store|api|human|queue|scheduler",
+              label: "Main Agent",
+              layer: "execution|data|control",
+              environment: "local|cloud|prod",
+              sensitivity: "public|internal|secret",
+              autonomy: "assistive|semi-auto|fully-agentic",
+              risk: "low|medium|high",
+              failureModes: ["silent-fail", "hallucination", "runaway-loop", "tool-abuse"],
+              tags: ["orchestrator", "root"],
+              metadata: {
+                trustBoundary: "internal-net",
+                owner: "platform",
+                pii: false
+              }
+            }
+          ],
+          edges: [
+            {
+              id: "e1",
+              from: "agent_main",
+              to: "tool_browser",
+              label: "tool_call",
+              flowType: "message|tool_call|data_write|data_read|approval|trigger",
+              direction: "uni|bi",
+              risk: "low|medium|high",
+              sensitivity: "public|internal|secret",
+              metadata: {
+                auth: "token",
+                rateLimit: "60/min",
+                blastRadius: "session"
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    // ---- sample data ----
+    let model = {
+      schemaVersion: "1.0",
+      project: { name: "Andrew Agentic Stack", timezone: "Europe/London", owner: "Andrew" },
+      versions: [
+        {
+          version: 1,
+          timestamp: "2026-04-10T10:00:00+01:00",
+          notes: "Local sandbox + manual approval",
+          nodes: [
+            { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
+            { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "medium", failureModes: ["hallucination"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
+            { id: "tool_browser", type: "tool", label: "Browser Tool", layer: "execution", environment: "local", sensitivity: "public", autonomy: "assistive", risk: "medium", failureModes: ["tool-abuse"], tags: ["web"], metadata: { trustBoundary: "internet", owner: "platform", pii: false } },
+            { id: "store_memory", type: "data_store", label: "Memory Files", layer: "data", environment: "local", sensitivity: "secret", autonomy: "assistive", risk: "high", failureModes: ["silent-fail"], tags: ["state"], metadata: { trustBoundary: "filesystem", owner: "andrew", pii: true } }
+          ],
+          edges: [
+            { id: "v1e1", from: "human_andrew", to: "agent_main", label: "prompt", flowType: "message", direction: "uni", risk: "low", sensitivity: "internal", metadata: { auth: "chat", blastRadius: "session" } },
+            { id: "v1e2", from: "agent_main", to: "tool_browser", label: "tool_call", flowType: "tool_call", direction: "uni", risk: "medium", sensitivity: "public", metadata: { auth: "none", blastRadius: "internet" } },
+            { id: "v1e3", from: "agent_main", to: "store_memory", label: "write_memory", flowType: "data_write", direction: "uni", risk: "high", sensitivity: "secret", metadata: { auth: "file-perms", blastRadius: "long-term-context" } }
+          ]
+        },
+        {
+          version: 2,
+          timestamp: "2026-04-14T10:00:00+01:00",
+          notes: "Added scheduler + cloud model",
+          nodes: [
+            { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
+            { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["hallucination", "runaway-loop"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
+            { id: "model_api", type: "api", label: "Model API", layer: "execution", environment: "cloud", sensitivity: "secret", autonomy: "semi-auto", risk: "high", failureModes: ["silent-fail"], tags: ["llm"], metadata: { trustBoundary: "external", owner: "vendor", pii: true } },
+            { id: "cron_sched", type: "scheduler", label: "Cron", layer: "control", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["runaway-loop"], tags: ["timers"], metadata: { trustBoundary: "daemon", owner: "platform", pii: false } },
+            { id: "store_memory", type: "data_store", label: "Memory Files", layer: "data", environment: "local", sensitivity: "secret", autonomy: "semi-auto", risk: "high", failureModes: ["silent-fail"], tags: ["state"], metadata: { trustBoundary: "filesystem", owner: "andrew", pii: true } }
+          ],
+          edges: [
+            { id: "v2e1", from: "human_andrew", to: "agent_main", label: "prompt", flowType: "message", direction: "uni", risk: "low", sensitivity: "internal", metadata: { auth: "chat", blastRadius: "session" } },
+            { id: "v2e2", from: "agent_main", to: "model_api", label: "inference", flowType: "tool_call", direction: "uni", risk: "high", sensitivity: "secret", metadata: { auth: "api-key", blastRadius: "vendor" } },
+            { id: "v2e3", from: "cron_sched", to: "agent_main", label: "trigger", flowType: "trigger", direction: "uni", risk: "medium", sensitivity: "internal", metadata: { auth: "local-daemon", blastRadius: "session" } },
+            { id: "v2e4", from: "agent_main", to: "store_memory", label: "write_memory", flowType: "data_write", direction: "uni", risk: "high", sensitivity: "secret", metadata: { auth: "file-perms", blastRadius: "long-term-context" } }
+          ]
+        },
+        {
+          version: 3,
+          timestamp: "2026-04-17T18:00:00+01:00",
+          notes: "Agentic sub-runs + policy approval gateway",
+          nodes: [
+            { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
+            { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["hallucination", "runaway-loop"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
+            { id: "agent_spawn", type: "agent", label: "Sub-Agent Runner", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "fully-agentic", risk: "high", failureModes: ["runaway-loop", "tool-abuse"], tags: ["isolated"], metadata: { trustBoundary: "isolated-session", owner: "platform", pii: false } },
+            { id: "policy_gate", type: "tool", label: "Approval Gateway", layer: "control", environment: "prod", sensitivity: "secret", autonomy: "semi-auto", risk: "medium", failureModes: ["silent-fail"], tags: ["guardrail"], metadata: { trustBoundary: "policy", owner: "platform", pii: true } },
+            { id: "model_api", type: "api", label: "Model API", layer: "execution", environment: "cloud", sensitivity: "secret", autonomy: "semi-auto", risk: "high", failureModes: ["silent-fail"], tags: ["llm"], metadata: { trustBoundary: "external", owner: "vendor", pii: true } },
+            { id: "store_memory", type: "data_store", label: "Memory Files", layer: "data", environment: "local", sensitivity: "secret", autonomy: "semi-auto", risk: "high", failureModes: ["silent-fail"], tags: ["state"], metadata: { trustBoundary: "filesystem", owner: "andrew", pii: true } }
+          ],
+          edges: [
+            { id: "v3e1", from: "human_andrew", to: "agent_main", label: "prompt", flowType: "message", direction: "uni", risk: "low", sensitivity: "internal", metadata: { auth: "chat", blastRadius: "session" } },
+            { id: "v3e2", from: "agent_main", to: "agent_spawn", label: "spawn_task", flowType: "trigger", direction: "uni", risk: "high", sensitivity: "internal", metadata: { auth: "session-key", blastRadius: "sub-system" } },
+            { id: "v3e3", from: "agent_spawn", to: "policy_gate", label: "approval_check", flowType: "approval", direction: "uni", risk: "medium", sensitivity: "secret", metadata: { auth: "policy-token", blastRadius: "action-scope" } },
+            { id: "v3e4", from: "agent_spawn", to: "model_api", label: "inference", flowType: "tool_call", direction: "uni", risk: "high", sensitivity: "secret", metadata: { auth: "api-key", blastRadius: "vendor" } },
+            { id: "v3e5", from: "agent_spawn", to: "store_memory", label: "write_memory", flowType: "data_write", direction: "uni", risk: "high", sensitivity: "secret", metadata: { auth: "file-perms", blastRadius: "long-term-context" } }
+          ]
+        }
+      ]
+    };
+
+    const byRiskColor = (risk) => ({ low: '#7dffb3', medium: '#ffd56b', high: '#ff6b9a' }[risk] || '#9db5ff');
+    const byTypeShape = (type) => ({
+      agent: 'ellipse', tool: 'box', model: 'diamond', data_store: 'database', api: 'hexagon', human: 'dot', queue: 'triangle', scheduler: 'star'
+    }[type] || 'ellipse');
+
+    const networkEl = document.getElementById('network');
+    const detailsEl = document.getElementById('details');
+    const statsEl = document.getElementById('stats');
+
+    const versionRange = document.getElementById('versionRange');
+    const versionLabel = document.getElementById('versionLabel');
+
+    const filters = {
+      layer: document.getElementById('layerFilter'),
+      environment: document.getElementById('envFilter'),
+      sensitivity: document.getElementById('sensFilter'),
+      autonomy: document.getElementById('autonomyFilter'),
+      failure: document.getElementById('failureFilter'),
+    };
+
+    document.getElementById('schemaPreview').textContent = JSON.stringify(V1_SCHEMA, null, 2);
+
+    let network;
+
+    function getCurrentVersion() {
+      const v = Number(versionRange.value);
+      return model.versions.find(x => x.version === v) || model.versions[model.versions.length - 1];
+    }
+
+    function passesNodeFilters(node) {
+      if (filters.layer.value !== 'all' && node.layer !== filters.layer.value) return false;
+      if (filters.environment.value !== 'all' && node.environment !== filters.environment.value) return false;
+      if (filters.sensitivity.value !== 'all' && node.sensitivity !== filters.sensitivity.value) return false;
+      if (filters.autonomy.value !== 'all' && node.autonomy !== filters.autonomy.value) return false;
+      if (filters.failure.value !== 'all' && !(node.failureModes || []).includes(filters.failure.value)) return false;
+      return true;
+    }
+
+    function render() {
+      const version = getCurrentVersion();
+      versionLabel.textContent = `Showing: v${version.version} — ${version.notes}`;
+
+      const filteredNodes = version.nodes.filter(passesNodeFilters);
+      const nodeIds = new Set(filteredNodes.map(n => n.id));
+      const filteredEdges = version.edges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
+
+      const nodes = filteredNodes.map(n => ({
+        id: n.id,
+        label: n.label,
+        shape: byTypeShape(n.type),
+        color: { background: byRiskColor(n.risk), border: '#dbe6ff' },
+        font: { color: '#0b1228', face: 'Inter' },
+        title: `${n.type} • ${n.layer} • ${n.environment}`
+      }));
+
+      const edges = filteredEdges.map(e => ({
+        id: e.id,
+        from: e.from,
+        to: e.to,
+        label: e.label,
+        color: { color: byRiskColor(e.risk), opacity: 0.9 },
+        arrows: 'to',
+        font: { color: '#a9bbf4', size: 10, strokeWidth: 0 }
+      }));
+
+      const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+      const options = {
+        interaction: { hover: true, navigationButtons: true, keyboard: true },
+        physics: { stabilization: false, barnesHut: { springLength: 170 } },
+        nodes: { borderWidth: 1.5, shadow: { enabled: true, color: 'rgba(80,140,255,.35)', size: 10 } },
+        edges: { smooth: { type: 'dynamic' } }
+      };
+
+      if (network) network.destroy();
+      network = new vis.Network(networkEl, data, options);
+
+      network.on('selectNode', (params) => {
+        const n = version.nodes.find(x => x.id === params.nodes[0]);
+        if (!n) return;
+        detailsEl.innerHTML = `
+          <div><b>${n.label}</b> <span class="pill">${n.type}</span></div>
+          <div class="stat">Layer: <b>${n.layer}</b></div>
+          <div class="stat">Env: <b>${n.environment}</b></div>
+          <div class="stat">Sensitivity: <b>${n.sensitivity}</b></div>
+          <div class="stat">Autonomy: <b>${n.autonomy}</b></div>
+          <div class="stat">Risk: <b>${n.risk}</b></div>
+          <div class="stat">Failures: <b>${(n.failureModes || []).join(', ') || 'none'}</b></div>
+          <div class="small">Tags: ${(n.tags || []).map(t => `<span class='pill'>${t}</span>`).join('')}</div>
+          <pre>${JSON.stringify(n.metadata || {}, null, 2)}</pre>
+        `;
+      });
+
+      network.on('selectEdge', (params) => {
+        const e = version.edges.find(x => x.id === params.edges[0]);
+        if (!e) return;
+        detailsEl.innerHTML = `
+          <div><b>${e.label}</b> <span class="pill">${e.flowType}</span></div>
+          <div class="stat">From: <b>${e.from}</b></div>
+          <div class="stat">To: <b>${e.to}</b></div>
+          <div class="stat">Risk: <b>${e.risk}</b></div>
+          <div class="stat">Sensitivity: <b>${e.sensitivity}</b></div>
+          <pre>${JSON.stringify(e.metadata || {}, null, 2)}</pre>
+        `;
+      });
+
+      const highRiskNodes = filteredNodes.filter(n => n.risk === 'high').length;
+      const highRiskEdges = filteredEdges.filter(e => e.risk === 'high').length;
+      const secretNodes = filteredNodes.filter(n => n.sensitivity === 'secret').length;
+      statsEl.innerHTML = `
+        <div class="stat">Nodes: <b>${filteredNodes.length}</b></div>
+        <div class="stat">Edges: <b>${filteredEdges.length}</b></div>
+        <div class="stat">High-risk nodes: <b>${highRiskNodes}</b></div>
+        <div class="stat">High-risk edges: <b>${highRiskEdges}</b></div>
+        <div class="stat">Secret nodes: <b>${secretNodes}</b></div>
+      `;
+    }
+
+    // init
+    versionRange.max = Math.max(...model.versions.map(v => v.version));
+    versionRange.value = versionRange.max;
+
+    versionRange.addEventListener('input', render);
+    Object.values(filters).forEach(el => el.addEventListener('change', render));
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      Object.values(filters).forEach(el => el.value = 'all');
+      versionRange.value = versionRange.max;
+      render();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if (!parsed.versions || !Array.isArray(parsed.versions)) throw new Error('Missing versions[]');
+        model = parsed;
+        versionRange.max = Math.max(...model.versions.map(v => v.version));
+        versionRange.value = versionRange.max;
+        render();
+      } catch (err) {
+        alert('Invalid JSON: ' + err.message);
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
