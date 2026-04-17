@@ -81,6 +81,17 @@
     }
     .stat { font-size: 12px; margin: 6px 0; }
     .stat b { color: var(--accent); }
+    .timeline-item {
+      border: 1px solid rgba(120,155,255,.28);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 8px 0;
+      background: #0b1328;
+      cursor: pointer;
+    }
+    .timeline-item:hover { border-color: rgba(120,155,255,.55); }
+    .timeline-time { color: var(--accent); font-size: 11px; }
+    .timeline-note { font-size: 12px; color: #d7e3ff; margin-top: 4px; }
 
     @media (max-width: 980px) {
       body {
@@ -187,6 +198,9 @@
     <h2 style="margin-top:12px">Quick stats</h2>
     <div id="stats"></div>
 
+    <h2 style="margin-top:12px">Chronology</h2>
+    <div id="timeline" class="small"></div>
+
     <h2 style="margin-top:12px">v1 JSON schema</h2>
     <pre id="schemaPreview"></pre>
   </aside>
@@ -205,6 +219,17 @@
           version: 1,
           timestamp: "2026-04-17T18:00:00+01:00",
           notes: "Initial architecture",
+          milestones: [
+            {
+              id: "m1",
+              at: "2026-04-17T18:05:00+01:00",
+              kind: "milestone|idea|insight|decision|incident",
+              title: "Started agentic map",
+              detail: "Defined first architecture graph and trust boundaries",
+              relatedNodeIds: ["agent_main"],
+              tags: ["v1", "foundation"]
+            }
+          ],
           nodes: [
             {
               id: "agent_main",
@@ -254,6 +279,10 @@
           version: 1,
           timestamp: "2026-04-10T10:00:00+01:00",
           notes: "Local sandbox + manual approval",
+          milestones: [
+            { id: "v1m1", at: "2026-04-10T10:05:00+01:00", kind: "milestone", title: "Baseline map", detail: "Captured core prompt/tool/memory flow", relatedNodeIds: ["agent_main", "tool_browser", "store_memory"], tags: ["baseline"] },
+            { id: "v1m2", at: "2026-04-10T10:18:00+01:00", kind: "insight", title: "Memory is high-risk", detail: "Persistent state creates long-term blast radius", relatedNodeIds: ["store_memory"], tags: ["risk", "memory"] }
+          ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
             { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "medium", failureModes: ["hallucination"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
@@ -270,6 +299,10 @@
           version: 2,
           timestamp: "2026-04-14T10:00:00+01:00",
           notes: "Added scheduler + cloud model",
+          milestones: [
+            { id: "v2m1", at: "2026-04-14T10:12:00+01:00", kind: "milestone", title: "Scheduler introduced", detail: "Automation moved from manual triggers to timed jobs", relatedNodeIds: ["cron_sched", "agent_main"], tags: ["automation"] },
+            { id: "v2m2", at: "2026-04-14T10:20:00+01:00", kind: "decision", title: "Cloud inference adopted", detail: "Accepted vendor dependency for model quality", relatedNodeIds: ["model_api"], tags: ["tradeoff", "latency"] }
+          ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
             { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["hallucination", "runaway-loop"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
@@ -288,6 +321,10 @@
           version: 3,
           timestamp: "2026-04-17T18:00:00+01:00",
           notes: "Agentic sub-runs + policy approval gateway",
+          milestones: [
+            { id: "v3m1", at: "2026-04-17T18:03:00+01:00", kind: "milestone", title: "Sub-agent runner live", detail: "Delegated complex tasks into isolated sessions", relatedNodeIds: ["agent_spawn"], tags: ["agentic"] },
+            { id: "v3m2", at: "2026-04-17T18:07:00+01:00", kind: "insight", title: "Approval gate reduces blast radius", detail: "Policy checks before high-impact actions", relatedNodeIds: ["policy_gate", "agent_spawn"], tags: ["safety", "governance"] }
+          ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
             { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["hallucination", "runaway-loop"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
@@ -316,6 +353,7 @@
     const detailsEl = document.getElementById('details');
     const statsEl = document.getElementById('stats');
     const breadcrumbsEl = document.getElementById('breadcrumbs');
+    const timelineEl = document.getElementById('timeline');
 
     const versionRange = document.getElementById('versionRange');
     const versionLabel = document.getElementById('versionLabel');
@@ -417,6 +455,51 @@
       });
 
       return { nodes: focusNodes, edges: focusEdges };
+    }
+
+    function getChronology() {
+      const rows = [];
+      for (const v of model.versions) {
+        rows.push({
+          id: `version-${v.version}`,
+          at: v.timestamp,
+          kind: 'version',
+          title: `v${v.version} snapshot`,
+          detail: v.notes,
+          version: v.version,
+          relatedNodeIds: []
+        });
+        for (const m of (v.milestones || [])) {
+          rows.push({ ...m, version: v.version });
+        }
+      }
+      rows.sort((a, b) => new Date(a.at) - new Date(b.at));
+      return rows;
+    }
+
+    function renderTimeline(currentVersion) {
+      const rows = getChronology();
+      timelineEl.innerHTML = rows.map(r => {
+        const isCurrent = r.version === currentVersion.version;
+        return `<div class="timeline-item" data-at="${r.at}" data-version="${r.version}" data-related="${(r.relatedNodeIds || []).join(',')}" style="${isCurrent ? 'border-color:#53c3ff' : ''}">
+          <div class="timeline-time">${new Date(r.at).toLocaleString()}</div>
+          <div class="timeline-note"><b>${r.kind}</b> — ${r.title}</div>
+          <div class="small">${r.detail || ''}</div>
+        </div>`;
+      }).join('');
+
+      timelineEl.querySelectorAll('.timeline-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const v = Number(el.getAttribute('data-version'));
+          const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
+          if (v) versionRange.value = String(v);
+          if (related.length) {
+            focusNodeId = related[0];
+            breadcrumbTrail.push(related[0]);
+          }
+          render();
+        });
+      });
     }
 
     function render() {
@@ -535,6 +618,7 @@
         <div class="stat">High-risk edges: <b>${highRiskEdges}</b></div>
         <div class="stat">Secret nodes: <b>${secretNodes}</b></div>
       `;
+      renderTimeline(version);
     }
 
     // init
