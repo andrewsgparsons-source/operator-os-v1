@@ -81,6 +81,23 @@
     }
     .stat { font-size: 12px; margin: 6px 0; }
     .stat b { color: var(--accent); }
+
+    @media (max-width: 980px) {
+      body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 58vh auto;
+        height: auto;
+        min-height: 100vh;
+        padding: 8px;
+        gap: 8px;
+      }
+      .panel {
+        overflow: visible;
+      }
+      #network {
+        height: 58vh;
+      }
+    }
   </style>
 </head>
 <body>
