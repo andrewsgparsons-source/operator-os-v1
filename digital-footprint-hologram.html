@@ -168,6 +168,8 @@
     </div>
 
     <button id="resetBtn">Reset filters</button>
+    <button id="focusMainBtn" style="margin-top:8px">Focus Main Agent</button>
+    <button id="clearFocusBtn" style="margin-top:8px">Clear focus mode</button>
 
     <h2 style="margin-top:12px">Risk legend</h2>
     <div class="legend-item"><span class="dot" style="background:#7dffb3"></span>Low</div>
@@ -179,6 +181,7 @@
 
   <aside class="panel">
     <h2>Selection details</h2>
+    <div id="breadcrumbs" class="small" style="margin-bottom:8px"></div>
     <div id="details" class="small">Click a node or edge to inspect metadata.</div>
 
     <h2 style="margin-top:12px">Quick stats</h2>
@@ -312,6 +315,7 @@
     const networkEl = document.getElementById('network');
     const detailsEl = document.getElementById('details');
     const statsEl = document.getElementById('stats');
+    const breadcrumbsEl = document.getElementById('breadcrumbs');
 
     const versionRange = document.getElementById('versionRange');
     const versionLabel = document.getElementById('versionLabel');
@@ -327,6 +331,8 @@
     document.getElementById('schemaPreview').textContent = JSON.stringify(V1_SCHEMA, null, 2);
 
     let network;
+    let focusNodeId = 'agent_main';
+    let breadcrumbTrail = ['agent_main'];
 
     function loadScript(src) {
       return new Promise((resolve, reject) => {
@@ -372,56 +378,102 @@
       return true;
     }
 
+    function updateBreadcrumbs(version) {
+      if (!focusNodeId) {
+        breadcrumbsEl.innerHTML = '<span class="small">Focus mode: off</span>';
+        return;
+      }
+      const labels = breadcrumbTrail
+        .map(id => version.nodes.find(n => n.id === id)?.label || id)
+        .slice(-6);
+      breadcrumbsEl.innerHTML = `<b>Focus path:</b> ${labels.join(' → ')}`;
+    }
+
+    function buildFocusView(nodes, edges, centerId) {
+      if (!centerId || !nodes.find(n => n.id === centerId)) return { nodes, edges };
+
+      const firstHopIds = new Set();
+      for (const e of edges) {
+        if (e.from === centerId) firstHopIds.add(e.to);
+        if (e.to === centerId) firstHopIds.add(e.from);
+      }
+
+      const keep = new Set([centerId, ...firstHopIds]);
+      const focusNodes = nodes.filter(n => keep.has(n.id));
+      const focusEdges = edges.filter(e => keep.has(e.from) && keep.has(e.to));
+
+      const ring = [...firstHopIds];
+      const radius = 260;
+      focusNodes.forEach((n, i) => {
+        if (n.id === centerId) {
+          n.x = 0; n.y = 0; n.fixed = { x: true, y: true };
+          return;
+        }
+        const idx = ring.indexOf(n.id);
+        const angle = (idx / Math.max(1, ring.length)) * Math.PI * 2;
+        n.x = Math.cos(angle) * radius;
+        n.y = Math.sin(angle) * radius;
+        n.fixed = { x: true, y: true };
+      });
+
+      return { nodes: focusNodes, edges: focusEdges };
+    }
+
     function render() {
       const version = getCurrentVersion();
       versionLabel.textContent = `Showing: v${version.version} — ${version.notes}`;
 
       const filteredNodes = version.nodes.filter(passesNodeFilters);
-      const nodeIds = new Set(filteredNodes.map(n => n.id));
-      const filteredEdges = version.edges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
+      const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+      const filteredEdges = version.edges.filter(e => filteredNodeIds.has(e.from) && filteredNodeIds.has(e.to));
 
       const MAIN_NODE_ID = 'agent_main';
+      const activeCenter = focusNodeId
+        ? (filteredNodes.some(n => n.id === focusNodeId) ? focusNodeId : (filteredNodes.some(n => n.id === MAIN_NODE_ID) ? MAIN_NODE_ID : null))
+        : null;
 
       const nodes = filteredNodes.map(n => {
         const isMain = n.id === MAIN_NODE_ID;
+        const isFocus = n.id === activeCenter;
         return {
           id: n.id,
           label: isMain ? `★ ${n.label}` : n.label,
           shape: byTypeShape(n.type),
-          size: isMain ? 52 : 28,
-          mass: isMain ? 5 : 1,
-          x: isMain ? 0 : undefined,
-          y: isMain ? 0 : undefined,
-          fixed: isMain ? { x: true, y: true } : false,
-          color: isMain
+          size: isFocus ? 56 : (isMain ? 48 : 28),
+          mass: isFocus ? 6 : (isMain ? 4 : 1),
+          x: undefined,
+          y: undefined,
+          fixed: false,
+          color: isFocus
             ? { background: '#53c3ff', border: '#ffffff', highlight: { background: '#73d2ff', border: '#ffffff' } }
             : { background: byRiskColor(n.risk), border: '#dbe6ff' },
-          font: { color: '#0b1228', face: 'Inter', size: isMain ? 18 : 14, bold: isMain ? '700' : '500' },
-          shadow: isMain ? { enabled: true, color: 'rgba(83,195,255,.9)', size: 28, x: 0, y: 0 } : true,
+          font: { color: '#0b1228', face: 'Inter', size: isFocus ? 19 : 14, bold: isFocus ? '700' : '500' },
+          shadow: isFocus ? { enabled: true, color: 'rgba(83,195,255,.9)', size: 28, x: 0, y: 0 } : true,
           title: `${n.type} • ${n.layer} • ${n.environment}${isMain ? ' • CENTRAL ORCHESTRATOR' : ''}`
         };
       });
 
       const edges = filteredEdges.map(e => {
-        const touchesMain = e.from === MAIN_NODE_ID || e.to === MAIN_NODE_ID;
+        const touchesCenter = e.from === activeCenter || e.to === activeCenter;
         return {
           id: e.id,
           from: e.from,
           to: e.to,
           label: e.label,
-          width: touchesMain ? 3.5 : 1.8,
-          color: touchesMain
+          width: touchesCenter ? 3.5 : 1.8,
+          color: touchesCenter
             ? { color: '#53c3ff', highlight: '#73d2ff', opacity: 1 }
             : { color: byRiskColor(e.risk), opacity: 0.9 },
           arrows: 'to',
-          font: { color: touchesMain ? '#d7e7ff' : '#a9bbf4', size: touchesMain ? 11 : 10, strokeWidth: 0 }
+          font: { color: touchesCenter ? '#d7e7ff' : '#a9bbf4', size: touchesCenter ? 11 : 10, strokeWidth: 0 }
         };
       });
 
-      const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+      const focused = buildFocusView(nodes, edges, activeCenter);
+      const data = { nodes: new vis.DataSet(focused.nodes), edges: new vis.DataSet(focused.edges) };
       const options = {
         interaction: { hover: true, navigationButtons: true, keyboard: true },
-        physics: { stabilization: false, barnesHut: { springLength: 170 } },
+        physics: { enabled: false, stabilization: false },
         nodes: { borderWidth: 1.5, shadow: { enabled: true, color: 'rgba(80,140,255,.35)', size: 10 } },
         edges: { smooth: { type: 'dynamic' } }
       };
@@ -429,16 +481,22 @@
       if (network) network.destroy();
       network = new vis.Network(networkEl, data, options);
 
-      // Keep main orchestrator visually central on initial render.
-      if (nodeIds.has('agent_main')) {
+      updateBreadcrumbs(version);
+      if (activeCenter && focused.nodes.some(n => n.id === activeCenter)) {
         setTimeout(() => {
-          network.focus('agent_main', { scale: 1.0, animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+          network.focus(activeCenter, { scale: 1.0, animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
         }, 120);
       }
 
       network.on('selectNode', (params) => {
-        const n = version.nodes.find(x => x.id === params.nodes[0]);
+        const selectedId = params.nodes[0];
+        const n = version.nodes.find(x => x.id === selectedId);
         if (!n) return;
+
+        // TheBrain-like behavior: selected node becomes new center.
+        focusNodeId = selectedId;
+        if (breadcrumbTrail[breadcrumbTrail.length - 1] !== selectedId) breadcrumbTrail.push(selectedId);
+
         detailsEl.innerHTML = `
           <div><b>${n.label}</b> <span class="pill">${n.type}</span></div>
           <div class="stat">Layer: <b>${n.layer}</b></div>
@@ -450,6 +508,8 @@
           <div class="small">Tags: ${(n.tags || []).map(t => `<span class='pill'>${t}</span>`).join('')}</div>
           <pre>${JSON.stringify(n.metadata || {}, null, 2)}</pre>
         `;
+
+        setTimeout(render, 40);
       });
 
       network.on('selectEdge', (params) => {
@@ -495,6 +555,20 @@
       document.getElementById('resetBtn').addEventListener('click', () => {
         Object.values(filters).forEach(el => el.value = 'all');
         versionRange.value = versionRange.max;
+        focusNodeId = 'agent_main';
+        breadcrumbTrail = ['agent_main'];
+        render();
+      });
+
+      document.getElementById('focusMainBtn').addEventListener('click', () => {
+        focusNodeId = 'agent_main';
+        breadcrumbTrail.push('agent_main');
+        render();
+      });
+
+      document.getElementById('clearFocusBtn').addEventListener('click', () => {
+        focusNodeId = null;
+        breadcrumbTrail = [];
         render();
       });
 
