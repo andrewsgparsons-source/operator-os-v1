@@ -118,6 +118,7 @@
     let focusId = 'agent_main';
     let hopDepth = 1;
     let Graph;
+    let graphMode = '3d';
 
     function neighborhood(rootId, depth = 1) {
       const keep = new Set([rootId]);
@@ -173,8 +174,10 @@
         links: data.links.map(l => ({ ...l, color: l.type==='jump' ? '#ffd56b' : '#7fa5ff' }))
       });
 
-      if (ui.mode.value === '2d' && Graph.numDimensions) Graph.numDimensions(2);
-      if (ui.mode.value === '3d' && Graph.numDimensions) Graph.numDimensions(3);
+      if (graphMode === '3d') {
+        if (ui.mode.value === '2d' && Graph.numDimensions) Graph.numDimensions(2);
+        if (ui.mode.value === '3d' && Graph.numDimensions) Graph.numDimensions(3);
+      }
 
       if (Graph.d3Force) {
         Graph.d3Force('link').distance(Number(ui.dist.value));
@@ -183,10 +186,13 @@
       }
 
       const node = Graph.graphData().nodes.find(x => x.id === focusId);
-      if (node && Graph.cameraPosition) {
-        const dist = 160;
-        const ratio = 1 + dist / Math.hypot(node.x || 1, node.y || 1, node.z || 1);
-        Graph.cameraPosition({ x:(node.x || 0) * ratio, y:(node.y || 0) * ratio, z:(node.z || 0) * ratio }, node, 850);
+      if (graphMode === '3d' && node && Graph.cameraPosition) {
+        const nx = Number.isFinite(node.x) ? node.x : 0;
+        const ny = Number.isFinite(node.y) ? node.y : 0;
+        const nz = Number.isFinite(node.z) ? node.z : 0;
+        const mag = Math.max(1, Math.hypot(nx, ny, nz));
+        const ratio = 1 + (180 / mag);
+        Graph.cameraPosition({ x: nx * ratio, y: ny * ratio, z: nz * ratio + 60 }, { x: nx, y: ny, z: nz }, 850);
       }
 
       renderSide();
@@ -203,23 +209,65 @@
       });
     }
 
-    async function boot() {
+    function webglAvailable() {
       try {
-        await loadScript('https://unpkg.com/3d-force-graph');
+        const c = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
       } catch {
-        document.getElementById('graph').innerHTML = '<div style="padding:16px;color:#ff9d6f">Could not load 3D graph library (network/CDN blocked).</div>';
-        return;
+        return false;
+      }
+    }
+
+    async function boot() {
+      const graphEl = document.getElementById('graph');
+      const can3d = webglAvailable();
+
+      if (can3d) {
+        try {
+          await loadScript('https://unpkg.com/3d-force-graph');
+          graphMode = '3d';
+          Graph = ForceGraph3D()(graphEl)
+            .backgroundColor('#070b16')
+            .nodeLabel(n => `${n.label}\n${n.note || ''}`)
+            .linkLabel(l => l.type)
+            .linkDirectionalParticles(1)
+            .linkDirectionalParticleWidth(l => l.type === 'jump' ? 2.8 : 1.4)
+            .linkWidth(l => l.type === 'jump' ? 2.2 : 1.1)
+            .onNodeClick(n => { focusId = n.id; render(); });
+        } catch {
+          graphMode = '2d';
+        }
+      } else {
+        graphMode = '2d';
       }
 
-      Graph = ForceGraph3D()(document.getElementById('graph'))
-        .backgroundColor('#070b16')
-        .nodeLabel(n => `${n.label}\n${n.note || ''}`)
-        .linkLabel(l => l.type)
-        .linkDirectionalParticles(1)
-        .linkDirectionalParticleWidth(l => l.type === 'jump' ? 2.8 : 1.4)
-        .linkWidth(l => l.type === 'jump' ? 2.2 : 1.1)
-        .nodeAutoColorBy('group')
-        .onNodeClick(n => { focusId = n.id; render(); });
+      if (graphMode === '2d') {
+        try {
+          await loadScript('https://unpkg.com/force-graph');
+          Graph = ForceGraph()(graphEl)
+            .backgroundColor('#070b16')
+            .nodeLabel(n => `${n.label}\n${n.note || ''}`)
+            .linkLabel(l => l.type)
+            .linkWidth(l => l.type === 'jump' ? 2.2 : 1.2)
+            .nodeCanvasObject((node, ctx, globalScale) => {
+              const label = node.label;
+              const fontSize = (node.id === focusId ? 16 : 12) / globalScale;
+              ctx.beginPath();
+              ctx.fillStyle = node.color || '#9fb5ff';
+              ctx.arc(node.x, node.y, node.id === focusId ? 8 : 5, 0, 2 * Math.PI, false);
+              ctx.fill();
+              ctx.font = `${fontSize}px Sans-Serif`;
+              ctx.fillStyle = '#dce6ff';
+              ctx.fillText(label, node.x + 8, node.y + 4);
+            })
+            .onNodeClick(n => { focusId = n.id; render(); });
+          ui.mode.value = '2d';
+          ui.mode.disabled = true;
+        } catch {
+          graphEl.innerHTML = '<div style="padding:16px;color:#ff9d6f">Could not load graph library on this device/network.</div>';
+          return;
+        }
+      }
 
       document.getElementById('focusRoot').onclick = () => { focusId = 'agent_main'; render(); };
       document.getElementById('expandOne').onclick = () => { hopDepth = 1; render(); };
