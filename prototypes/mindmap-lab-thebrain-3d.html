@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindMap Lab — TheBrain-style 3D Test</title>
+  <style>
+    :root { --bg:#070b16; --panel:#0f1730; --ink:#dce6ff; --muted:#92a5df; --accent:#57c5ff; }
+    *{box-sizing:border-box}
+    body{margin:0;height:100vh;display:grid;grid-template-columns:320px 1fr 320px;gap:10px;padding:10px;background:radial-gradient(circle at 20% 0%, #13224a, var(--bg) 45%);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+    .panel{background:linear-gradient(180deg,rgba(15,23,48,.95),rgba(10,16,34,.95));border:1px solid rgba(120,155,255,.25);border-radius:12px;padding:12px;overflow:auto}
+    h1{font-size:16px;margin:0 0 8px;color:var(--accent)}
+    h2{font-size:12px;margin:10px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .small{font-size:12px;color:var(--muted)}
+    #graph{border:1px solid rgba(120,155,255,.25);border-radius:12px;overflow:hidden}
+    button,select,input{width:100%;background:#101a36;color:var(--ink);border:1px solid rgba(120,155,255,.35);border-radius:8px;padding:8px;margin-top:6px}
+    .node-chip{display:inline-block;padding:3px 8px;border:1px solid rgba(120,155,255,.35);border-radius:999px;margin:3px;font-size:11px;cursor:pointer}
+    .node-chip:hover{border-color:#57c5ff}
+    .stat{font-size:12px;margin:4px 0}
+    @media (max-width: 980px){body{grid-template-columns:1fr;grid-template-rows:auto 60vh auto;height:auto}}
+  </style>
+</head>
+<body>
+  <aside class="panel">
+    <h1>MindMap Lab</h1>
+    <div class="small">Test case: TheBrain-like focus graph + 3D interaction</div>
+
+    <h2>Controls</h2>
+    <label class="small">Layout mode</label>
+    <select id="mode">
+      <option value="3d">3D force</option>
+      <option value="2d">2D force</option>
+    </select>
+
+    <label class="small">Link distance</label>
+    <input id="distance" type="range" min="40" max="220" value="110" />
+
+    <label class="small">Node charge</label>
+    <input id="charge" type="range" min="-320" max="-20" value="-120" />
+
+    <button id="focusRoot">Focus root</button>
+    <button id="expandOne">Expand 1 hop</button>
+    <button id="expandTwo">Expand 2 hops</button>
+
+    <h2>Red/Green philosophy (always on)</h2>
+    <div class="small" style="margin-top:6px">Green = scale/ship/known-good paths. Red = risk/unknown/needs review. This is permanent (no toggle) to enforce no-drift discipline.</div>
+
+    <h2>How this behaves</h2>
+    <div class="small">Click any node to re-center the map around it. Parents, children, and sibling/jump relations become the visible context, like TheBrain's thought focus.</div>
+  </aside>
+
+  <main id="graph"></main>
+
+  <aside class="panel">
+    <h2>Focus</h2>
+    <div id="focusTitle">agent_main</div>
+    <div id="focusMeta" class="small"></div>
+
+    <h2>Parent</h2>
+    <div id="parent"></div>
+
+    <h2>Children</h2>
+    <div id="children"></div>
+
+    <h2>Jumps / Related</h2>
+    <div id="jumps"></div>
+
+    <h2>Stats</h2>
+    <div id="stats"></div>
+  </aside>
+
+  <script>
+    const seed = {
+      nodes: [
+        { id:'agent_main', label:'Meta Agent', group:'meta', rg:'green', note:'Optimises + routes specialists' },
+        { id:'agent_spawn', label:'Task Agent Runner', group:'exec', rg:'green', note:'Executes delegated tasks' },
+        { id:'policy_gate', label:'Policy Gate', group:'control', rg:'red', note:'Approvals + guardrails' },
+        { id:'model_api', label:'Model API', group:'api', rg:'red', note:'Inference + model access' },
+        { id:'store_memory', label:'Memory', group:'data', rg:'red', note:'Persistent context + decisions' },
+        { id:'harness_eval', label:'Harness Evaluator', group:'meta', rg:'green', note:'Scores quality, drift, latency, cost' },
+        { id:'task_recruit', label:'Recruitment Agent', group:'task', rg:'green', note:'Domain specialist for talent workflows' },
+        { id:'task_sales', label:'Sales Ops Agent', group:'task', rg:'green', note:'Domain specialist for pipeline automation' },
+        { id:'task_content', label:'Content Agent', group:'task', rg:'green', note:'Domain specialist for content workflows' },
+        { id:'human_andrew', label:'Andrew', group:'human', rg:'green', note:'Operator + strategic oversight' },
+      ],
+      links: [
+        { source:'human_andrew', target:'agent_main', type:'parent' },
+        { source:'agent_main', target:'agent_spawn', type:'child' },
+        { source:'agent_main', target:'harness_eval', type:'child' },
+        { source:'agent_main', target:'policy_gate', type:'child' },
+        { source:'agent_spawn', target:'task_recruit', type:'child' },
+        { source:'agent_spawn', target:'task_sales', type:'child' },
+        { source:'agent_spawn', target:'task_content', type:'child' },
+        { source:'agent_spawn', target:'model_api', type:'child' },
+        { source:'agent_main', target:'store_memory', type:'child' },
+        { source:'harness_eval', target:'task_recruit', type:'jump' },
+        { source:'harness_eval', target:'task_sales', type:'jump' },
+        { source:'harness_eval', target:'task_content', type:'jump' },
+        { source:'policy_gate', target:'task_recruit', type:'jump' }
+      ]
+    };
+
+    const colorByGroup = g => ({ meta:'#57c5ff', exec:'#ffd56b', control:'#ff9d6f', api:'#ff6b9a', data:'#7dffb3', task:'#b7b3ff', human:'#cdd8ff' }[g] || '#9fb5ff');
+    const colorByRG = rg => ({ green:'#3fe08f', red:'#ff6b6b' }[rg] || '#9fb5ff');
+
+    const ui = {
+      mode: document.getElementById('mode'),
+      dist: document.getElementById('distance'),
+      charge: document.getElementById('charge'),
+      focusTitle: document.getElementById('focusTitle'),
+      focusMeta: document.getElementById('focusMeta'),
+      parent: document.getElementById('parent'),
+      children: document.getElementById('children'),
+      jumps: document.getElementById('jumps'),
+      stats: document.getElementById('stats')
+    };
+
+    let focusId = 'agent_main';
+    let hopDepth = 1;
+    let Graph;
+
+    function neighborhood(rootId, depth = 1) {
+      const keep = new Set([rootId]);
+      let frontier = new Set([rootId]);
+      for (let d=0; d<depth; d++) {
+        const next = new Set();
+        seed.links.forEach(l => {
+          if (frontier.has(l.source)) { keep.add(l.target); next.add(l.target); }
+          if (frontier.has(l.target)) { keep.add(l.source); next.add(l.source); }
+        });
+        frontier = next;
+      }
+      return {
+        nodes: seed.nodes.filter(n => keep.has(n.id)),
+        links: seed.links.filter(l => keep.has(l.source) && keep.has(l.target))
+      };
+    }
+
+    function rel(rootId) {
+      const parent = seed.links.find(l => l.target === rootId && l.type === 'parent')?.source || null;
+      const children = seed.links.filter(l => l.source === rootId && l.type === 'child').map(l => l.target);
+      const jumps = seed.links.filter(l => (l.source===rootId || l.target===rootId) && l.type === 'jump').map(l => l.source===rootId ? l.target : l.source);
+      return { parent, children, jumps };
+    }
+
+    function chip(id) {
+      const n = seed.nodes.find(x => x.id === id);
+      return n ? `<span class="node-chip" data-id="${id}">${n.label}</span>` : '';
+    }
+
+    function bindChips() {
+      document.querySelectorAll('.node-chip').forEach(el => {
+        el.onclick = () => { focusId = el.dataset.id; render(); };
+      });
+    }
+
+    function renderSide() {
+      const n = seed.nodes.find(x => x.id === focusId);
+      const r = rel(focusId);
+      ui.focusTitle.textContent = n?.label || focusId;
+      ui.focusMeta.textContent = n?.note || '';
+      ui.parent.innerHTML = r.parent ? chip(r.parent) : '<span class="small">None</span>';
+      ui.children.innerHTML = r.children.length ? r.children.map(chip).join('') : '<span class="small">None</span>';
+      ui.jumps.innerHTML = r.jumps.length ? r.jumps.map(chip).join('') : '<span class="small">None</span>';
+      ui.stats.innerHTML = `<div class="stat">Visible nodes: <b>${Graph.graphData().nodes.length}</b></div><div class="stat">Visible links: <b>${Graph.graphData().links.length}</b></div><div class="stat">Focus depth: <b>${hopDepth} hop</b></div>`;
+      bindChips();
+    }
+
+    function render() {
+      const data = neighborhood(focusId, hopDepth);
+      Graph.graphData({
+        nodes: data.nodes.map(n => ({ ...n, color: colorByRG(n.rg), val: n.id===focusId ? 18 : 7 })),
+        links: data.links.map(l => ({ ...l, color: l.type==='jump' ? '#ffd56b' : '#7fa5ff' }))
+      });
+
+      if (ui.mode.value === '2d' && Graph.numDimensions) Graph.numDimensions(2);
+      if (ui.mode.value === '3d' && Graph.numDimensions) Graph.numDimensions(3);
+
+      if (Graph.d3Force) {
+        Graph.d3Force('link').distance(Number(ui.dist.value));
+        Graph.d3Force('charge').strength(Number(ui.charge.value));
+        Graph.d3ReheatSimulation();
+      }
+
+      const node = Graph.graphData().nodes.find(x => x.id === focusId);
+      if (node && Graph.cameraPosition) {
+        const dist = 160;
+        const ratio = 1 + dist / Math.hypot(node.x || 1, node.y || 1, node.z || 1);
+        Graph.cameraPosition({ x:(node.x || 0) * ratio, y:(node.y || 0) * ratio, z:(node.z || 0) * ratio }, node, 850);
+      }
+
+      renderSide();
+    }
+
+    async function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function boot() {
+      try {
+        await loadScript('https://unpkg.com/3d-force-graph');
+      } catch {
+        document.getElementById('graph').innerHTML = '<div style="padding:16px;color:#ff9d6f">Could not load 3D graph library (network/CDN blocked).</div>';
+        return;
+      }
+
+      Graph = ForceGraph3D()(document.getElementById('graph'))
+        .backgroundColor('#070b16')
+        .nodeLabel(n => `${n.label}\n${n.note || ''}`)
+        .linkLabel(l => l.type)
+        .linkDirectionalParticles(1)
+        .linkDirectionalParticleWidth(l => l.type === 'jump' ? 2.8 : 1.4)
+        .linkWidth(l => l.type === 'jump' ? 2.2 : 1.1)
+        .nodeAutoColorBy('group')
+        .onNodeClick(n => { focusId = n.id; render(); });
+
+      document.getElementById('focusRoot').onclick = () => { focusId = 'agent_main'; render(); };
+      document.getElementById('expandOne').onclick = () => { hopDepth = 1; render(); };
+      document.getElementById('expandTwo').onclick = () => { hopDepth = 2; render(); };
+      ui.mode.onchange = render;
+      ui.dist.oninput = render;
+      ui.charge.oninput = render;
+
+      render();
+    }
+
+    boot();
+  </script>
+</body>
+</html>

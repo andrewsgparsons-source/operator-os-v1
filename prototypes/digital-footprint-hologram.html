@@ -435,7 +435,14 @@
             { id: "v3m14", at: "2026-04-17T21:32:00+01:00", kind: "incident", title: "MCP runtime connection mismatch", detail: "Memory indicates prior cross-read success for UI-related MCP rows, but current runtime DB verification fails with tenant/user mismatch and needs credential path refresh", relatedNodeIds: ["agent_main", "store_memory", "policy_gate"], tags: ["mcp", "supabase", "credentials", "ui-learnings"] },
             { id: "v3m15", at: "2026-04-17T22:03:00+01:00", kind: "idea", title: "Token/API threshold tracking", detail: "Track token usage and API threshold alerts across sessions to catch budget/limit pressure early", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "api", "monitoring", "thresholds"] },
             { id: "v3m16", at: "2026-04-18T07:16:00+01:00", kind: "milestone", title: "Token health panel implemented", detail: "Added per-session token usage cards, threshold bands (70/85/95%), and alert states directly in the map UI", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "monitoring", "ui", "alerts"] },
-            { id: "v3m17", at: "2026-04-18T07:39:00+01:00", kind: "milestone", title: "Live token feed connected", detail: "Map now fetches token/API usage from a live JSON feed with auto-refresh and fallback handling for demos", relatedNodeIds: ["agent_main", "agent_spawn", "model_api", "policy_gate"], tags: ["tokens", "live", "api", "demo"] }
+            { id: "v3m17", at: "2026-04-18T07:39:00+01:00", kind: "milestone", title: "Live token feed connected", detail: "Map now fetches token/API usage from a live JSON feed with auto-refresh and fallback handling for demos", relatedNodeIds: ["agent_main", "agent_spawn", "model_api", "policy_gate"], tags: ["tokens", "live", "api", "demo"] },
+            { id: "v3m18", at: "2026-04-18T17:35:00+01:00", kind: "insight", title: "Imperial AI programme mapped for benchmarking", detail: "Captured brochure-derived structure (modules, audience, agentic/recruitment angle, delivery model) to benchmark against Andrew’s training offer design", relatedNodeIds: ["human_andrew", "agent_main", "store_memory"], tags: ["benchmark", "training", "recruitment", "agentic-ai"] },
+            { id: "v3m19", at: "2026-04-18T17:47:00+01:00", kind: "milestone", title: "YouTube benchmark resource logged", detail: "Added video resource for 2026 business AI workflow demand signals and extracted practical positioning takeaways for Andrew's offer design", relatedNodeIds: ["human_andrew", "agent_main", "store_memory"], tags: ["youtube", "benchmark", "offer-design", "ai-workflows"] },
+            { id: "v3m20", at: "2026-04-18T18:16:00+01:00", kind: "insight", title: "State-of-the-art agent harness optimisation focus", detail: "Logged new video thread as agent harness optimisation research for map evolution and operating model maturity (not AI training-offer framing)", relatedNodeIds: ["agent_main", "agent_spawn", "policy_gate", "model_api"], tags: ["youtube", "agent-harness", "optimisation", "state-of-the-art"] },
+            { id: "v3m21", at: "2026-04-18T18:34:00+01:00", kind: "insight", title: "Meta-agent + domain task-agent model", detail: "Andrew highlighted a dual-layer pattern where a meta-agent optimises/trains specialist task agents that become masters of a narrow domain", relatedNodeIds: ["agent_main", "agent_spawn", "policy_gate"], tags: ["meta-agent", "task-agent", "specialisation", "orchestration"] },
+            { id: "v3m22", at: "2026-04-18T19:16:00+01:00", kind: "milestone", title: "TheBrain-style 3D side-map prototype created", detail: "Built a separate mindmap lab prototype focused on interactive node-centric navigation, parent/child/jump structure, and 2D/3D force layouts for harness optimisation exploration", relatedNodeIds: ["agent_main", "agent_spawn", "store_memory"], tags: ["mindmap", "3d", "thebrain", "prototype"] },
+            { id: "v3m23", at: "2026-04-18T19:18:00+01:00", kind: "insight", title: "Red/Green philosophy added to side-map", detail: "Integrated Red/Green visual mode into the side-map prototype to distinguish scale-ready paths from risk/review zones in agent harness design", relatedNodeIds: ["agent_main", "agent_spawn", "policy_gate", "model_api"], tags: ["red-green", "visualisation", "harness", "risk"] },
+            { id: "v3m24", at: "2026-04-18T19:31:00+01:00", kind: "decision", title: "No-drift discipline set as permanent", detail: "Andrew set incremental improvement with zero unintended change as a permanent operating rule; removed optionality/toggle framing for Red-Green behaviour in side-map prototype", relatedNodeIds: ["human_andrew", "agent_main", "policy_gate", "store_memory"], tags: ["no-drift", "red-green", "decision", "quality"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -585,6 +592,36 @@
           'Log decisions with timestamps for post-run audits.'
         ],
         tags: ['youtube', 'agentic', 'workflow']
+      },
+      {
+        id: 'r2',
+        type: 'youtube',
+        title: 'I’ve Built 500 AI Workflows, This is What Businesses Want in 2026',
+        url: 'https://youtu.be/Y3PcRp5RFzk?si=nEAxONDmMLLs5Ylk',
+        creator: 'Nate Herk | AI Automation',
+        watchedAt: '2026-04-18T17:46:00+01:00',
+        relatedNodeIds: ['human_andrew', 'agent_main', 'agent_spawn'],
+        insights: [
+          'Buyer demand is shifting from generic chatbots to workflow-level automation tied to measurable business outcomes.',
+          'Winning offers emphasise practical integration into existing operations rather than isolated AI demos.',
+          'Service positioning should connect AI capability to ROI language: speed, margin, conversion, and staffing leverage.'
+        ],
+        tags: ['youtube', 'ai-workflows', 'positioning', 'offer-design']
+      },
+      {
+        id: 'r3',
+        type: 'youtube',
+        title: 'Agent harness optimisation (state-of-the-art thread)',
+        url: 'https://youtu.be/xnG8h3UnNFI?si=hZd73IFbijT2DrHU',
+        creator: 'TBD',
+        watchedAt: '2026-04-18T18:16:00+01:00',
+        relatedNodeIds: ['agent_main', 'agent_spawn', 'policy_gate', 'model_api'],
+        insights: [
+          'Track this as state-of-the-art research on agent harness optimisation rather than training-offer messaging.',
+          'Use it to refine orchestration quality, task routing, guardrails, and execution reliability patterns.',
+          'Translate insights into map-level architecture and operating model improvements.'
+        ],
+        tags: ['youtube', 'agent-harness', 'optimisation', 'state-of-the-art']
       }
     ];
 
