@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agentic Architecture Hologram (v1)</title>
-  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <!-- vis-network is loaded dynamically with fallbacks for mobile/network blockers -->
   <style>
     :root {
       --bg: #0a0f1d;
@@ -42,7 +42,7 @@
     .small { font-size: 12px; color: var(--muted); }
     .control { margin: 10px 0; }
     label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
-    select, input[type="range"], input[type="file"], button {
+    select, input[type="range"], input[type="file"], input[type="datetime-local"], button {
       width: 100%;
       background: #0f1630;
       color: var(--ink);
@@ -81,6 +81,92 @@
     }
     .stat { font-size: 12px; margin: 6px 0; }
     .stat b { color: var(--accent); }
+    .timeline-item {
+      border: 1px solid rgba(120,155,255,.28);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 8px 0;
+      background: #0b1328;
+      cursor: pointer;
+    }
+    .timeline-item:hover { border-color: rgba(120,155,255,.55); }
+    .timeline-time { color: var(--accent); font-size: 11px; }
+    .timeline-note { font-size: 12px; color: #d7e3ff; margin-top: 4px; }
+    .stage-item {
+      border: 1px solid rgba(120,155,255,.28);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 6px 0;
+      background: #0b1328;
+    }
+    .stage-item.active {
+      border-color: #53c3ff;
+      box-shadow: 0 0 0 1px rgba(83,195,255,.45) inset;
+    }
+    .stage-title { font-size: 12px; color: #d7e7ff; font-weight: 600; }
+    .failure-item {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+    }
+    .failure-title { font-size: 12px; font-weight: 600; color: #ffd56b; }
+    .mode-card {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+    }
+    .mode-title { font-size: 12px; font-weight: 700; color: #53c3ff; }
+    .resource-item {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+      cursor: pointer;
+    }
+    .resource-item:hover { border-color: rgba(120,155,255,.55); }
+    .resource-title { font-size: 12px; font-weight: 700; color: #7dffb3; }
+    .token-card {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+    }
+    .token-meter {
+      height: 8px;
+      border-radius: 999px;
+      background: #1a2444;
+      overflow: hidden;
+      margin-top: 6px;
+      border: 1px solid rgba(120,155,255,.2);
+    }
+    .token-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 58vh auto;
+        height: auto;
+        min-height: 100vh;
+        padding: 8px;
+        gap: 8px;
+      }
+      .panel {
+        overflow: visible;
+      }
+      #network {
+        height: 58vh;
+      }
+    }
   </style>
 </head>
 <body>
@@ -151,6 +237,32 @@
     </div>
 
     <button id="resetBtn">Reset filters</button>
+    <button id="focusMainBtn" style="margin-top:8px">Focus Main Agent</button>
+    <button id="clearFocusBtn" style="margin-top:8px">Clear focus mode</button>
+
+    <h2 style="margin-top:12px">Demo tour</h2>
+    <div class="control">
+      <label for="demoRange">Time period</label>
+      <select id="demoRange">
+        <option value="all">All history</option>
+        <option value="today">Today</option>
+        <option value="last24h">Last 24 hours</option>
+        <option value="last7d">Last 7 days</option>
+        <option value="custom">Custom range</option>
+      </select>
+    </div>
+    <div class="control">
+      <label for="demoStart">Custom start</label>
+      <input id="demoStart" type="datetime-local" />
+    </div>
+    <div class="control">
+      <label for="demoEnd">Custom end</label>
+      <input id="demoEnd" type="datetime-local" />
+    </div>
+    <button id="demoStartBtn">▶ Run demo</button>
+    <button id="demoStopBtn" style="margin-top:8px">■ Stop demo</button>
+    <label style="margin-top:8px; display:block"><input id="demoVoiceToggle" type="checkbox" checked /> Voice narration</label>
+    <div id="demoStatus" class="small" style="margin-top:6px">Demo idle.</div>
 
     <h2 style="margin-top:12px">Risk legend</h2>
     <div class="legend-item"><span class="dot" style="background:#7dffb3"></span>Low</div>
@@ -162,10 +274,29 @@
 
   <aside class="panel">
     <h2>Selection details</h2>
+    <div id="breadcrumbs" class="small" style="margin-bottom:8px"></div>
     <div id="details" class="small">Click a node or edge to inspect metadata.</div>
 
     <h2 style="margin-top:12px">Quick stats</h2>
     <div id="stats"></div>
+
+    <h2 style="margin-top:12px">Token health</h2>
+    <div id="tokenHealth" class="small"></div>
+
+    <h2 style="margin-top:12px">Collaboration funnel</h2>
+    <div id="funnel" class="small"></div>
+
+    <h2 style="margin-top:12px">Interaction modes</h2>
+    <div id="modes" class="small"></div>
+
+    <h2 style="margin-top:12px">Failure modes library</h2>
+    <div id="failures" class="small"></div>
+
+    <h2 style="margin-top:12px">Resources library</h2>
+    <div id="resources" class="small"></div>
+
+    <h2 style="margin-top:12px">Chronology</h2>
+    <div id="timeline" class="small"></div>
 
     <h2 style="margin-top:12px">v1 JSON schema</h2>
     <pre id="schemaPreview"></pre>
@@ -185,6 +316,17 @@
           version: 1,
           timestamp: "2026-04-17T18:00:00+01:00",
           notes: "Initial architecture",
+          milestones: [
+            {
+              id: "m1",
+              at: "2026-04-17T18:05:00+01:00",
+              kind: "milestone|idea|insight|decision|incident",
+              title: "Started agentic map",
+              detail: "Defined first architecture graph and trust boundaries",
+              relatedNodeIds: ["agent_main"],
+              tags: ["v1", "foundation"]
+            }
+          ],
           nodes: [
             {
               id: "agent_main",
@@ -234,6 +376,10 @@
           version: 1,
           timestamp: "2026-04-10T10:00:00+01:00",
           notes: "Local sandbox + manual approval",
+          milestones: [
+            { id: "v1m1", at: "2026-04-10T10:05:00+01:00", kind: "milestone", title: "Baseline map", detail: "Captured core prompt/tool/memory flow", relatedNodeIds: ["agent_main", "tool_browser", "store_memory"], tags: ["baseline"] },
+            { id: "v1m2", at: "2026-04-10T10:18:00+01:00", kind: "insight", title: "Memory is high-risk", detail: "Persistent state creates long-term blast radius", relatedNodeIds: ["store_memory"], tags: ["risk", "memory"] }
+          ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
             { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "medium", failureModes: ["hallucination"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
@@ -250,6 +396,10 @@
           version: 2,
           timestamp: "2026-04-14T10:00:00+01:00",
           notes: "Added scheduler + cloud model",
+          milestones: [
+            { id: "v2m1", at: "2026-04-14T10:12:00+01:00", kind: "milestone", title: "Scheduler introduced", detail: "Automation moved from manual triggers to timed jobs", relatedNodeIds: ["cron_sched", "agent_main"], tags: ["automation"] },
+            { id: "v2m2", at: "2026-04-14T10:20:00+01:00", kind: "decision", title: "Cloud inference adopted", detail: "Accepted vendor dependency for model quality", relatedNodeIds: ["model_api"], tags: ["tradeoff", "latency"] }
+          ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
             { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["hallucination", "runaway-loop"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
@@ -268,6 +418,25 @@
           version: 3,
           timestamp: "2026-04-17T18:00:00+01:00",
           notes: "Agentic sub-runs + policy approval gateway",
+          milestones: [
+            { id: "v3m1", at: "2026-04-17T18:03:00+01:00", kind: "milestone", title: "Sub-agent runner live", detail: "Delegated complex tasks into isolated sessions", relatedNodeIds: ["agent_spawn"], tags: ["agentic"] },
+            { id: "v3m2", at: "2026-04-17T18:07:00+01:00", kind: "insight", title: "Approval gate reduces blast radius", detail: "Policy checks before high-impact actions", relatedNodeIds: ["policy_gate", "agent_spawn"], tags: ["safety", "governance"] },
+            { id: "v3m3", at: "2026-04-17T19:14:00+01:00", kind: "decision", title: "Map becomes primary traceability layer", detail: "All meaningful chats/actions should be logged chronologically with node links", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "process"] },
+            { id: "v3m4", at: "2026-04-17T19:21:00+01:00", kind: "decision", title: "Browser workflow locked to direct CDP", detail: "Use Windows Chrome remote debugging profile=windows by default; stop defaulting to browser relay", relatedNodeIds: ["tool_browser", "agent_main"], tags: ["browser", "cdp", "operating-rule"] },
+            { id: "v3m5", at: "2026-04-17T19:26:00+01:00", kind: "milestone", title: "Live map verified over Windows CDP", detail: "Confirmed direct visual load of GitHub Pages map and chronology in remote debugging session", relatedNodeIds: ["tool_browser", "agent_main"], tags: ["verification", "cdp", "map"] },
+            { id: "v3m6", at: "2026-04-17T19:26:30+01:00", kind: "insight", title: "Chronology now has dual role", detail: "Map acts as architecture view + auditable message/action timeline for Andrew collaboration", relatedNodeIds: ["agent_main", "store_memory"], tags: ["traceability", "presentation", "audit"] },
+            { id: "v3m7", at: "2026-04-17T19:36:00+01:00", kind: "milestone", title: "Demo tour mode added", detail: "Added button-driven time-range walkthrough that auto-plays chronology achievements", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["demo", "onboarding", "timeline"] },
+            { id: "v3m8", at: "2026-04-17T19:50:00+01:00", kind: "milestone", title: "Voice narration linked to demo run", detail: "Run demo now speaks each chronology step aloud for selected time period", relatedNodeIds: ["agent_main", "tool_browser"], tags: ["voice", "demo", "accessibility"] },
+            { id: "v3m9", at: "2026-04-17T20:00:00+01:00", kind: "idea", title: "Human-agent onboarding funnel vision", detail: "Project direction reframed as a methodology for onboarding humans and agents of any ability into effective collaboration", relatedNodeIds: ["human_andrew", "agent_main", "agent_spawn"], tags: ["vision", "onboarding", "methodology", "collaboration"] },
+            { id: "v3m10", at: "2026-04-17T20:02:00+01:00", kind: "decision", title: "Funnel stages formalized with interaction-mapping emphasis", detail: "Added 7-stage onboarding funnel in UI while preserving explicit focus on mapping our interactions and chronology traceability", relatedNodeIds: ["human_andrew", "agent_main", "store_memory"], tags: ["funnel", "traceability", "process"] },
+            { id: "v3m11", at: "2026-04-17T21:20:00+01:00", kind: "milestone", title: "Failure modes library added", detail: "Human-agent interaction failure modes now documented with signals and mitigations for onboarding and demos", relatedNodeIds: ["human_andrew", "agent_main", "policy_gate"], tags: ["risk", "failure-modes", "onboarding"] },
+            { id: "v3m12", at: "2026-04-17T21:22:00+01:00", kind: "decision", title: "Differentiate Agent Mode vs Traditional Chat", detail: "Added explicit interaction-mode split so execution capabilities are distinct from advisory chat behavior", relatedNodeIds: ["agent_main", "agent_spawn", "human_andrew"], tags: ["modes", "onboarding", "governance"] },
+            { id: "v3m13", at: "2026-04-17T21:27:00+01:00", kind: "milestone", title: "Resources library for videos + insights", detail: "Added resource mapping panel to capture YouTube references, key insights, and node links", relatedNodeIds: ["tool_browser", "agent_main", "store_memory"], tags: ["resources", "youtube", "insights"] },
+            { id: "v3m14", at: "2026-04-17T21:32:00+01:00", kind: "incident", title: "MCP runtime connection mismatch", detail: "Memory indicates prior cross-read success for UI-related MCP rows, but current runtime DB verification fails with tenant/user mismatch and needs credential path refresh", relatedNodeIds: ["agent_main", "store_memory", "policy_gate"], tags: ["mcp", "supabase", "credentials", "ui-learnings"] },
+            { id: "v3m15", at: "2026-04-17T22:03:00+01:00", kind: "idea", title: "Token/API threshold tracking", detail: "Track token usage and API threshold alerts across sessions to catch budget/limit pressure early", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "api", "monitoring", "thresholds"] },
+            { id: "v3m16", at: "2026-04-18T07:16:00+01:00", kind: "milestone", title: "Token health panel implemented", detail: "Added per-session token usage cards, threshold bands (70/85/95%), and alert states directly in the map UI", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "monitoring", "ui", "alerts"] },
+            { id: "v3m17", at: "2026-04-18T07:39:00+01:00", kind: "milestone", title: "Live token feed connected", detail: "Map now fetches token/API usage from a live JSON feed with auto-refresh and fallback handling for demos", relatedNodeIds: ["agent_main", "agent_spawn", "model_api", "policy_gate"], tags: ["tokens", "live", "api", "demo"] }
+          ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
             { id: "agent_main", type: "agent", label: "Main Agent", layer: "execution", environment: "local", sensitivity: "internal", autonomy: "semi-auto", risk: "medium", failureModes: ["hallucination", "runaway-loop"], tags: ["orchestrator"], metadata: { trustBoundary: "workstation", owner: "platform", pii: false } },
@@ -295,6 +464,18 @@
     const networkEl = document.getElementById('network');
     const detailsEl = document.getElementById('details');
     const statsEl = document.getElementById('stats');
+    const tokenHealthEl = document.getElementById('tokenHealth');
+    const breadcrumbsEl = document.getElementById('breadcrumbs');
+    const timelineEl = document.getElementById('timeline');
+    const funnelEl = document.getElementById('funnel');
+    const modesEl = document.getElementById('modes');
+    const failuresEl = document.getElementById('failures');
+    const resourcesEl = document.getElementById('resources');
+    const demoRangeEl = document.getElementById('demoRange');
+    const demoStartEl = document.getElementById('demoStart');
+    const demoEndEl = document.getElementById('demoEnd');
+    const demoStatusEl = document.getElementById('demoStatus');
+    const demoVoiceToggleEl = document.getElementById('demoVoiceToggle');
 
     const versionRange = document.getElementById('versionRange');
     const versionLabel = document.getElementById('versionLabel');
@@ -310,6 +491,47 @@
     document.getElementById('schemaPreview').textContent = JSON.stringify(V1_SCHEMA, null, 2);
 
     let network;
+    let focusNodeId = 'agent_main';
+    let breadcrumbTrail = ['agent_main'];
+    let demoTimer = null;
+    let demoActiveId = null;
+    let speaking = false;
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = () => resolve(src);
+        s.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(s);
+      });
+    }
+
+    function updateDemoInputState() {
+      const isCustom = demoRangeEl.value === 'custom';
+      demoStartEl.disabled = !isCustom;
+      demoEndEl.disabled = !isCustom;
+    }
+
+    async function ensureVisLoaded() {
+      if (window.vis) return;
+      const sources = [
+        './assets/vis-network.min.js',
+        'https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js',
+        'https://unpkg.com/vis-network/standalone/umd/vis-network.min.js'
+      ];
+      let lastErr;
+      for (const src of sources) {
+        try {
+          await loadScript(src);
+          if (window.vis) return;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error('vis-network failed to load');
+    }
 
     function getCurrentVersion() {
       const v = Number(versionRange.value);
@@ -325,37 +547,446 @@
       return true;
     }
 
+    const FUNNEL_STAGES = [
+      { id: 'discovery', title: '1) Discovery', detail: 'Clarify intent, actors, constraints, outcomes.' },
+      { id: 'orientation', title: '2) Orientation', detail: 'Establish shared language, interfaces, and context.' },
+      { id: 'capability-mapping', title: '3) Capability mapping', detail: 'Map human strengths, agent/tool capacities, and gaps.' },
+      { id: 'trust-safety', title: '4) Trust & safety calibration', detail: 'Define permissions, approvals, and risk boundaries.' },
+      { id: 'assisted-execution', title: '5) Assisted execution', detail: 'Run collaborative tasks with human-in-the-loop.' },
+      { id: 'autonomous-delegation', title: '6) Autonomous delegation', detail: 'Delegate bounded work to agents with guardrails.' },
+      { id: 'continuous-improvement', title: '7) Continuous improvement', detail: 'Capture learnings and refine workflows continuously.' }
+    ];
+
+    const FAILURE_LIBRARY = [
+      { mode: 'Misaligned intent', signal: 'Agent solves the wrong problem', mitigation: 'Use explicit success criteria and restate objectives before execution.' },
+      { mode: 'Hallucinated confidence', signal: 'Plausible but incorrect output', mitigation: 'Require citations/checkpoints before high-impact actions.' },
+      { mode: 'Instruction drift', signal: 'Method deviates across steps', mitigation: 'Pin operating rules and run periodic rule-conformance checks.' },
+      { mode: 'Context loss', signal: 'Ignores prior constraints/decisions', mitigation: 'Persist key decisions in chronology + memory and rehydrate each run.' },
+      { mode: 'Over-automation', signal: 'Acts beyond approval expectations', mitigation: 'Gate sensitive actions through explicit approval nodes.' },
+      { mode: 'Tool misuse/abuse', signal: 'Wrong tool or overly broad scope', mitigation: 'Scope tools narrowly and add allowlists with audit logs.' },
+      { mode: 'Data leakage', signal: 'Sensitive data exposed externally', mitigation: 'Classify sensitivity and block external egress for secret data.' },
+      { mode: 'Silent failure', signal: 'Task fails with no escalation', mitigation: 'Add completion assertions, alerts, and fallback notifications.' },
+      { mode: 'Runaway loops/cost blowouts', signal: 'Unbounded retries or recursion', mitigation: 'Set hard budgets, max-steps, and loop guards.' },
+      { mode: 'Accountability blur', signal: 'Unclear who decided what', mitigation: 'Timestamp every decision with actor + node links in chronology.' }
+    ];
+
+    const RESOURCE_LIBRARY = [
+      {
+        id: 'r1',
+        type: 'youtube',
+        title: 'Agentic Workflow Patterns (example)',
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        creator: 'Example Channel',
+        watchedAt: '2026-04-17T21:27:00+01:00',
+        relatedNodeIds: ['agent_main', 'agent_spawn'],
+        insights: [
+          'Use explicit handoff contracts between planner and executor agents.',
+          'Track autonomy level per task, not per system.',
+          'Log decisions with timestamps for post-run audits.'
+        ],
+        tags: ['youtube', 'agentic', 'workflow']
+      }
+    ];
+
+    const TOKEN_HEALTH = {
+      thresholds: { warn: 70, high: 85, critical: 95 },
+      windows: [
+        { id: 'w1', label: 'Main session', used: 0, limit: 272000, apiCalls: 0, relatedNodeIds: ['agent_main'] },
+        { id: 'w2', label: 'Sub-agent / group sessions', used: 0, limit: 272000, apiCalls: 0, relatedNodeIds: ['agent_spawn'] },
+        { id: 'w3', label: 'Model API budget', used: 0, limit: 2000000, apiCalls: 0, relatedNodeIds: ['model_api', 'policy_gate'] }
+      ],
+      source: { mode: 'demo', updatedAt: null, note: 'Demo fallback values' }
+    };
+
+    function renderFunnel() {
+      funnelEl.innerHTML = `
+        <div class="small" style="margin-bottom:6px"><b>Current emphasis:</b> mapping interactions + chronology traceability.</div>
+        ${FUNNEL_STAGES.map((s, i) => `<div class="stage-item ${i === 4 ? 'active' : ''}"><div class="stage-title">${s.title}</div><div class="small">${s.detail}</div></div>`).join('')}
+      `;
+    }
+
+    function renderModes() {
+      modesEl.innerHTML = `
+        <div class="mode-card">
+          <div class="mode-title">Traditional Chat (advisory mode)</div>
+          <div class="small">- Primary action: explain, suggest, draft.</div>
+          <div class="small">- No external side effects unless explicitly approved.</div>
+          <div class="small">- Best for thinking, planning, and review loops.</div>
+        </div>
+        <div class="mode-card">
+          <div class="mode-title">Agent Mode (execution mode)</div>
+          <div class="small">- Primary action: run tools, change systems, deliver outcomes.</div>
+          <div class="small">- Uses permissions, guardrails, and approvals for high-impact actions.</div>
+          <div class="small">- Best for repeatable workflows, delegation, and automation.</div>
+        </div>
+        <div class="small" style="margin-top:6px"><b>Current process emphasis:</b> map each interaction by mode and record outcomes chronologically for auditability.</div>
+      `;
+    }
+
+    function renderFailureLibrary() {
+      failuresEl.innerHTML = FAILURE_LIBRARY.map(f => `
+        <div class="failure-item">
+          <div class="failure-title">${f.mode}</div>
+          <div class="small"><b>Signal:</b> ${f.signal}</div>
+          <div class="small"><b>Mitigation:</b> ${f.mitigation}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderResources() {
+      resourcesEl.innerHTML = RESOURCE_LIBRARY.map(r => `
+        <div class="resource-item" data-res-id="${r.id}" data-related="${(r.relatedNodeIds || []).join(',')}">
+          <div class="resource-title">${r.type.toUpperCase()} — ${r.title}</div>
+          <div class="small"><b>Creator:</b> ${r.creator || 'unknown'}</div>
+          <div class="small"><b>Watched:</b> ${new Date(r.watchedAt).toLocaleString()}</div>
+          <div class="small"><b>Tags:</b> ${(r.tags || []).join(', ')}</div>
+          <div class="small"><b>Insights:</b></div>
+          <ul style="margin:4px 0 0 16px; padding:0">${(r.insights || []).map(i => `<li class="small">${i}</li>`).join('')}</ul>
+        </div>
+      `).join('');
+
+      resourcesEl.querySelectorAll('.resource-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
+          if (related.length) {
+            focusNodeId = related[0];
+            breadcrumbTrail.push(related[0]);
+            render();
+          }
+        });
+      });
+    }
+
+    function tokenLevel(pct) {
+      const { warn, high, critical } = TOKEN_HEALTH.thresholds;
+      if (pct >= critical) return { level: 'critical', color: '#ff6b9a' };
+      if (pct >= high) return { level: 'high', color: '#ff9e6b' };
+      if (pct >= warn) return { level: 'warn', color: '#ffd56b' };
+      return { level: 'ok', color: '#7dffb3' };
+    }
+
+    function renderTokenHealth() {
+      const windows = TOKEN_HEALTH.windows.map(w => {
+        const pct = Math.min(100, Math.round((w.used / Math.max(1, w.limit)) * 100));
+        const t = tokenLevel(pct);
+        const remaining = Math.max(0, w.limit - w.used);
+        return { ...w, pct, ...t, remaining };
+      });
+
+      const highest = windows.reduce((acc, w) => w.pct > acc.pct ? w : acc, windows[0]);
+      const activeAlert = windows.filter(w => w.level !== 'ok').length;
+      const sourceMode = TOKEN_HEALTH.source?.mode || 'demo';
+      const sourceAt = TOKEN_HEALTH.source?.updatedAt ? new Date(TOKEN_HEALTH.source.updatedAt).toLocaleString() : 'n/a';
+      const sourceNote = TOKEN_HEALTH.source?.note || '';
+
+      tokenHealthEl.innerHTML = `
+        <div class="small"><b>Thresholds:</b> warn ${TOKEN_HEALTH.thresholds.warn}% • high ${TOKEN_HEALTH.thresholds.high}% • critical ${TOKEN_HEALTH.thresholds.critical}%</div>
+        <div class="small" style="margin-top:4px"><b>Active alerts:</b> ${activeAlert} • <b>Top pressure:</b> ${highest.label} (${highest.pct}%)</div>
+        <div class="small" style="margin-top:4px"><b>Source:</b> ${sourceMode.toUpperCase()} • ${sourceAt}${sourceNote ? ` • ${sourceNote}` : ''}</div>
+        ${windows.map(w => `
+          <div class="token-card" data-related="${(w.relatedNodeIds || []).join(',')}">
+            <div><b>${w.label}</b> <span class="pill">${w.level.toUpperCase()}</span></div>
+            <div class="small">${w.used.toLocaleString()} / ${w.limit.toLocaleString()} tokens (${w.pct}%) • API calls: ${w.apiCalls.toLocaleString()}</div>
+            <div class="small">Remaining: ${w.remaining.toLocaleString()} tokens</div>
+            <div class="token-meter"><div class="token-fill" style="width:${w.pct}%; background:${w.color}"></div></div>
+          </div>
+        `).join('')}
+      `;
+
+      tokenHealthEl.querySelectorAll('.token-card').forEach(el => {
+        el.addEventListener('click', () => {
+          const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
+          if (related.length) {
+            focusNodeId = related[0];
+            breadcrumbTrail.push(related[0]);
+            render();
+          }
+        });
+      });
+    }
+
+    async function loadLiveTokenHealth() {
+      const url = `./assets/token-health-live.json?t=${Date.now()}`;
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = await res.json();
+        if (!payload || !Array.isArray(payload.windows)) throw new Error('Invalid token feed payload');
+
+        TOKEN_HEALTH.thresholds = { ...TOKEN_HEALTH.thresholds, ...(payload.thresholds || {}) };
+        TOKEN_HEALTH.windows = payload.windows;
+        TOKEN_HEALTH.source = {
+          mode: payload.source?.mode || 'live',
+          updatedAt: payload.source?.updatedAt || new Date().toISOString(),
+          note: payload.source?.note || 'Auto-refreshed from token-health-live.json'
+        };
+        renderTokenHealth();
+      } catch (err) {
+        TOKEN_HEALTH.source = {
+          mode: 'demo',
+          updatedAt: new Date().toISOString(),
+          note: 'Live feed unavailable; showing fallback values'
+        };
+        renderTokenHealth();
+      }
+    }
+
+    function updateBreadcrumbs(version) {
+      if (!focusNodeId) {
+        breadcrumbsEl.innerHTML = '<span class="small">Focus mode: off</span>';
+        return;
+      }
+      const labels = breadcrumbTrail
+        .map(id => version.nodes.find(n => n.id === id)?.label || id)
+        .slice(-6);
+      breadcrumbsEl.innerHTML = `<b>Focus path:</b> ${labels.join(' → ')}`;
+    }
+
+    function buildFocusView(nodes, edges, centerId) {
+      if (!centerId || !nodes.find(n => n.id === centerId)) return { nodes, edges };
+
+      const firstHopIds = new Set();
+      for (const e of edges) {
+        if (e.from === centerId) firstHopIds.add(e.to);
+        if (e.to === centerId) firstHopIds.add(e.from);
+      }
+
+      const keep = new Set([centerId, ...firstHopIds]);
+      const focusNodes = nodes.filter(n => keep.has(n.id));
+      const focusEdges = edges.filter(e => keep.has(e.from) && keep.has(e.to));
+
+      const ring = [...firstHopIds];
+      const radius = 260;
+      focusNodes.forEach((n, i) => {
+        if (n.id === centerId) {
+          n.x = 0; n.y = 0; n.fixed = { x: true, y: true };
+          return;
+        }
+        const idx = ring.indexOf(n.id);
+        const angle = (idx / Math.max(1, ring.length)) * Math.PI * 2;
+        n.x = Math.cos(angle) * radius;
+        n.y = Math.sin(angle) * radius;
+        n.fixed = { x: true, y: true };
+      });
+
+      return { nodes: focusNodes, edges: focusEdges };
+    }
+
+    function getChronology() {
+      const rows = [];
+      for (const v of model.versions) {
+        rows.push({
+          id: `version-${v.version}`,
+          at: v.timestamp,
+          kind: 'version',
+          title: `v${v.version} snapshot`,
+          detail: v.notes,
+          version: v.version,
+          relatedNodeIds: []
+        });
+        for (const m of (v.milestones || [])) {
+          rows.push({ ...m, version: v.version });
+        }
+      }
+      rows.sort((a, b) => new Date(a.at) - new Date(b.at));
+      return rows;
+    }
+
+    function getRangeBounds() {
+      const now = new Date();
+      const mode = demoRangeEl.value;
+      if (mode === 'all') return { start: null, end: null };
+      if (mode === 'today') {
+        const start = new Date(now); start.setHours(0, 0, 0, 0);
+        return { start, end: now };
+      }
+      if (mode === 'last24h') return { start: new Date(now.getTime() - 24 * 60 * 60 * 1000), end: now };
+      if (mode === 'last7d') return { start: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), end: now };
+      if (mode === 'custom') {
+        const start = demoStartEl.value ? new Date(demoStartEl.value) : null;
+        const end = demoEndEl.value ? new Date(demoEndEl.value) : null;
+        return { start, end };
+      }
+      return { start: null, end: null };
+    }
+
+    function getChronologyForRange() {
+      const rows = getChronology();
+      const { start, end } = getRangeBounds();
+      return rows.filter(r => {
+        const t = new Date(r.at);
+        if (start && t < start) return false;
+        if (end && t > end) return false;
+        return true;
+      });
+    }
+
+    function stopNarration() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      speaking = false;
+    }
+
+    function speak(text, onDone) {
+      if (!demoVoiceToggleEl.checked || !('speechSynthesis' in window)) {
+        onDone?.();
+        return;
+      }
+      stopNarration();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.03;
+      utterance.pitch = 1.0;
+      utterance.onend = () => { speaking = false; onDone?.(); };
+      utterance.onerror = () => { speaking = false; onDone?.(); };
+      speaking = true;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopDemo() {
+      if (demoTimer) clearTimeout(demoTimer);
+      demoTimer = null;
+      demoActiveId = null;
+      stopNarration();
+      demoStatusEl.textContent = 'Demo idle.';
+      render();
+    }
+
+    function runDemo() {
+      const rows = getChronologyForRange();
+      if (!rows.length) {
+        demoStatusEl.textContent = 'No chronology entries in selected range.';
+        return;
+      }
+
+      // Reset to clean tour state.
+      Object.values(filters).forEach(el => el.value = 'all');
+      focusNodeId = 'agent_main';
+      breadcrumbTrail = ['agent_main'];
+
+      let i = 0;
+      const step = () => {
+        const row = rows[i];
+        demoActiveId = row.id;
+        if (row.version) versionRange.value = String(row.version);
+        if (row.relatedNodeIds && row.relatedNodeIds.length) {
+          focusNodeId = row.relatedNodeIds[0];
+          if (breadcrumbTrail[breadcrumbTrail.length - 1] !== focusNodeId) breadcrumbTrail.push(focusNodeId);
+        }
+        render();
+        demoStatusEl.textContent = `Demo ${i + 1}/${rows.length}: ${row.kind} — ${row.title}`;
+        detailsEl.innerHTML = `
+          <div><b>Demo step ${i + 1}/${rows.length}</b></div>
+          <div class="stat">Time: <b>${new Date(row.at).toLocaleString()}</b></div>
+          <div class="stat">Type: <b>${row.kind}</b></div>
+          <div class="stat">Title: <b>${row.title}</b></div>
+          <div class="small">${row.detail || ''}</div>
+          <div class="small">Related nodes: ${(row.relatedNodeIds || []).join(', ') || 'none'}</div>
+        `;
+
+        const narration = `Step ${i + 1} of ${rows.length}. ${row.kind}. ${row.title}. ${row.detail || ''}`;
+
+        i += 1;
+        const queueNext = () => {
+          if (i < rows.length) {
+            demoTimer = setTimeout(step, 800);
+          } else {
+            demoTimer = null;
+            demoStatusEl.textContent = `Demo complete (${rows.length} steps).`;
+            demoActiveId = null;
+            render();
+          }
+        };
+
+        speak(narration, queueNext);
+      };
+
+      step();
+    }
+
+    function renderTimeline(currentVersion) {
+      const rows = getChronology();
+      timelineEl.innerHTML = rows.map(r => {
+        const isCurrent = r.version === currentVersion.version;
+        const isDemo = demoActiveId && demoActiveId === r.id;
+        const border = isDemo ? 'border-color:#ffd56b; box-shadow:0 0 0 1px rgba(255,213,107,.55) inset;' : (isCurrent ? 'border-color:#53c3ff' : '');
+        return `<div class="timeline-item" data-at="${r.at}" data-id="${r.id}" data-version="${r.version}" data-related="${(r.relatedNodeIds || []).join(',')}" style="${border}">
+          <div class="timeline-time">${new Date(r.at).toLocaleString()}</div>
+          <div class="timeline-note"><b>${r.kind}</b> — ${r.title}</div>
+          <div class="small">${r.detail || ''}</div>
+        </div>`;
+      }).join('');
+
+      timelineEl.querySelectorAll('.timeline-item').forEach(el => {
+        el.addEventListener('click', () => {
+          if (demoTimer) stopDemo();
+          const v = Number(el.getAttribute('data-version'));
+          const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
+          if (v) versionRange.value = String(v);
+          if (related.length) {
+            focusNodeId = related[0];
+            breadcrumbTrail.push(related[0]);
+          }
+          render();
+        });
+      });
+    }
+
     function render() {
       const version = getCurrentVersion();
       versionLabel.textContent = `Showing: v${version.version} — ${version.notes}`;
 
       const filteredNodes = version.nodes.filter(passesNodeFilters);
-      const nodeIds = new Set(filteredNodes.map(n => n.id));
-      const filteredEdges = version.edges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
+      const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+      const filteredEdges = version.edges.filter(e => filteredNodeIds.has(e.from) && filteredNodeIds.has(e.to));
 
-      const nodes = filteredNodes.map(n => ({
-        id: n.id,
-        label: n.label,
-        shape: byTypeShape(n.type),
-        color: { background: byRiskColor(n.risk), border: '#dbe6ff' },
-        font: { color: '#0b1228', face: 'Inter' },
-        title: `${n.type} • ${n.layer} • ${n.environment}`
-      }));
+      const MAIN_NODE_ID = 'agent_main';
+      const activeCenter = focusNodeId
+        ? (filteredNodes.some(n => n.id === focusNodeId) ? focusNodeId : (filteredNodes.some(n => n.id === MAIN_NODE_ID) ? MAIN_NODE_ID : null))
+        : null;
 
-      const edges = filteredEdges.map(e => ({
-        id: e.id,
-        from: e.from,
-        to: e.to,
-        label: e.label,
-        color: { color: byRiskColor(e.risk), opacity: 0.9 },
-        arrows: 'to',
-        font: { color: '#a9bbf4', size: 10, strokeWidth: 0 }
-      }));
+      const nodes = filteredNodes.map(n => {
+        const isMain = n.id === MAIN_NODE_ID;
+        const isFocus = n.id === activeCenter;
+        return {
+          id: n.id,
+          label: isMain ? `★ ${n.label}` : n.label,
+          shape: byTypeShape(n.type),
+          size: isFocus ? 56 : (isMain ? 48 : 28),
+          mass: isFocus ? 6 : (isMain ? 4 : 1),
+          x: undefined,
+          y: undefined,
+          fixed: false,
+          color: isFocus
+            ? { background: '#53c3ff', border: '#ffffff', highlight: { background: '#73d2ff', border: '#ffffff' } }
+            : { background: byRiskColor(n.risk), border: '#dbe6ff' },
+          font: { color: '#0b1228', face: 'Inter', size: isFocus ? 19 : 14, bold: isFocus ? '700' : '500' },
+          shadow: isFocus ? { enabled: true, color: 'rgba(83,195,255,.9)', size: 28, x: 0, y: 0 } : true,
+          title: `${n.type} • ${n.layer} • ${n.environment}${isMain ? ' • CENTRAL ORCHESTRATOR' : ''}`
+        };
+      });
 
-      const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+      const edges = filteredEdges.map(e => {
+        const touchesCenter = e.from === activeCenter || e.to === activeCenter;
+        return {
+          id: e.id,
+          from: e.from,
+          to: e.to,
+          label: e.label,
+          width: touchesCenter ? 3.5 : 1.8,
+          color: touchesCenter
+            ? { color: '#53c3ff', highlight: '#73d2ff', opacity: 1 }
+            : { color: byRiskColor(e.risk), opacity: 0.9 },
+          arrows: 'to',
+          font: { color: touchesCenter ? '#d7e7ff' : '#a9bbf4', size: touchesCenter ? 11 : 10, strokeWidth: 0 }
+        };
+      });
+
+      const focused = buildFocusView(nodes, edges, activeCenter);
+      const data = { nodes: new vis.DataSet(focused.nodes), edges: new vis.DataSet(focused.edges) };
       const options = {
         interaction: { hover: true, navigationButtons: true, keyboard: true },
-        physics: { stabilization: false, barnesHut: { springLength: 170 } },
+        physics: { enabled: false, stabilization: false },
         nodes: { borderWidth: 1.5, shadow: { enabled: true, color: 'rgba(80,140,255,.35)', size: 10 } },
         edges: { smooth: { type: 'dynamic' } }
       };
@@ -363,9 +994,22 @@
       if (network) network.destroy();
       network = new vis.Network(networkEl, data, options);
 
+      updateBreadcrumbs(version);
+      if (activeCenter && focused.nodes.some(n => n.id === activeCenter)) {
+        setTimeout(() => {
+          network.focus(activeCenter, { scale: 1.0, animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+        }, 120);
+      }
+
       network.on('selectNode', (params) => {
-        const n = version.nodes.find(x => x.id === params.nodes[0]);
+        const selectedId = params.nodes[0];
+        const n = version.nodes.find(x => x.id === selectedId);
         if (!n) return;
+
+        // TheBrain-like behavior: selected node becomes new center.
+        focusNodeId = selectedId;
+        if (breadcrumbTrail[breadcrumbTrail.length - 1] !== selectedId) breadcrumbTrail.push(selectedId);
+
         detailsEl.innerHTML = `
           <div><b>${n.label}</b> <span class="pill">${n.type}</span></div>
           <div class="stat">Layer: <b>${n.layer}</b></div>
@@ -377,6 +1021,8 @@
           <div class="small">Tags: ${(n.tags || []).map(t => `<span class='pill'>${t}</span>`).join('')}</div>
           <pre>${JSON.stringify(n.metadata || {}, null, 2)}</pre>
         `;
+
+        setTimeout(render, 40);
       });
 
       network.on('selectEdge', (params) => {
@@ -402,38 +1048,83 @@
         <div class="stat">High-risk edges: <b>${highRiskEdges}</b></div>
         <div class="stat">Secret nodes: <b>${secretNodes}</b></div>
       `;
+      renderTokenHealth();
+      renderFunnel();
+      renderModes();
+      renderFailureLibrary();
+      renderResources();
+      renderTimeline(version);
     }
 
     // init
-    versionRange.max = Math.max(...model.versions.map(v => v.version));
-    versionRange.value = versionRange.max;
-
-    versionRange.addEventListener('input', render);
-    Object.values(filters).forEach(el => el.addEventListener('change', render));
-
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      Object.values(filters).forEach(el => el.value = 'all');
-      versionRange.value = versionRange.max;
-      render();
-    });
-
-    document.getElementById('fileInput').addEventListener('change', async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+    async function boot() {
       try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        if (!parsed.versions || !Array.isArray(parsed.versions)) throw new Error('Missing versions[]');
-        model = parsed;
-        versionRange.max = Math.max(...model.versions.map(v => v.version));
-        versionRange.value = versionRange.max;
-        render();
+        await ensureVisLoaded();
       } catch (err) {
-        alert('Invalid JSON: ' + err.message);
+        detailsEl.innerHTML = `<span style="color:#ff6b9a"><b>Could not load graph library.</b><br/>This is usually a mobile/network CDN block.<br/>Try a different network or reload.</span><pre>${String(err.message || err)}</pre>`;
+        return;
       }
-    });
 
-    render();
+      versionRange.max = Math.max(...model.versions.map(v => v.version));
+      versionRange.value = versionRange.max;
+
+      versionRange.addEventListener('input', render);
+      Object.values(filters).forEach(el => el.addEventListener('change', render));
+      demoRangeEl.addEventListener('change', updateDemoInputState);
+      updateDemoInputState();
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        Object.values(filters).forEach(el => el.value = 'all');
+        versionRange.value = versionRange.max;
+        focusNodeId = 'agent_main';
+        breadcrumbTrail = ['agent_main'];
+        render();
+      });
+
+      document.getElementById('focusMainBtn').addEventListener('click', () => {
+        focusNodeId = 'agent_main';
+        breadcrumbTrail.push('agent_main');
+        render();
+      });
+
+      document.getElementById('clearFocusBtn').addEventListener('click', () => {
+        focusNodeId = null;
+        breadcrumbTrail = [];
+        render();
+      });
+
+      document.getElementById('demoStartBtn').addEventListener('click', () => {
+        if (demoTimer) clearTimeout(demoTimer);
+        demoTimer = null;
+        runDemo();
+      });
+
+      document.getElementById('demoStopBtn').addEventListener('click', () => {
+        stopDemo();
+      });
+
+      document.getElementById('fileInput').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          if (!parsed.versions || !Array.isArray(parsed.versions)) throw new Error('Missing versions[]');
+          model = parsed;
+          versionRange.max = Math.max(...model.versions.map(v => v.version));
+          versionRange.value = versionRange.max;
+          render();
+        } catch (err) {
+          alert('Invalid JSON: ' + err.message);
+        }
+      });
+
+      render();
+      loadLiveTokenHealth();
+      setInterval(loadLiveTokenHealth, 60000);
+    }
+
+    boot();
   </script>
 </body>
 </html>

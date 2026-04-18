@@ -130,6 +130,26 @@
     }
     .resource-item:hover { border-color: rgba(120,155,255,.55); }
     .resource-title { font-size: 12px; font-weight: 700; color: #7dffb3; }
+    .token-card {
+      border: 1px solid rgba(120,155,255,.25);
+      border-radius: 10px;
+      padding: 8px;
+      margin: 7px 0;
+      background: #0b1328;
+    }
+    .token-meter {
+      height: 8px;
+      border-radius: 999px;
+      background: #1a2444;
+      overflow: hidden;
+      margin-top: 6px;
+      border: 1px solid rgba(120,155,255,.2);
+    }
+    .token-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
 
     @media (max-width: 980px) {
       body {
@@ -259,6 +279,9 @@
 
     <h2 style="margin-top:12px">Quick stats</h2>
     <div id="stats"></div>
+
+    <h2 style="margin-top:12px">Token health</h2>
+    <div id="tokenHealth" class="small"></div>
 
     <h2 style="margin-top:12px">Collaboration funnel</h2>
     <div id="funnel" class="small"></div>
@@ -410,7 +433,9 @@
             { id: "v3m12", at: "2026-04-17T21:22:00+01:00", kind: "decision", title: "Differentiate Agent Mode vs Traditional Chat", detail: "Added explicit interaction-mode split so execution capabilities are distinct from advisory chat behavior", relatedNodeIds: ["agent_main", "agent_spawn", "human_andrew"], tags: ["modes", "onboarding", "governance"] },
             { id: "v3m13", at: "2026-04-17T21:27:00+01:00", kind: "milestone", title: "Resources library for videos + insights", detail: "Added resource mapping panel to capture YouTube references, key insights, and node links", relatedNodeIds: ["tool_browser", "agent_main", "store_memory"], tags: ["resources", "youtube", "insights"] },
             { id: "v3m14", at: "2026-04-17T21:32:00+01:00", kind: "incident", title: "MCP runtime connection mismatch", detail: "Memory indicates prior cross-read success for UI-related MCP rows, but current runtime DB verification fails with tenant/user mismatch and needs credential path refresh", relatedNodeIds: ["agent_main", "store_memory", "policy_gate"], tags: ["mcp", "supabase", "credentials", "ui-learnings"] },
-            { id: "v3m15", at: "2026-04-17T22:03:00+01:00", kind: "idea", title: "Token/API threshold tracking", detail: "Track token usage and API threshold alerts across sessions to catch budget/limit pressure early", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "api", "monitoring", "thresholds"] }
+            { id: "v3m15", at: "2026-04-17T22:03:00+01:00", kind: "idea", title: "Token/API threshold tracking", detail: "Track token usage and API threshold alerts across sessions to catch budget/limit pressure early", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "api", "monitoring", "thresholds"] },
+            { id: "v3m16", at: "2026-04-18T07:16:00+01:00", kind: "milestone", title: "Token health panel implemented", detail: "Added per-session token usage cards, threshold bands (70/85/95%), and alert states directly in the map UI", relatedNodeIds: ["agent_main", "policy_gate", "store_memory"], tags: ["tokens", "monitoring", "ui", "alerts"] },
+            { id: "v3m17", at: "2026-04-18T07:39:00+01:00", kind: "milestone", title: "Live token feed connected", detail: "Map now fetches token/API usage from a live JSON feed with auto-refresh and fallback handling for demos", relatedNodeIds: ["agent_main", "agent_spawn", "model_api", "policy_gate"], tags: ["tokens", "live", "api", "demo"] }
           ],
           nodes: [
             { id: "human_andrew", type: "human", label: "Andrew", layer: "control", environment: "local", sensitivity: "internal", autonomy: "assistive", risk: "low", failureModes: [], tags: ["approver"], metadata: { trustBoundary: "human", owner: "andrew", pii: false } },
@@ -439,6 +464,7 @@
     const networkEl = document.getElementById('network');
     const detailsEl = document.getElementById('details');
     const statsEl = document.getElementById('stats');
+    const tokenHealthEl = document.getElementById('tokenHealth');
     const breadcrumbsEl = document.getElementById('breadcrumbs');
     const timelineEl = document.getElementById('timeline');
     const funnelEl = document.getElementById('funnel');
@@ -562,6 +588,16 @@
       }
     ];
 
+    const TOKEN_HEALTH = {
+      thresholds: { warn: 70, high: 85, critical: 95 },
+      windows: [
+        { id: 'w1', label: 'Main session', used: 0, limit: 272000, apiCalls: 0, relatedNodeIds: ['agent_main'] },
+        { id: 'w2', label: 'Sub-agent / group sessions', used: 0, limit: 272000, apiCalls: 0, relatedNodeIds: ['agent_spawn'] },
+        { id: 'w3', label: 'Model API budget', used: 0, limit: 2000000, apiCalls: 0, relatedNodeIds: ['model_api', 'policy_gate'] }
+      ],
+      source: { mode: 'demo', updatedAt: null, note: 'Demo fallback values' }
+    };
+
     function renderFunnel() {
       funnelEl.innerHTML = `
         <div class="small" style="margin-bottom:6px"><b>Current emphasis:</b> mapping interactions + chronology traceability.</div>
@@ -619,6 +655,80 @@
           }
         });
       });
+    }
+
+    function tokenLevel(pct) {
+      const { warn, high, critical } = TOKEN_HEALTH.thresholds;
+      if (pct >= critical) return { level: 'critical', color: '#ff6b9a' };
+      if (pct >= high) return { level: 'high', color: '#ff9e6b' };
+      if (pct >= warn) return { level: 'warn', color: '#ffd56b' };
+      return { level: 'ok', color: '#7dffb3' };
+    }
+
+    function renderTokenHealth() {
+      const windows = TOKEN_HEALTH.windows.map(w => {
+        const pct = Math.min(100, Math.round((w.used / Math.max(1, w.limit)) * 100));
+        const t = tokenLevel(pct);
+        const remaining = Math.max(0, w.limit - w.used);
+        return { ...w, pct, ...t, remaining };
+      });
+
+      const highest = windows.reduce((acc, w) => w.pct > acc.pct ? w : acc, windows[0]);
+      const activeAlert = windows.filter(w => w.level !== 'ok').length;
+      const sourceMode = TOKEN_HEALTH.source?.mode || 'demo';
+      const sourceAt = TOKEN_HEALTH.source?.updatedAt ? new Date(TOKEN_HEALTH.source.updatedAt).toLocaleString() : 'n/a';
+      const sourceNote = TOKEN_HEALTH.source?.note || '';
+
+      tokenHealthEl.innerHTML = `
+        <div class="small"><b>Thresholds:</b> warn ${TOKEN_HEALTH.thresholds.warn}% • high ${TOKEN_HEALTH.thresholds.high}% • critical ${TOKEN_HEALTH.thresholds.critical}%</div>
+        <div class="small" style="margin-top:4px"><b>Active alerts:</b> ${activeAlert} • <b>Top pressure:</b> ${highest.label} (${highest.pct}%)</div>
+        <div class="small" style="margin-top:4px"><b>Source:</b> ${sourceMode.toUpperCase()} • ${sourceAt}${sourceNote ? ` • ${sourceNote}` : ''}</div>
+        ${windows.map(w => `
+          <div class="token-card" data-related="${(w.relatedNodeIds || []).join(',')}">
+            <div><b>${w.label}</b> <span class="pill">${w.level.toUpperCase()}</span></div>
+            <div class="small">${w.used.toLocaleString()} / ${w.limit.toLocaleString()} tokens (${w.pct}%) • API calls: ${w.apiCalls.toLocaleString()}</div>
+            <div class="small">Remaining: ${w.remaining.toLocaleString()} tokens</div>
+            <div class="token-meter"><div class="token-fill" style="width:${w.pct}%; background:${w.color}"></div></div>
+          </div>
+        `).join('')}
+      `;
+
+      tokenHealthEl.querySelectorAll('.token-card').forEach(el => {
+        el.addEventListener('click', () => {
+          const related = (el.getAttribute('data-related') || '').split(',').filter(Boolean);
+          if (related.length) {
+            focusNodeId = related[0];
+            breadcrumbTrail.push(related[0]);
+            render();
+          }
+        });
+      });
+    }
+
+    async function loadLiveTokenHealth() {
+      const url = `./assets/token-health-live.json?t=${Date.now()}`;
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = await res.json();
+        if (!payload || !Array.isArray(payload.windows)) throw new Error('Invalid token feed payload');
+
+        TOKEN_HEALTH.thresholds = { ...TOKEN_HEALTH.thresholds, ...(payload.thresholds || {}) };
+        TOKEN_HEALTH.windows = payload.windows;
+        TOKEN_HEALTH.source = {
+          mode: payload.source?.mode || 'live',
+          updatedAt: payload.source?.updatedAt || new Date().toISOString(),
+          note: payload.source?.note || 'Auto-refreshed from token-health-live.json'
+        };
+        renderTokenHealth();
+      } catch (err) {
+        TOKEN_HEALTH.source = {
+          mode: 'demo',
+          updatedAt: new Date().toISOString(),
+          note: 'Live feed unavailable; showing fallback values'
+        };
+        renderTokenHealth();
+      }
     }
 
     function updateBreadcrumbs(version) {
@@ -938,6 +1048,7 @@
         <div class="stat">High-risk edges: <b>${highRiskEdges}</b></div>
         <div class="stat">Secret nodes: <b>${secretNodes}</b></div>
       `;
+      renderTokenHealth();
       renderFunnel();
       renderModes();
       renderFailureLibrary();
@@ -1009,6 +1120,8 @@
       });
 
       render();
+      loadLiveTokenHealth();
+      setInterval(loadLiveTokenHealth, 60000);
     }
 
     boot();

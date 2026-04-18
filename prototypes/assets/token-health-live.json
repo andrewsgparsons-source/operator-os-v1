@@ -1,0 +1,45 @@
+{
+  "thresholds": {
+    "warn": 70,
+    "high": 85,
+    "critical": 95
+  },
+  "source": {
+    "mode": "live",
+    "updatedAt": "2026-04-18T06:39:45.307305+00:00",
+    "note": "Computed from local OpenClaw session JSONL logs"
+  },
+  "windows": [
+    {
+      "id": "w1",
+      "label": "Main session (24h)",
+      "used": 1785372,
+      "limit": 5000000,
+      "apiCalls": 47,
+      "relatedNodeIds": [
+        "agent_main"
+      ]
+    },
+    {
+      "id": "w2",
+      "label": "Other sessions (24h)",
+      "used": 25127330,
+      "limit": 5000000,
+      "apiCalls": 351,
+      "relatedNodeIds": [
+        "agent_spawn"
+      ]
+    },
+    {
+      "id": "w3",
+      "label": "Model/API rolling 30d",
+      "used": 151008862,
+      "limit": 200000000,
+      "apiCalls": 1879,
+      "relatedNodeIds": [
+        "model_api",
+        "policy_gate"
+      ]
+    }
+  ]
+}
