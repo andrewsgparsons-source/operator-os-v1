@@ -3,283 +3,273 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MindMap Lab — TheBrain-style 3D Test</title>
+  <title>MindMap Scratchpad</title>
   <style>
-    :root { --bg:#070b16; --panel:#0f1730; --ink:#dce6ff; --muted:#92a5df; --accent:#57c5ff; }
-    *{box-sizing:border-box}
-    body{margin:0;height:100vh;display:grid;grid-template-columns:320px 1fr 320px;gap:10px;padding:10px;background:radial-gradient(circle at 20% 0%, #13224a, var(--bg) 45%);color:var(--ink);font-family:Inter,system-ui,sans-serif}
-    .panel{background:linear-gradient(180deg,rgba(15,23,48,.95),rgba(10,16,34,.95));border:1px solid rgba(120,155,255,.25);border-radius:12px;padding:12px;overflow:auto}
-    h1{font-size:16px;margin:0 0 8px;color:var(--accent)}
-    h2{font-size:12px;margin:10px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-    .small{font-size:12px;color:var(--muted)}
-    #graph{border:1px solid rgba(120,155,255,.25);border-radius:12px;overflow:hidden}
-    button,select,input{width:100%;background:#101a36;color:var(--ink);border:1px solid rgba(120,155,255,.35);border-radius:8px;padding:8px;margin-top:6px}
-    .node-chip{display:inline-block;padding:3px 8px;border:1px solid rgba(120,155,255,.35);border-radius:999px;margin:3px;font-size:11px;cursor:pointer}
-    .node-chip:hover{border-color:#57c5ff}
-    .stat{font-size:12px;margin:4px 0}
-    @media (max-width: 980px){body{grid-template-columns:1fr;grid-template-rows:auto 60vh auto;height:auto}}
+    :root {
+      --bg: #ffffff;
+      --ink: #15355f;
+      --muted: #5a7aa7;
+      --line: #9ebfe9;
+      --node1: #b7d7ff;
+      --node2: #7fb4ff;
+      --nodeBorder: #4d88d8;
+      --focus: #2f6fcb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
+    }
+    .left {
+      border-right: 1px solid #d7e6fa;
+      padding: 12px;
+      overflow: auto;
+    }
+    h1 { font-size: 17px; margin: 0 0 10px; }
+    .small { font-size: 12px; color: var(--muted); }
+    button, input {
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid #b8d3f6;
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #f5faff;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    button:active { transform: translateY(1px); }
+    .chips { margin-top: 10px; }
+    .chip {
+      display: inline-block;
+      margin: 4px 4px 0 0;
+      border: 1px solid #b8d3f6;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 11px;
+      color: #406da4;
+      cursor: pointer;
+      background: #f3f8ff;
+    }
+    .chip:hover { border-color: #7eaeea; }
+    #stageWrap { position: relative; overflow: hidden; }
+    svg { width: 100%; height: 100%; display: block; background: #ffffff; }
+    .toolbar {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid #cfe2fb;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 12px;
+      color: #5679a8;
+    }
+    @media (max-width: 900px) {
+      body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; height: 100vh; }
+      .left { border-right: 0; border-bottom: 1px solid #d7e6fa; }
+    }
   </style>
 </head>
 <body>
-  <aside class="panel">
-    <h1>MindMap Lab</h1>
-    <div class="small">Test case: TheBrain-like focus graph + 3D interaction</div>
+  <aside class="left">
+    <h1>MindMap Scratchpad</h1>
+    <div class="small">Minimal TheBrain-style view: one focus node + parent/children/jumps.</div>
 
-    <h2>Controls</h2>
-    <label class="small">Layout mode</label>
-    <select id="mode">
-      <option value="3d">3D force</option>
-      <option value="2d">2D force</option>
-    </select>
-
-    <label class="small">Link distance</label>
-    <input id="distance" type="range" min="40" max="220" value="110" />
-
-    <label class="small">Node charge</label>
-    <input id="charge" type="range" min="-320" max="-20" value="-120" />
-
+    <input id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
+    <button id="addChild">+ Add child to focus</button>
+    <button id="addParent">+ Add parent above focus</button>
+    <button id="addJump">+ Add jump link to focus</button>
     <button id="focusRoot">Focus root</button>
-    <button id="expandOne">Expand 1 hop</button>
-    <button id="expandTwo">Expand 2 hops</button>
 
-    <h2>Red/Green philosophy (always on)</h2>
-    <div class="small" style="margin-top:6px">Green = scale/ship/known-good paths. Red = risk/unknown/needs review. This is permanent (no toggle) to enforce no-drift discipline.</div>
+    <div style="margin-top:12px" class="small"><b>Focus node</b></div>
+    <div id="focusName" style="font-weight:600;margin-top:4px">Core Idea</div>
 
-    <h2>How this behaves</h2>
-    <div class="small">Click any node to re-center the map around it. Parents, children, and sibling/jump relations become the visible context, like TheBrain's thought focus.</div>
+    <div style="margin-top:12px" class="small"><b>Quick focus</b></div>
+    <div id="quickNodes" class="chips"></div>
   </aside>
 
-  <main id="graph"></main>
-
-  <aside class="panel">
-    <h2>Focus</h2>
-    <div id="focusTitle">agent_main</div>
-    <div id="focusMeta" class="small"></div>
-
-    <h2>Parent</h2>
-    <div id="parent"></div>
-
-    <h2>Children</h2>
-    <div id="children"></div>
-
-    <h2>Jumps / Related</h2>
-    <div id="jumps"></div>
-
-    <h2>Stats</h2>
-    <div id="stats"></div>
-  </aside>
+  <main id="stageWrap">
+    <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="toolbar">Tap node to focus it</div>
+  </main>
 
   <script>
-    const seed = {
-      nodes: [
-        { id:'agent_main', label:'Meta Agent', group:'meta', rg:'green', note:'Optimises + routes specialists' },
-        { id:'agent_spawn', label:'Task Agent Runner', group:'exec', rg:'green', note:'Executes delegated tasks' },
-        { id:'policy_gate', label:'Policy Gate', group:'control', rg:'red', note:'Approvals + guardrails' },
-        { id:'model_api', label:'Model API', group:'api', rg:'red', note:'Inference + model access' },
-        { id:'store_memory', label:'Memory', group:'data', rg:'red', note:'Persistent context + decisions' },
-        { id:'harness_eval', label:'Harness Evaluator', group:'meta', rg:'green', note:'Scores quality, drift, latency, cost' },
-        { id:'task_recruit', label:'Recruitment Agent', group:'task', rg:'green', note:'Domain specialist for talent workflows' },
-        { id:'task_sales', label:'Sales Ops Agent', group:'task', rg:'green', note:'Domain specialist for pipeline automation' },
-        { id:'task_content', label:'Content Agent', group:'task', rg:'green', note:'Domain specialist for content workflows' },
-        { id:'human_andrew', label:'Andrew', group:'human', rg:'green', note:'Operator + strategic oversight' },
-      ],
-      links: [
-        { source:'human_andrew', target:'agent_main', type:'parent' },
-        { source:'agent_main', target:'agent_spawn', type:'child' },
-        { source:'agent_main', target:'harness_eval', type:'child' },
-        { source:'agent_main', target:'policy_gate', type:'child' },
-        { source:'agent_spawn', target:'task_recruit', type:'child' },
-        { source:'agent_spawn', target:'task_sales', type:'child' },
-        { source:'agent_spawn', target:'task_content', type:'child' },
-        { source:'agent_spawn', target:'model_api', type:'child' },
-        { source:'agent_main', target:'store_memory', type:'child' },
-        { source:'harness_eval', target:'task_recruit', type:'jump' },
-        { source:'harness_eval', target:'task_sales', type:'jump' },
-        { source:'harness_eval', target:'task_content', type:'jump' },
-        { source:'policy_gate', target:'task_recruit', type:'jump' }
-      ]
-    };
+    const svg = document.getElementById('stage');
+    const input = document.getElementById('nodeLabel');
+    const focusName = document.getElementById('focusName');
+    const quickNodes = document.getElementById('quickNodes');
 
-    const colorByGroup = g => ({ meta:'#57c5ff', exec:'#ffd56b', control:'#ff9d6f', api:'#ff6b9a', data:'#7dffb3', task:'#b7b3ff', human:'#cdd8ff' }[g] || '#9fb5ff');
-    const colorByRG = rg => ({ green:'#3fe08f', red:'#ff6b6b' }[rg] || '#9fb5ff');
+    const nodes = [{ id: 'n1', label: 'Core Idea' }];
+    const links = [];
+    let focusId = 'n1';
+    let seq = 1;
 
-    const ui = {
-      mode: document.getElementById('mode'),
-      dist: document.getElementById('distance'),
-      charge: document.getElementById('charge'),
-      focusTitle: document.getElementById('focusTitle'),
-      focusMeta: document.getElementById('focusMeta'),
-      parent: document.getElementById('parent'),
-      children: document.getElementById('children'),
-      jumps: document.getElementById('jumps'),
-      stats: document.getElementById('stats')
-    };
+    const W = 1200, H = 760;
+    const center = { x: W / 2, y: H / 2 };
 
-    let focusId = 'agent_main';
-    let hopDepth = 1;
-    let Graph;
-    let graphMode = '3d';
+    function nextId() { seq += 1; return 'n' + seq; }
+    function getNode(id) { return nodes.find(n => n.id === id); }
 
-    function neighborhood(rootId, depth = 1) {
-      const keep = new Set([rootId]);
-      let frontier = new Set([rootId]);
-      for (let d=0; d<depth; d++) {
-        const next = new Set();
-        seed.links.forEach(l => {
-          if (frontier.has(l.source)) { keep.add(l.target); next.add(l.target); }
-          if (frontier.has(l.target)) { keep.add(l.source); next.add(l.source); }
-        });
-        frontier = next;
-      }
-      return {
-        nodes: seed.nodes.filter(n => keep.has(n.id)),
-        links: seed.links.filter(l => keep.has(l.source) && keep.has(l.target))
-      };
-    }
-
-    function rel(rootId) {
-      const parent = seed.links.find(l => l.target === rootId && l.type === 'parent')?.source || null;
-      const children = seed.links.filter(l => l.source === rootId && l.type === 'child').map(l => l.target);
-      const jumps = seed.links.filter(l => (l.source===rootId || l.target===rootId) && l.type === 'jump').map(l => l.source===rootId ? l.target : l.source);
-      return { parent, children, jumps };
-    }
-
-    function chip(id) {
-      const n = seed.nodes.find(x => x.id === id);
-      return n ? `<span class="node-chip" data-id="${id}">${n.label}</span>` : '';
-    }
-
-    function bindChips() {
-      document.querySelectorAll('.node-chip').forEach(el => {
-        el.onclick = () => { focusId = el.dataset.id; render(); };
-      });
-    }
-
-    function renderSide() {
-      const n = seed.nodes.find(x => x.id === focusId);
-      const r = rel(focusId);
-      ui.focusTitle.textContent = n?.label || focusId;
-      ui.focusMeta.textContent = n?.note || '';
-      ui.parent.innerHTML = r.parent ? chip(r.parent) : '<span class="small">None</span>';
-      ui.children.innerHTML = r.children.length ? r.children.map(chip).join('') : '<span class="small">None</span>';
-      ui.jumps.innerHTML = r.jumps.length ? r.jumps.map(chip).join('') : '<span class="small">None</span>';
-      ui.stats.innerHTML = `<div class="stat">Visible nodes: <b>${Graph.graphData().nodes.length}</b></div><div class="stat">Visible links: <b>${Graph.graphData().links.length}</b></div><div class="stat">Focus depth: <b>${hopDepth} hop</b></div>`;
-      bindChips();
-    }
-
-    function render() {
-      const data = neighborhood(focusId, hopDepth);
-      Graph.graphData({
-        nodes: data.nodes.map(n => ({ ...n, color: colorByRG(n.rg), val: n.id===focusId ? 18 : 7 })),
-        links: data.links.map(l => ({ ...l, color: l.type==='jump' ? '#ffd56b' : '#7fa5ff' }))
-      });
-
-      if (graphMode === '3d') {
-        if (ui.mode.value === '2d' && Graph.numDimensions) Graph.numDimensions(2);
-        if (ui.mode.value === '3d' && Graph.numDimensions) Graph.numDimensions(3);
-      }
-
-      if (Graph.d3Force) {
-        Graph.d3Force('link').distance(Number(ui.dist.value));
-        Graph.d3Force('charge').strength(Number(ui.charge.value));
-        Graph.d3ReheatSimulation();
-      }
-
-      const node = Graph.graphData().nodes.find(x => x.id === focusId);
-      if (graphMode === '3d' && node && Graph.cameraPosition) {
-        const nx = Number.isFinite(node.x) ? node.x : 0;
-        const ny = Number.isFinite(node.y) ? node.y : 0;
-        const nz = Number.isFinite(node.z) ? node.z : 0;
-        const mag = Math.max(1, Math.hypot(nx, ny, nz));
-        const ratio = 1 + (180 / mag);
-        Graph.cameraPosition({ x: nx * ratio, y: ny * ratio, z: nz * ratio + 60 }, { x: nx, y: ny, z: nz }, 850);
-      }
-
-      renderSide();
-    }
-
-    async function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }
-
-    function webglAvailable() {
-      try {
-        const c = document.createElement('canvas');
-        return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
-      } catch {
-        return false;
-      }
-    }
-
-    async function boot() {
-      const graphEl = document.getElementById('graph');
-      const can3d = webglAvailable();
-
-      if (can3d) {
-        try {
-          await loadScript('https://unpkg.com/3d-force-graph');
-          graphMode = '3d';
-          Graph = ForceGraph3D()(graphEl)
-            .backgroundColor('#070b16')
-            .nodeLabel(n => `${n.label}\n${n.note || ''}`)
-            .linkLabel(l => l.type)
-            .linkDirectionalParticles(1)
-            .linkDirectionalParticleWidth(l => l.type === 'jump' ? 2.8 : 1.4)
-            .linkWidth(l => l.type === 'jump' ? 2.2 : 1.1)
-            .onNodeClick(n => { focusId = n.id; render(); });
-        } catch {
-          graphMode = '2d';
-        }
-      } else {
-        graphMode = '2d';
-      }
-
-      if (graphMode === '2d') {
-        try {
-          await loadScript('https://unpkg.com/force-graph');
-          Graph = ForceGraph()(graphEl)
-            .backgroundColor('#070b16')
-            .nodeLabel(n => `${n.label}\n${n.note || ''}`)
-            .linkLabel(l => l.type)
-            .linkWidth(l => l.type === 'jump' ? 2.2 : 1.2)
-            .nodeCanvasObject((node, ctx, globalScale) => {
-              const label = node.label;
-              const fontSize = (node.id === focusId ? 16 : 12) / globalScale;
-              ctx.beginPath();
-              ctx.fillStyle = node.color || '#9fb5ff';
-              ctx.arc(node.x, node.y, node.id === focusId ? 8 : 5, 0, 2 * Math.PI, false);
-              ctx.fill();
-              ctx.font = `${fontSize}px Sans-Serif`;
-              ctx.fillStyle = '#dce6ff';
-              ctx.fillText(label, node.x + 8, node.y + 4);
-            })
-            .onNodeClick(n => { focusId = n.id; render(); });
-          ui.mode.value = '2d';
-          ui.mode.disabled = true;
-        } catch {
-          graphEl.innerHTML = '<div style="padding:16px;color:#ff9d6f">Could not load graph library on this device/network.</div>';
-          return;
-        }
-      }
-
-      document.getElementById('focusRoot').onclick = () => { focusId = 'agent_main'; render(); };
-      document.getElementById('expandOne').onclick = () => { hopDepth = 1; render(); };
-      document.getElementById('expandTwo').onclick = () => { hopDepth = 2; render(); };
-      ui.mode.onchange = render;
-      ui.dist.oninput = render;
-      ui.charge.oninput = render;
-
+    function addNodeWith(type) {
+      const label = (input.value || '').trim() || defaultLabel(type);
+      const id = nextId();
+      nodes.push({ id, label });
+      if (type === 'child') links.push({ from: focusId, to: id, type: 'child' });
+      if (type === 'parent') links.push({ from: id, to: focusId, type: 'parent' });
+      if (type === 'jump') links.push({ from: focusId, to: id, type: 'jump' });
+      focusId = id;
+      input.value = '';
       render();
     }
 
-    boot();
+    function defaultLabel(type) {
+      if (type === 'child') return 'Child idea';
+      if (type === 'parent') return 'Parent context';
+      return 'Jump idea';
+    }
+
+    function relationship(fid) {
+      const parentLink = links.find(l => l.to === fid && (l.type === 'parent' || l.type === 'child'));
+      const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
+
+      const children = links
+        .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.to)
+        .filter(id => id !== parent);
+
+      const jumps = links
+        .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
+        .map(l => l.from === fid ? l.to : l.from);
+
+      return { parent, children, jumps };
+    }
+
+    function place(fid) {
+      const rel = relationship(fid);
+      const pos = {};
+      pos[fid] = { x: center.x, y: center.y };
+
+      if (rel.parent) pos[rel.parent] = { x: center.x, y: center.y - 180 };
+
+      rel.children.forEach((id, i) => {
+        const spread = (rel.children.length - 1) * 170;
+        const x = center.x - spread / 2 + i * 170;
+        pos[id] = { x, y: center.y + 180 };
+      });
+
+      rel.jumps.forEach((id, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const rank = Math.floor(i / 2);
+        const x = center.x + side * (240 + rank * 150);
+        const y = center.y + (side < 0 ? -80 : 80);
+        pos[id] = { x, y };
+      });
+
+      return pos;
+    }
+
+    function line(x1, y1, x2, y2, color, dash = false) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+      el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+      el.setAttribute('stroke', color);
+      el.setAttribute('stroke-width', '2');
+      if (dash) el.setAttribute('stroke-dasharray', '7 6');
+      return el;
+    }
+
+    function nodeShape(n, x, y, focused) {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.style.cursor = 'pointer';
+      g.addEventListener('click', () => { focusId = n.id; render(); });
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x);
+      text.setAttribute('y', y - 42);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size', focused ? '17' : '14');
+      text.setAttribute('font-weight', focused ? '700' : '500');
+      text.setAttribute('fill', '#204e86');
+      text.textContent = n.label;
+
+      const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      e.setAttribute('cx', x); e.setAttribute('cy', y);
+      e.setAttribute('rx', focused ? '92' : '82');
+      e.setAttribute('ry', focused ? '34' : '30');
+      e.setAttribute('fill', 'url(#blueGrad)');
+      e.setAttribute('stroke', focused ? '#2f6fcb' : '#4d88d8');
+      e.setAttribute('stroke-width', focused ? '3' : '2');
+
+      g.appendChild(text);
+      g.appendChild(e);
+      return g;
+    }
+
+    function defs() {
+      const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      grad.setAttribute('id', 'blueGrad');
+      grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
+      grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
+
+      const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#b7d7ff');
+      const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#7fb4ff');
+
+      grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
+      return d;
+    }
+
+    function renderQuick() {
+      quickNodes.innerHTML = '';
+      nodes.slice(-16).forEach(n => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = n.label;
+        chip.onclick = () => { focusId = n.id; render(); };
+        quickNodes.appendChild(chip);
+      });
+    }
+
+    function render() {
+      const focus = getNode(focusId);
+      focusName.textContent = focus?.label || focusId;
+
+      const pos = place(focusId);
+      svg.innerHTML = '';
+      svg.appendChild(defs());
+
+      links.forEach(l => {
+        const a = pos[l.from], b = pos[l.to];
+        if (!a || !b) return;
+        const color = l.type === 'jump' ? '#7fa8d9' : '#9ebfe9';
+        svg.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+      });
+
+      Object.entries(pos).forEach(([id, p]) => {
+        const n = getNode(id);
+        if (!n) return;
+        svg.appendChild(nodeShape(n, p.x, p.y, id === focusId));
+      });
+
+      renderQuick();
+    }
+
+    document.getElementById('addChild').onclick = () => addNodeWith('child');
+    document.getElementById('addParent').onclick = () => addNodeWith('parent');
+    document.getElementById('addJump').onclick = () => addNodeWith('jump');
+    document.getElementById('focusRoot').onclick = () => { focusId = 'n1'; render(); };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addNodeWith('child');
+    });
+
+    render();
   </script>
 </body>
 </html>
