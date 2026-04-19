@@ -2,148 +2,468 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MindMap Scratchpad</title>
   <style>
+    /* ============================================================
+       MINDMAP CONFIGURATOR — Blue Theme, Drawer-Style
+       ============================================================ */
     :root {
-      --bg: #ffffff;
-      --ink: #15355f;
-      --muted: #5a7aa7;
-      --line: #9ebfe9;
-      --nodeBorder: #4d88d8;
-      --focus: #2f6fcb;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
-      height: 100vh;
-      display: grid;
-      grid-template-rows: 56vh 44vh;
+      --primary: #1E5BA8;
+      --primary-light: #E3EEF9;
+      --primary-hover: #143D6F;
+      --accent: #5B9FD8;
+      --accent-light: #D1E7F8;
+      --bg: #F5F9FC;
+      --bg-panel: #FFFFFF;
+      --text: #1A1A1A;
+      --text-secondary: #5C5C5C;
+      --text-muted: #8A8A8A;
+      --border: #D1E0ED;
+      --shadow: 0 2px 12px rgba(30, 91, 168, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* TOP HALF: nodes-only viewport */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      color: var(--text);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    #mindmapContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ===== GRAPH PREVIEW (TOP) ===== */
     #graphPane {
       position: relative;
-      border-bottom: 1px solid #d7e6fa;
+      flex: 0 0 auto;
+      height: 55vh;
+      height: 55dvh;
+      min-height: 15vh;
+      max-height: 80vh;
+      background: #ffffff;
       overflow: hidden;
-      background: #fff;
+      touch-action: none;
     }
-    svg { width: 100%; height: 100%; display: block; background: #fff; touch-action: none; }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #ffffff;
+      touch-action: none;
+    }
+
     .overlay {
       position: absolute;
       top: 10px;
       right: 10px;
       display: flex;
       gap: 6px;
-      background: rgba(255,255,255,.94);
-      border: 1px solid #cfe2fb;
-      border-radius: 10px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       padding: 6px;
       z-index: 2;
+      box-shadow: var(--shadow);
     }
+
     .overlay button {
       width: auto;
-      padding: 6px 10px;
+      padding: 6px 12px;
       margin: 0;
-      border-radius: 8px;
-      border: 1px solid #b8d3f6;
-      background: #f5faff;
-      color: var(--ink);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--primary);
       font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
-    /* BOTTOM HALF: controls only (no zoom/pan effect) */
-    #uiPane {
-      display: grid;
-      grid-template-columns: 320px 1fr;
+    .overlay button:hover {
+      background: var(--primary-light);
+    }
+
+    .overlay button:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* ===== DRAG HANDLE (DIVIDER) ===== */
+    #dragHandle {
+      flex: 0 0 auto;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: row-resize;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #dragHandle .handle-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    #dragHandle .handle-arrow:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    #dragHandle .handle-bar {
+      width: 48px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background var(--transition);
+    }
+
+    #dragHandle:active .handle-bar {
+      background: var(--primary);
+    }
+
+    /* ===== TAB NAVIGATION ===== */
+    #tabNav {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 6px;
+      padding: 12px 12px 0 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      background: var(--bg);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    #tabNav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-pill {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .tab-pill:not(.active):hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--accent-light);
+    }
+
+    /* ===== CONTROLS AREA (BOTTOM) ===== */
+    #controlsPane {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+      padding: 0;
       min-height: 0;
-    }
-    .left {
-      border-right: 1px solid #d7e6fa;
-      padding: 12px;
-      overflow: auto;
-    }
-    .right {
-      padding: 12px;
-      overflow: auto;
+      position: relative;
     }
 
-    h1 { font-size: 17px; margin: 0 0 10px; }
-    h2 { font-size: 13px; margin: 0 0 8px; }
-    .small { font-size: 12px; color: var(--muted); }
-    button, input {
-      width: 100%;
-      margin-top: 8px;
-      border: 1px solid #b8d3f6;
-      border-radius: 10px;
-      padding: 9px 10px;
-      background: #f5faff;
-      color: var(--ink);
-      font-size: 14px;
+    .tab-content {
+      display: none;
+      padding: 16px;
     }
-    .chips { margin-top: 10px; }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .control-box {
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-box h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .control-box .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-panel);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-top: 10px;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.secondary {
+      background: var(--bg-panel);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+
+    button.secondary:hover {
+      background: var(--primary-light);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
     .chip {
       display: inline-block;
-      margin: 4px 4px 0 0;
-      border: 1px solid #b8d3f6;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 4px 9px;
-      font-size: 11px;
-      color: #406da4;
+      background: var(--bg-panel);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      background: #f3f8ff;
+      transition: all var(--transition);
+      -webkit-tap-highlight-color: transparent;
     }
 
-    @media (max-width: 900px) {
-      body { grid-template-rows: 52vh 48vh; }
-      #uiPane { grid-template-columns: 1fr; }
-      .left { border-right: 0; border-bottom: 1px solid #d7e6fa; }
+    .chip:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .chip:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .info-line:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Scroll fade indicator */
+    #controlsPane::after {
+      content: '';
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events: none;
+      display: block;
+      z-index: 1;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      #graphPane {
+        height: 50vh;
+        height: 50dvh;
+      }
     }
   </style>
 </head>
 <body>
-  <section id="graphPane">
-    <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="overlay">
-      <button id="zoomOut">−</button>
-      <button id="zoomReset">100%</button>
-      <button id="zoomIn">+</button>
+  <div id="mindmapContainer">
+    <!-- GRAPH PANE -->
+    <section id="graphPane">
+      <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="overlay">
+        <button id="zoomOut">−</button>
+        <button id="zoomReset">100%</button>
+        <button id="zoomIn">+</button>
+      </div>
+    </section>
+
+    <!-- DRAG HANDLE -->
+    <div id="dragHandle">
+      <span class="handle-arrow" id="collapseUp">▲</span>
+      <div class="handle-bar"></div>
+      <span class="handle-arrow" id="expandDown">▼</span>
     </div>
-  </section>
 
-  <section id="uiPane">
-    <aside class="left">
-      <h1>MindMap Scratchpad</h1>
-      <div class="small">Top half is nodes-only. Bottom controls stay fixed (never zoomed).</div>
+    <!-- TAB NAVIGATION -->
+    <nav id="tabNav">
+      <button class="tab-pill active" data-tab="add">Add Nodes</button>
+      <button class="tab-pill" data-tab="focus">Focus</button>
+      <button class="tab-pill" data-tab="navigate">Navigate</button>
+      <button class="tab-pill" data-tab="info">Info</button>
+    </nav>
 
-      <input id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
-      <button id="addChild">+ Add child to focus</button>
-      <button id="addParent">+ Add parent above focus</button>
-      <button id="addJump">+ Add jump link to focus</button>
-      <button id="focusRoot">Focus root</button>
+    <!-- CONTROLS PANE -->
+    <section id="controlsPane">
+      <!-- ADD NODES TAB -->
+      <div class="tab-content active" data-tab="add">
+        <div class="control-box">
+          <h2>Add Node</h2>
+          <div class="subtitle">Create new nodes and connections</div>
+          <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
+          <button id="addChild">+ Add Child to Focus</button>
+          <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
+          <button id="addJump" class="secondary">+ Add Jump Link to Focus</button>
+        </div>
+      </div>
 
-      <div style="margin-top:12px" class="small"><b>Focus node</b></div>
-      <div id="focusName" style="font-weight:600;margin-top:4px">Core Idea</div>
+      <!-- FOCUS TAB -->
+      <div class="tab-content" data-tab="focus">
+        <div class="control-box">
+          <h2>Current Focus</h2>
+          <div class="info-line">
+            <span class="info-label">Focused Node</span>
+            <span class="info-value" id="focusName">Core Idea</span>
+          </div>
+          <button id="focusRoot" class="secondary">⌂ Focus Root Node</button>
+        </div>
+      </div>
 
-      <div style="margin-top:12px" class="small"><b>Quick focus</b></div>
-      <div id="quickNodes" class="chips"></div>
-    </aside>
+      <!-- NAVIGATE TAB -->
+      <div class="tab-content" data-tab="navigate">
+        <div class="control-box">
+          <h2>Quick Navigate</h2>
+          <div class="subtitle">Tap any node to focus</div>
+          <div id="quickNodes" class="chips"></div>
+        </div>
+      </div>
 
-    <aside class="right">
-      <h2>Layout</h2>
-      <div class="small">Parent above, children below, jumps to the sides. Tap node to re-focus.</div>
-      <div class="small" style="margin-top:8px">Zoom works only in node viewport (top half). Selectors here are fixed and never zoom.</div>
-    </aside>
-  </section>
+      <!-- INFO TAB -->
+      <div class="tab-content" data-tab="info">
+        <div class="control-box">
+          <h2>Layout & Controls</h2>
+          <div class="subtitle">
+            <p style="margin: 0 0 8px 0;"><strong>Graph Layout:</strong> Parent above, children below, jumps to the sides.</p>
+            <p style="margin: 0 0 8px 0;"><strong>Tap Node:</strong> Re-focus on that node</p>
+            <p style="margin: 0 0 8px 0;"><strong>Zoom:</strong> Use buttons or scroll/pinch on graph</p>
+            <p style="margin: 0;"><strong>Drawer:</strong> Drag the handle to resize</p>
+          </div>
+        </div>
+        <div class="control-box">
+          <h2>Graph Stats</h2>
+          <div class="info-line">
+            <span class="info-label">Total Nodes</span>
+            <span class="info-value" id="statNodes">1</span>
+          </div>
+          <div class="info-line">
+            <span class="info-label">Total Links</span>
+            <span class="info-value" id="statLinks">0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <script>
+    // ===== GRAPH STATE =====
     const svg = document.getElementById('stage');
     const input = document.getElementById('nodeLabel');
     const focusName = document.getElementById('focusName');
     const quickNodes = document.getElementById('quickNodes');
+    const statNodes = document.getElementById('statNodes');
+    const statLinks = document.getElementById('statLinks');
 
     const nodes = [{ id: 'n1', label: 'Core Idea' }];
     const links = [];
@@ -153,11 +473,11 @@
     const W = 1200, H = 760;
     const center = { x: W / 2, y: H / 2 };
 
-    // viewport transform (nodes only)
     let scale = 1;
     let tx = 0;
     let ty = 0;
 
+    // ===== GRAPH FUNCTIONS =====
     function nextId() { seq += 1; return 'n' + seq; }
     function getNode(id) { return nodes.find(n => n.id === id); }
 
@@ -171,6 +491,7 @@
       focusId = id;
       input.value = '';
       render();
+      updateStats();
     }
 
     function defaultLabel(type) {
@@ -240,7 +561,7 @@
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('font-size', focused ? '17' : '14');
       text.setAttribute('font-weight', focused ? '700' : '500');
-      text.setAttribute('fill', '#204e86');
+      text.setAttribute('fill', '#1E5BA8');
       text.textContent = n.label;
 
       const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
@@ -248,7 +569,7 @@
       e.setAttribute('rx', focused ? '92' : '82');
       e.setAttribute('ry', focused ? '34' : '30');
       e.setAttribute('fill', 'url(#blueGrad)');
-      e.setAttribute('stroke', focused ? '#2f6fcb' : '#4d88d8');
+      e.setAttribute('stroke', focused ? '#1E5BA8' : '#5B9FD8');
       e.setAttribute('stroke-width', focused ? '3' : '2');
 
       g.appendChild(text);
@@ -264,9 +585,9 @@
       grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
 
       const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#b7d7ff');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#D1E7F8');
       const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#7fb4ff');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#7FB9E8');
 
       grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
       return d;
@@ -274,7 +595,7 @@
 
     function renderQuick() {
       quickNodes.innerHTML = '';
-      nodes.slice(-18).forEach(n => {
+      nodes.slice(-24).forEach(n => {
         const chip = document.createElement('span');
         chip.className = 'chip';
         chip.textContent = n.label;
@@ -288,6 +609,11 @@
       if (!p) return;
       tx = center.x - p.x;
       ty = center.y - p.y;
+    }
+
+    function updateStats() {
+      statNodes.textContent = nodes.length;
+      statLinks.textContent = links.length;
     }
 
     function render() {
@@ -307,7 +633,7 @@
       links.forEach(l => {
         const a = pos[l.from], b = pos[l.to];
         if (!a || !b) return;
-        const color = l.type === 'jump' ? '#7fa8d9' : '#9ebfe9';
+        const color = l.type === 'jump' ? '#7FA8D9' : '#A8CCE8';
         layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
       });
 
@@ -321,11 +647,12 @@
       renderQuick();
     }
 
-    // zoom controls only affect nodes layer
+    // ===== ZOOM CONTROLS =====
     function setScale(next) {
       scale = Math.max(0.6, Math.min(2.2, next));
       render();
     }
+
     document.getElementById('zoomIn').onclick = () => setScale(scale + 0.12);
     document.getElementById('zoomOut').onclick = () => setScale(scale - 0.12);
     document.getElementById('zoomReset').onclick = () => { scale = 1; render(); };
@@ -336,6 +663,7 @@
       setScale(scale + delta);
     }, { passive: false });
 
+    // ===== NODE ACTIONS =====
     document.getElementById('addChild').onclick = () => addNodeWith('child');
     document.getElementById('addParent').onclick = () => addNodeWith('parent');
     document.getElementById('addJump').onclick = () => addNodeWith('jump');
@@ -345,7 +673,77 @@
       if (e.key === 'Enter') addNodeWith('child');
     });
 
+    // ===== TAB NAVIGATION =====
+    document.querySelectorAll('.tab-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const targetTab = pill.getAttribute('data-tab');
+        
+        // Update active pill
+        document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        
+        // Update active content
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+      });
+    });
+
+    // ===== DRAWER RESIZE =====
+    let dragging = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    const graphPane = document.getElementById('graphPane');
+    const dragHandle = document.getElementById('dragHandle');
+
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+      dragging = true;
+      startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      startHeight = graphPane.offsetHeight;
+      document.body.style.userSelect = 'none';
+    }
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+
+    function drag(e) {
+      if (!dragging) return;
+      const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const deltaY = currentY - startY;
+      const newHeight = startHeight + deltaY;
+      const minHeight = window.innerHeight * 0.15;
+      const maxHeight = window.innerHeight * 0.80;
+      
+      if (newHeight >= minHeight && newHeight <= maxHeight) {
+        graphPane.style.height = `${newHeight}px`;
+      }
+    }
+
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+
+    function stopDrag() {
+      dragging = false;
+      document.body.style.userSelect = '';
+    }
+
+    // Collapse/expand buttons
+    document.getElementById('collapseUp').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.25}vh`;
+    });
+
+    document.getElementById('expandDown').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.70}vh`;
+    });
+
+    // ===== INITIAL RENDER =====
     render();
+    updateStats();
   </script>
 </body>
 </html>
