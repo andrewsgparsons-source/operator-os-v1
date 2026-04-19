@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindMap Scratchpad</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --ink: #15355f;
+      --muted: #5a7aa7;
+      --line: #9ebfe9;
+      --nodeBorder: #4d88d8;
+      --focus: #2f6fcb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 56vh 44vh;
+    }
+
+    /* TOP HALF: nodes-only viewport */
+    #graphPane {
+      position: relative;
+      border-bottom: 1px solid #d7e6fa;
+      overflow: hidden;
+      background: #fff;
+    }
+    svg { width: 100%; height: 100%; display: block; background: #fff; touch-action: none; }
+    .overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,.94);
+      border: 1px solid #cfe2fb;
+      border-radius: 10px;
+      padding: 6px;
+      z-index: 2;
+    }
+    .overlay button {
+      width: auto;
+      padding: 6px 10px;
+      margin: 0;
+      border-radius: 8px;
+      border: 1px solid #b8d3f6;
+      background: #f5faff;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* BOTTOM HALF: controls only (no zoom/pan effect) */
+    #uiPane {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 0;
+    }
+    .left {
+      border-right: 1px solid #d7e6fa;
+      padding: 12px;
+      overflow: auto;
+    }
+    .right {
+      padding: 12px;
+      overflow: auto;
+    }
+
+    h1 { font-size: 17px; margin: 0 0 10px; }
+    h2 { font-size: 13px; margin: 0 0 8px; }
+    .small { font-size: 12px; color: var(--muted); }
+    button, input {
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid #b8d3f6;
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #f5faff;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .chips { margin-top: 10px; }
+    .chip {
+      display: inline-block;
+      margin: 4px 4px 0 0;
+      border: 1px solid #b8d3f6;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 11px;
+      color: #406da4;
+      cursor: pointer;
+      background: #f3f8ff;
+    }
+
+    @media (max-width: 900px) {
+      body { grid-template-rows: 52vh 48vh; }
+      #uiPane { grid-template-columns: 1fr; }
+      .left { border-right: 0; border-bottom: 1px solid #d7e6fa; }
+    }
+  </style>
+</head>
+<body>
+  <section id="graphPane">
+    <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="overlay">
+      <button id="zoomOut">−</button>
+      <button id="zoomReset">100%</button>
+      <button id="zoomIn">+</button>
+    </div>
+  </section>
+
+  <section id="uiPane">
+    <aside class="left">
+      <h1>MindMap Scratchpad</h1>
+      <div class="small">Top half is nodes-only. Bottom controls stay fixed (never zoomed).</div>
+
+      <input id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
+      <button id="addChild">+ Add child to focus</button>
+      <button id="addParent">+ Add parent above focus</button>
+      <button id="addJump">+ Add jump link to focus</button>
+      <button id="focusRoot">Focus root</button>
+
+      <div style="margin-top:12px" class="small"><b>Focus node</b></div>
+      <div id="focusName" style="font-weight:600;margin-top:4px">Core Idea</div>
+
+      <div style="margin-top:12px" class="small"><b>Quick focus</b></div>
+      <div id="quickNodes" class="chips"></div>
+    </aside>
+
+    <aside class="right">
+      <h2>Layout</h2>
+      <div class="small">Parent above, children below, jumps to the sides. Tap node to re-focus.</div>
+      <div class="small" style="margin-top:8px">Zoom works only in node viewport (top half). Selectors here are fixed and never zoom.</div>
+    </aside>
+  </section>
+
+  <script>
+    const svg = document.getElementById('stage');
+    const input = document.getElementById('nodeLabel');
+    const focusName = document.getElementById('focusName');
+    const quickNodes = document.getElementById('quickNodes');
+
+    const nodes = [{ id: 'n1', label: 'Core Idea' }];
+    const links = [];
+    let focusId = 'n1';
+    let seq = 1;
+
+    const W = 1200, H = 760;
+    const center = { x: W / 2, y: H / 2 };
+
+    // viewport transform (nodes only)
+    let scale = 1;
+    let tx = 0;
+    let ty = 0;
+
+    function nextId() { seq += 1; return 'n' + seq; }
+    function getNode(id) { return nodes.find(n => n.id === id); }
+
+    function addNodeWith(type) {
+      const label = (input.value || '').trim() || defaultLabel(type);
+      const id = nextId();
+      nodes.push({ id, label });
+      if (type === 'child') links.push({ from: focusId, to: id, type: 'child' });
+      if (type === 'parent') links.push({ from: id, to: focusId, type: 'parent' });
+      if (type === 'jump') links.push({ from: focusId, to: id, type: 'jump' });
+      focusId = id;
+      input.value = '';
+      render();
+    }
+
+    function defaultLabel(type) {
+      if (type === 'child') return 'Child idea';
+      if (type === 'parent') return 'Parent context';
+      return 'Jump idea';
+    }
+
+    function relationship(fid) {
+      const parentLink = links.find(l => l.to === fid && (l.type === 'parent' || l.type === 'child'));
+      const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
+
+      const children = links
+        .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.to)
+        .filter(id => id !== parent);
+
+      const jumps = links
+        .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
+        .map(l => l.from === fid ? l.to : l.from);
+
+      return { parent, children, jumps };
+    }
+
+    function place(fid) {
+      const rel = relationship(fid);
+      const pos = {};
+      pos[fid] = { x: center.x, y: center.y };
+
+      if (rel.parent) pos[rel.parent] = { x: center.x, y: center.y - 180 };
+
+      rel.children.forEach((id, i) => {
+        const spread = (rel.children.length - 1) * 170;
+        const x = center.x - spread / 2 + i * 170;
+        pos[id] = { x, y: center.y + 180 };
+      });
+
+      rel.jumps.forEach((id, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const rank = Math.floor(i / 2);
+        const x = center.x + side * (240 + rank * 150);
+        const y = center.y + (side < 0 ? -80 : 80);
+        pos[id] = { x, y };
+      });
+
+      return pos;
+    }
+
+    function line(x1, y1, x2, y2, color, dash = false) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+      el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+      el.setAttribute('stroke', color);
+      el.setAttribute('stroke-width', '2');
+      if (dash) el.setAttribute('stroke-dasharray', '7 6');
+      return el;
+    }
+
+    function nodeShape(n, x, y, focused) {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.style.cursor = 'pointer';
+      g.addEventListener('click', () => { focusId = n.id; render(); });
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x);
+      text.setAttribute('y', y - 42);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size', focused ? '17' : '14');
+      text.setAttribute('font-weight', focused ? '700' : '500');
+      text.setAttribute('fill', '#204e86');
+      text.textContent = n.label;
+
+      const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      e.setAttribute('cx', x); e.setAttribute('cy', y);
+      e.setAttribute('rx', focused ? '92' : '82');
+      e.setAttribute('ry', focused ? '34' : '30');
+      e.setAttribute('fill', 'url(#blueGrad)');
+      e.setAttribute('stroke', focused ? '#2f6fcb' : '#4d88d8');
+      e.setAttribute('stroke-width', focused ? '3' : '2');
+
+      g.appendChild(text);
+      g.appendChild(e);
+      return g;
+    }
+
+    function defs() {
+      const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      grad.setAttribute('id', 'blueGrad');
+      grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
+      grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
+
+      const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#b7d7ff');
+      const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#7fb4ff');
+
+      grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
+      return d;
+    }
+
+    function renderQuick() {
+      quickNodes.innerHTML = '';
+      nodes.slice(-18).forEach(n => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = n.label;
+        chip.onclick = () => { focusId = n.id; render(); };
+        quickNodes.appendChild(chip);
+      });
+    }
+
+    function focusTransformOnNode(pos, fid) {
+      const p = pos[fid];
+      if (!p) return;
+      tx = center.x - p.x;
+      ty = center.y - p.y;
+    }
+
+    function render() {
+      const focus = getNode(focusId);
+      focusName.textContent = focus?.label || focusId;
+
+      const pos = place(focusId);
+      focusTransformOnNode(pos, focusId);
+
+      svg.innerHTML = '';
+      svg.appendChild(defs());
+
+      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      layer.setAttribute('id', 'nodeLayer');
+      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+
+      links.forEach(l => {
+        const a = pos[l.from], b = pos[l.to];
+        if (!a || !b) return;
+        const color = l.type === 'jump' ? '#7fa8d9' : '#9ebfe9';
+        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+      });
+
+      Object.entries(pos).forEach(([id, p]) => {
+        const n = getNode(id);
+        if (!n) return;
+        layer.appendChild(nodeShape(n, p.x, p.y, id === focusId));
+      });
+
+      svg.appendChild(layer);
+      renderQuick();
+    }
+
+    // zoom controls only affect nodes layer
+    function setScale(next) {
+      scale = Math.max(0.6, Math.min(2.2, next));
+      render();
+    }
+    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.12);
+    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.12);
+    document.getElementById('zoomReset').onclick = () => { scale = 1; render(); };
+
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.08 : -0.08;
+      setScale(scale + delta);
+    }, { passive: false });
+
+    document.getElementById('addChild').onclick = () => addNodeWith('child');
+    document.getElementById('addParent').onclick = () => addNodeWith('parent');
+    document.getElementById('addJump').onclick = () => addNodeWith('jump');
+    document.getElementById('focusRoot').onclick = () => { focusId = 'n1'; render(); };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addNodeWith('child');
+    });
+
+    render();
+  </script>
+</body>
+</html>
