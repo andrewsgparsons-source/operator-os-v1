@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MindMap Scratchpad</title>
+  <title>MindMap Scratchpad — Nested</title>
   <style>
     /* ============================================================
-       MINDMAP CONFIGURATOR — Blue Theme, Drawer-Style
+       NESTED MINDMAP — Infinite Zoom, Fractal Structure
        ============================================================ */
     :root {
       --primary: #1E5BA8;
@@ -49,6 +49,38 @@
       overflow: hidden;
     }
 
+    /* ===== BREADCRUMB TRAIL ===== */
+    #breadcrumb {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .breadcrumb-item {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .breadcrumb-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .breadcrumb-sep {
+      color: var(--text-muted);
+    }
+
     /* ===== GRAPH PREVIEW (TOP) ===== */
     #graphPane {
       position: relative;
@@ -75,12 +107,18 @@
       top: 10px;
       right: 10px;
       display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .overlay-row {
+      display: flex;
       gap: 6px;
       background: rgba(255,255,255,.96);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 6px;
-      z-index: 2;
       box-shadow: var(--shadow);
     }
 
@@ -105,6 +143,27 @@
     .overlay button:active {
       background: var(--primary);
       color: white;
+    }
+
+    .zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 3;
+    }
+
+    .zoom-hint.show {
+      opacity: 1;
     }
 
     /* ===== DRAG HANDLE (DIVIDER) ===== */
@@ -370,14 +429,24 @@
 </head>
 <body>
   <div id="mindmapContainer">
+    <!-- BREADCRUMB TRAIL -->
+    <div id="breadcrumb"></div>
+
     <!-- GRAPH PANE -->
     <section id="graphPane">
       <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="overlay">
-        <button id="zoomOut">−</button>
-        <button id="zoomReset">100%</button>
-        <button id="zoomIn">+</button>
+        <div class="overlay-row">
+          <button id="zoomOut">−</button>
+          <button id="zoomReset">100%</button>
+          <button id="zoomIn">+</button>
+        </div>
+        <div class="overlay-row">
+          <button id="enterNode">↓ Enter</button>
+          <button id="exitNode">↑ Exit</button>
+        </div>
       </div>
+      <div class="zoom-hint" id="zoomHint"></div>
     </section>
 
     <!-- DRAG HANDLE -->
@@ -433,22 +502,26 @@
       <!-- INFO TAB -->
       <div class="tab-content" data-tab="info">
         <div class="control-box">
-          <h2>Layout & Controls</h2>
+          <h2>Nested Mindmaps</h2>
           <div class="subtitle">
-            <p style="margin: 0 0 8px 0;"><strong>Graph Layout:</strong> Parent above, children below, jumps to the sides.</p>
-            <p style="margin: 0 0 8px 0;"><strong>Tap Node:</strong> Re-focus on that node</p>
-            <p style="margin: 0 0 8px 0;"><strong>Zoom:</strong> Use buttons or scroll/pinch on graph</p>
-            <p style="margin: 0;"><strong>Drawer:</strong> Drag the handle to resize</p>
+            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom In:</strong> Zoom into the focused node beyond 3× to enter its nested mindmap</p>
+            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom Out:</strong> Zoom out below 0.4× to exit to parent level</p>
+            <p style="margin: 0 0 8px 0;"><strong>📍 Breadcrumbs:</strong> Click any level in the trail to jump there</p>
+            <p style="margin: 0;"><strong>🎨 Colors:</strong> Each nesting level has a unique color scheme</p>
           </div>
         </div>
         <div class="control-box">
           <h2>Graph Stats</h2>
           <div class="info-line">
-            <span class="info-label">Total Nodes</span>
+            <span class="info-label">Current Level</span>
+            <span class="info-value" id="statDepth">0</span>
+          </div>
+          <div class="info-line">
+            <span class="info-label">Nodes Here</span>
             <span class="info-value" id="statNodes">1</span>
           </div>
           <div class="info-line">
-            <span class="info-label">Total Links</span>
+            <span class="info-label">Links Here</span>
             <span class="info-value" id="statLinks">0</span>
           </div>
         </div>
@@ -457,38 +530,188 @@
   </div>
 
   <script>
-    // ===== GRAPH STATE =====
-    const svg = document.getElementById('stage');
-    const input = document.getElementById('nodeLabel');
-    const focusName = document.getElementById('focusName');
-    const quickNodes = document.getElementById('quickNodes');
-    const statNodes = document.getElementById('statNodes');
-    const statLinks = document.getElementById('statLinks');
+    // ===== COLOR SCHEMES BY DEPTH =====
+    const colorSchemes = [
+      { primary: '#1E5BA8', light: '#D1E7F8', grad1: '#D1E7F8', grad2: '#7FB9E8', line: '#A8CCE8' }, // Blue
+      { primary: '#7B2D8E', light: '#E8D1F0', grad1: '#E8D1F0', grad2: '#B87FC8', line: '#C8A8E8' }, // Purple
+      { primary: '#2D8E7B', light: '#D1F0E8', grad1: '#D1F0E8', grad2: '#7FC8B8', line: '#A8E8C8' }, // Teal
+      { primary: '#8E5A2D', light: '#F0E2D1', grad1: '#F0E2D1', grad2: '#C8A87F', line: '#E8C8A8' }, // Brown
+      { primary: '#2D5A8E', light: '#D1E2F0', grad1: '#D1E2F0', grad2: '#7FA8C8', line: '#A8C8E8' }, // Steel
+    ];
 
-    const nodes = [{ id: 'n1', label: 'Core Idea' }];
-    const links = [];
-    let focusId = 'n1';
-    let seq = 1;
+    function getColorScheme(depth) {
+      return colorSchemes[depth % colorSchemes.length];
+    }
 
+    // ===== NAVIGATION STATE =====
+    const rootMindmap = {
+      nodes: [{ id: 'n1', label: 'Core Idea', nested: null }],
+      links: [],
+      focusId: 'n1',
+      seq: 1
+    };
+
+    let navStack = []; // Stack of { mindmap, nodeId } to track path
+    let currentMindmap = rootMindmap;
+    let currentDepth = 0;
+
+    // ===== VIEW STATE =====
     const W = 1200, H = 760;
     const center = { x: W / 2, y: H / 2 };
-
     let scale = 1;
     let tx = 0;
     let ty = 0;
 
-    // ===== GRAPH FUNCTIONS =====
-    function nextId() { seq += 1; return 'n' + seq; }
-    function getNode(id) { return nodes.find(n => n.id === id); }
+    // ===== DOM ELEMENTS =====
+    const svg = document.getElementById('stage');
+    const input = document.getElementById('nodeLabel');
+    const focusName = document.getElementById('focusName');
+    const quickNodes = document.getElementById('quickNodes');
+    const statDepth = document.getElementById('statDepth');
+    const statNodes = document.getElementById('statNodes');
+    const statLinks = document.getElementById('statLinks');
+    const breadcrumb = document.getElementById('breadcrumb');
+    const zoomHint = document.getElementById('zoomHint');
 
+    // ===== HELPER FUNCTIONS =====
+    function nextId() {
+      currentMindmap.seq += 1;
+      return 'n' + currentMindmap.seq;
+    }
+
+    function getNode(id) {
+      return currentMindmap.nodes.find(n => n.id === id);
+    }
+
+    function getFocusedNode() {
+      return getNode(currentMindmap.focusId);
+    }
+
+    function hasNestedContent(nodeId) {
+      const node = getNode(nodeId);
+      return node && node.nested && (node.nested.nodes.length > 1 || node.nested.links.length > 0);
+    }
+
+    // ===== NESTED NAVIGATION =====
+    function enterNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      // Create nested mindmap if it doesn't exist
+      if (!node.nested) {
+        node.nested = {
+          nodes: [{ id: 'n1', label: node.label, nested: null }],
+          links: [],
+          focusId: 'n1',
+          seq: 1
+        };
+      }
+
+      // Push current state to nav stack
+      navStack.push({ mindmap: currentMindmap, nodeId: nodeId });
+      currentMindmap = node.nested;
+      currentDepth = navStack.length;
+      scale = 1;
+      tx = 0;
+      ty = 0;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Entered nested mindmap ↓');
+    }
+
+    function exitNode() {
+      if (navStack.length === 0) {
+        showZoomHint('Already at root level');
+        return;
+      }
+
+      const prev = navStack.pop();
+      currentMindmap = prev.mindmap;
+      currentMindmap.focusId = prev.nodeId; // Focus the node we exited from
+      currentDepth = navStack.length;
+      scale = 1;
+      tx = 0;
+      ty = 0;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Exited to parent level ↑');
+    }
+
+    function jumpToLevel(levelIndex) {
+      if (levelIndex < 0 || levelIndex > navStack.length) return;
+
+      if (levelIndex === 0) {
+        // Jump to root
+        navStack = [];
+        currentMindmap = rootMindmap;
+        currentDepth = 0;
+      } else {
+        // Jump to specific level
+        const targetStack = navStack.slice(0, levelIndex);
+        const targetState = targetStack[targetStack.length - 1];
+        navStack = targetStack;
+        currentMindmap = targetState.mindmap;
+        currentDepth = navStack.length;
+      }
+
+      scale = 1;
+      tx = 0;
+      ty = 0;
+      render();
+      updateBreadcrumb();
+    }
+
+    function updateBreadcrumb() {
+      breadcrumb.innerHTML = '';
+
+      // Root
+      const rootItem = document.createElement('span');
+      rootItem.className = 'breadcrumb-item';
+      rootItem.textContent = '🏠 Root';
+      rootItem.onclick = () => jumpToLevel(0);
+      breadcrumb.appendChild(rootItem);
+
+      // Stack path
+      navStack.forEach((item, idx) => {
+        const sep = document.createElement('span');
+        sep.className = 'breadcrumb-sep';
+        sep.textContent = ' › ';
+        breadcrumb.appendChild(sep);
+
+        const node = item.mindmap.nodes.find(n => n.id === item.nodeId);
+        const crumb = document.createElement('span');
+        crumb.className = 'breadcrumb-item';
+        crumb.textContent = node ? node.label : item.nodeId;
+        crumb.onclick = () => jumpToLevel(idx + 1);
+        breadcrumb.appendChild(crumb);
+      });
+    }
+
+    function showZoomHint(text) {
+      zoomHint.textContent = text;
+      zoomHint.classList.add('show');
+      setTimeout(() => zoomHint.classList.remove('show'), 2000);
+    }
+
+    // ===== NODE OPERATIONS =====
     function addNodeWith(type) {
       const label = (input.value || '').trim() || defaultLabel(type);
       const id = nextId();
-      nodes.push({ id, label });
-      if (type === 'child') links.push({ from: focusId, to: id, type: 'child' });
-      if (type === 'parent') links.push({ from: id, to: focusId, type: 'parent' });
-      if (type === 'jump') links.push({ from: focusId, to: id, type: 'jump' });
-      focusId = id;
+      currentMindmap.nodes.push({ id, label, nested: null });
+
+      if (type === 'child') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'child' });
+      }
+      if (type === 'parent') {
+        currentMindmap.links.push({ from: id, to: currentMindmap.focusId, type: 'parent' });
+      }
+      if (type === 'jump') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'jump' });
+      }
+
+      currentMindmap.focusId = id;
       input.value = '';
       render();
       updateStats();
@@ -501,15 +724,17 @@
     }
 
     function relationship(fid) {
-      const parentLink = links.find(l => l.to === fid && (l.type === 'parent' || l.type === 'child'));
+      const parentLink = currentMindmap.links.find(l =>
+        l.to === fid && (l.type === 'parent' || l.type === 'child')
+      );
       const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
 
-      const children = links
+      const children = currentMindmap.links
         .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
         .map(l => l.to)
         .filter(id => id !== parent);
 
-      const jumps = links
+      const jumps = currentMindmap.links
         .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
         .map(l => l.from === fid ? l.to : l.from);
 
@@ -540,6 +765,7 @@
       return pos;
     }
 
+    // ===== RENDERING =====
     function line(x1, y1, x2, y2, color, dash = false) {
       const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       el.setAttribute('x1', x1); el.setAttribute('y1', y1);
@@ -550,10 +776,13 @@
       return el;
     }
 
-    function nodeShape(n, x, y, focused) {
+    function nodeShape(n, x, y, focused, colors) {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.style.cursor = 'pointer';
-      g.addEventListener('click', () => { focusId = n.id; render(); });
+      g.addEventListener('click', () => {
+        currentMindmap.focusId = n.id;
+        render();
+      });
 
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', x);
@@ -561,33 +790,46 @@
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('font-size', focused ? '17' : '14');
       text.setAttribute('font-weight', focused ? '700' : '500');
-      text.setAttribute('fill', '#1E5BA8');
+      text.setAttribute('fill', colors.primary);
       text.textContent = n.label;
 
       const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
       e.setAttribute('cx', x); e.setAttribute('cy', y);
       e.setAttribute('rx', focused ? '92' : '82');
       e.setAttribute('ry', focused ? '34' : '30');
-      e.setAttribute('fill', 'url(#blueGrad)');
-      e.setAttribute('stroke', focused ? '#1E5BA8' : '#5B9FD8');
+      e.setAttribute('fill', `url(#grad-${currentDepth})`);
+      e.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
       e.setAttribute('stroke-width', focused ? '3' : '2');
 
       g.appendChild(text);
       g.appendChild(e);
+
+      // Nested indicator
+      if (hasNestedContent(n.id)) {
+        const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        indicator.setAttribute('cx', x + (focused ? 70 : 62));
+        indicator.setAttribute('cy', y - (focused ? 18 : 16));
+        indicator.setAttribute('r', '6');
+        indicator.setAttribute('fill', '#FFB800');
+        indicator.setAttribute('stroke', '#fff');
+        indicator.setAttribute('stroke-width', '1.5');
+        g.appendChild(indicator);
+      }
+
       return g;
     }
 
-    function defs() {
+    function defs(colors) {
       const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
       const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-      grad.setAttribute('id', 'blueGrad');
+      grad.setAttribute('id', `grad-${currentDepth}`);
       grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
       grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
 
       const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#D1E7F8');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', colors.grad1);
       const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#7FB9E8');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', colors.grad2);
 
       grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
       return d;
@@ -595,11 +837,14 @@
 
     function renderQuick() {
       quickNodes.innerHTML = '';
-      nodes.slice(-24).forEach(n => {
+      currentMindmap.nodes.slice(-24).forEach(n => {
         const chip = document.createElement('span');
         chip.className = 'chip';
         chip.textContent = n.label;
-        chip.onclick = () => { focusId = n.id; render(); };
+        chip.onclick = () => {
+          currentMindmap.focusId = n.id;
+          render();
+        };
         quickNodes.appendChild(chip);
       });
     }
@@ -612,54 +857,83 @@
     }
 
     function updateStats() {
-      statNodes.textContent = nodes.length;
-      statLinks.textContent = links.length;
+      statDepth.textContent = currentDepth;
+      statNodes.textContent = currentMindmap.nodes.length;
+      statLinks.textContent = currentMindmap.links.length;
     }
 
     function render() {
-      const focus = getNode(focusId);
-      focusName.textContent = focus?.label || focusId;
+      const colors = getColorScheme(currentDepth);
+      const focus = getFocusedNode();
+      focusName.textContent = focus?.label || currentMindmap.focusId;
 
-      const pos = place(focusId);
-      focusTransformOnNode(pos, focusId);
+      const pos = place(currentMindmap.focusId);
+      focusTransformOnNode(pos, currentMindmap.focusId);
 
       svg.innerHTML = '';
-      svg.appendChild(defs());
+      svg.appendChild(defs(colors));
 
       const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       layer.setAttribute('id', 'nodeLayer');
       layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
 
-      links.forEach(l => {
+      currentMindmap.links.forEach(l => {
         const a = pos[l.from], b = pos[l.to];
         if (!a || !b) return;
-        const color = l.type === 'jump' ? '#7FA8D9' : '#A8CCE8';
+        const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
         layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
       });
 
       Object.entries(pos).forEach(([id, p]) => {
         const n = getNode(id);
         if (!n) return;
-        layer.appendChild(nodeShape(n, p.x, p.y, id === focusId));
+        layer.appendChild(nodeShape(n, p.x, p.y, id === currentMindmap.focusId, colors));
       });
 
       svg.appendChild(layer);
       renderQuick();
+      updateStats();
     }
 
     // ===== ZOOM CONTROLS =====
+    const ZOOM_ENTER_THRESHOLD = 3.0;
+    const ZOOM_EXIT_THRESHOLD = 0.4;
+
     function setScale(next) {
-      scale = Math.max(0.6, Math.min(2.2, next));
+      const prevScale = scale;
+      scale = Math.max(0.3, Math.min(5.0, next));
+
+      // Check zoom thresholds
+      if (prevScale < ZOOM_ENTER_THRESHOLD && scale >= ZOOM_ENTER_THRESHOLD) {
+        // Crossed enter threshold
+        const focused = getFocusedNode();
+        if (focused) {
+          enterNode(focused.id);
+          return;
+        }
+      }
+
+      if (prevScale > ZOOM_EXIT_THRESHOLD && scale <= ZOOM_EXIT_THRESHOLD) {
+        // Crossed exit threshold
+        exitNode();
+        return;
+      }
+
       render();
     }
 
-    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.12);
-    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.12);
+    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.15);
+    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.15);
     document.getElementById('zoomReset').onclick = () => { scale = 1; render(); };
+    document.getElementById('enterNode').onclick = () => {
+      const focused = getFocusedNode();
+      if (focused) enterNode(focused.id);
+    };
+    document.getElementById('exitNode').onclick = () => exitNode();
 
     svg.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const delta = e.deltaY < 0 ? 0.08 : -0.08;
+      const delta = e.deltaY < 0 ? 0.1 : -0.1;
       setScale(scale + delta);
     }, { passive: false });
 
@@ -667,7 +941,10 @@
     document.getElementById('addChild').onclick = () => addNodeWith('child');
     document.getElementById('addParent').onclick = () => addNodeWith('parent');
     document.getElementById('addJump').onclick = () => addNodeWith('jump');
-    document.getElementById('focusRoot').onclick = () => { focusId = 'n1'; render(); };
+    document.getElementById('focusRoot').onclick = () => {
+      currentMindmap.focusId = currentMindmap.nodes[0].id;
+      render();
+    };
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addNodeWith('child');
@@ -677,12 +954,8 @@
     document.querySelectorAll('.tab-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         const targetTab = pill.getAttribute('data-tab');
-        
-        // Update active pill
         document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
-        
-        // Update active content
         document.querySelectorAll('.tab-content').forEach(content => {
           content.classList.remove('active');
         });
@@ -732,18 +1005,17 @@
       document.body.style.userSelect = '';
     }
 
-    // Collapse/expand buttons
     document.getElementById('collapseUp').addEventListener('click', () => {
-      graphPane.style.height = `${window.innerHeight * 0.25}vh`;
+      graphPane.style.height = `${window.innerHeight * 0.25}px`;
     });
 
     document.getElementById('expandDown').addEventListener('click', () => {
-      graphPane.style.height = `${window.innerHeight * 0.70}vh`;
+      graphPane.style.height = `${window.innerHeight * 0.70}px`;
     });
 
     // ===== INITIAL RENDER =====
     render();
-    updateStats();
+    updateBreadcrumb();
   </script>
 </body>
 </html>
