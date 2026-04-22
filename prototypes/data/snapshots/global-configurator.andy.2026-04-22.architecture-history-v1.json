@@ -1,0 +1,996 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Global Configurator",
+      "nested": null
+    },
+    {
+      "id": "n2",
+      "label": "Identity",
+      "nested": null
+    },
+    {
+      "id": "n3",
+      "label": "Personal",
+      "nested": null
+    },
+    {
+      "id": "n4",
+      "label": "Work",
+      "nested": null
+    },
+    {
+      "id": "n5",
+      "label": "Projects",
+      "nested": null
+    },
+    {
+      "id": "n6",
+      "label": "Knowledge",
+      "nested": null
+    },
+    {
+      "id": "n7",
+      "label": "Resources",
+      "nested": null
+    },
+    {
+      "id": "n8",
+      "label": "Workflows",
+      "nested": null
+    },
+    {
+      "id": "n9",
+      "label": "Guardrails",
+      "nested": null
+    },
+    {
+      "id": "n10",
+      "label": "Decisions",
+      "nested": null
+    },
+    {
+      "id": "n11",
+      "label": "Incidents",
+      "nested": null
+    },
+    {
+      "id": "n12",
+      "label": "Experiments",
+      "nested": null
+    },
+    {
+      "id": "n13",
+      "label": "Agents & Tools",
+      "nested": null
+    },
+    {
+      "id": "n14",
+      "label": "Architecture",
+      "nested": null
+    },
+    {
+      "id": "n15",
+      "label": "History",
+      "nested": null
+    },
+    {
+      "id": "n16",
+      "label": "Protocols",
+      "nested": null,
+      "resources": [
+        {
+          "id": "r-collab",
+          "title": "Collaboration Protocol V2",
+          "url": "./docs/GLOBAL_CONFIGURATOR_COLLAB_PROTOCOL_V1.md",
+          "note": "Snapshot workflow + collaboration rules",
+          "addedAt": "2026-04-22T19:28:00+01:00"
+        },
+        {
+          "id": "r-everything",
+          "title": "Everything Mapping Model V2",
+          "url": "./docs/GLOBAL_CONFIGURATOR_EVERYTHING_MAPPING_MODEL_V1.md",
+          "note": "Full-scope mapping model (not agent-only)",
+          "addedAt": "2026-04-22T19:28:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n17",
+      "label": "Map Everything",
+      "nested": null,
+      "resources": [
+        {
+          "id": "r-principle",
+          "title": "Core principle",
+          "url": "",
+          "note": "Everything is represented as nodes, links, resources, and chronology events.",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n18",
+      "label": "Andrew (human)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-human_andrew",
+          "title": "Architecture metadata",
+          "url": "",
+          "note": "id=human_andrew | layer=control | env=local | risk=low",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n19",
+      "label": "Main Agent (agent)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-agent_main",
+          "title": "Architecture metadata",
+          "url": "",
+          "note": "id=agent_main | layer=execution | env=local | risk=medium",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n20",
+      "label": "Sub-Agent Runner (agent)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-agent_spawn",
+          "title": "Architecture metadata",
+          "url": "",
+          "note": "id=agent_spawn | layer=execution | env=local | risk=high",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n21",
+      "label": "Approval Gateway (tool)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-policy_gate",
+          "title": "Architecture metadata",
+          "url": "",
+          "note": "id=policy_gate | layer=control | env=prod | risk=medium",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n22",
+      "label": "Model API (api)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-model_api",
+          "title": "Architecture metadata",
+          "url": "",
+          "note": "id=model_api | layer=execution | env=cloud | risk=high",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n23",
+      "label": "Memory Files (data_store)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-store_memory",
+          "title": "Architecture metadata",
+          "url": "",
+          "note": "id=store_memory | layer=data | env=local | risk=high",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n24",
+      "label": "v3m1 \u00b7 Sub-agent runner live",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m1",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-17T18:03:00+01:00 \u2014 Delegated complex tasks into isolated sessions",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n25",
+      "label": "v3m2 \u00b7 Approval gate reduces blast radius",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m2",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-17T18:07:00+01:00 \u2014 Policy checks before high-impact actions",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n26",
+      "label": "v3m3 \u00b7 Map becomes primary traceability layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m3",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-17T19:14:00+01:00 \u2014 All meaningful chats/actions should be logged chronologically with node links",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n27",
+      "label": "v3m4 \u00b7 Browser workflow locked to direct CDP",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m4",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-17T19:21:00+01:00 \u2014 Use Windows Chrome remote debugging profile=windows by default; stop defaulting to browser relay",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n28",
+      "label": "v3m5 \u00b7 Live map verified over Windows CDP",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m5",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-17T19:26:00+01:00 \u2014 Confirmed direct visual load of GitHub Pages map and chronology in remote debugging session",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n29",
+      "label": "v3m6 \u00b7 Chronology now has dual role",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m6",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-17T19:26:30+01:00 \u2014 Map acts as architecture view + auditable message/action timeline for Andrew collaboration",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n30",
+      "label": "v3m7 \u00b7 Demo tour mode added",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m7",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-17T19:36:00+01:00 \u2014 Added button-driven time-range walkthrough that auto-plays chronology achievements",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n31",
+      "label": "v3m8 \u00b7 Voice narration linked to demo run",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m8",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-17T19:50:00+01:00 \u2014 Run demo now speaks each chronology step aloud for selected time period",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n32",
+      "label": "v3m9 \u00b7 Human-agent onboarding funnel vision",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m9",
+          "title": "Idea",
+          "url": "",
+          "note": "2026-04-17T20:00:00+01:00 \u2014 Project direction reframed as a methodology for onboarding humans and agents of any ability into effective collaboration",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n33",
+      "label": "v3m10 \u00b7 Funnel stages formalized with interaction-mapping emphasis",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m10",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-17T20:02:00+01:00 \u2014 Added 7-stage onboarding funnel in UI while preserving explicit focus on mapping our interactions and chronology traceability",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n34",
+      "label": "v3m11 \u00b7 Failure modes library added",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m11",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-17T21:20:00+01:00 \u2014 Human-agent interaction failure modes now documented with signals and mitigations for onboarding and demos",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n35",
+      "label": "v3m12 \u00b7 Differentiate Agent Mode vs Traditional Chat",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m12",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-17T21:22:00+01:00 \u2014 Added explicit interaction-mode split so execution capabilities are distinct from advisory chat behavior",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n36",
+      "label": "v3m13 \u00b7 Resources library for videos + insights",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m13",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-17T21:27:00+01:00 \u2014 Added resource mapping panel to capture YouTube references, key insights, and node links",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n37",
+      "label": "v3m14 \u00b7 MCP runtime connection mismatch",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m14",
+          "title": "Incident",
+          "url": "",
+          "note": "2026-04-17T21:32:00+01:00 \u2014 Memory indicates prior cross-read success for UI-related MCP rows, but current runtime DB verification fails with tenant/user mismatch and needs credential path refresh",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n38",
+      "label": "v3m15 \u00b7 Token/API threshold tracking",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m15",
+          "title": "Idea",
+          "url": "",
+          "note": "2026-04-17T22:03:00+01:00 \u2014 Track token usage and API threshold alerts across sessions to catch budget/limit pressure early",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n39",
+      "label": "v3m16 \u00b7 Token health panel implemented",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m16",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-18T07:16:00+01:00 \u2014 Added per-session token usage cards, threshold bands (70/85/95%), and alert states directly in the map UI",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n40",
+      "label": "v3m17 \u00b7 Live token feed connected",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m17",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-18T07:39:00+01:00 \u2014 Map now fetches token/API usage from a live JSON feed with auto-refresh and fallback handling for demos",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n41",
+      "label": "v3m18 \u00b7 Imperial AI programme mapped for benchmarking",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m18",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-18T17:35:00+01:00 \u2014 Captured brochure-derived structure (modules, audience, agentic/recruitment angle, delivery model) to benchmark against Andrew\u2019s training offer design",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n42",
+      "label": "v3m19 \u00b7 YouTube benchmark resource logged",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m19",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-18T17:47:00+01:00 \u2014 Added video resource for 2026 business AI workflow demand signals and extracted practical positioning takeaways for Andrew's offer design",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n43",
+      "label": "v3m20 \u00b7 State-of-the-art agent harness optimisation focus",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m20",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-18T18:16:00+01:00 \u2014 Logged new video thread as agent harness optimisation research for map evolution and operating model maturity (not AI training-offer framing)",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n44",
+      "label": "v3m21 \u00b7 Meta-agent + domain task-agent model",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m21",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-18T18:34:00+01:00 \u2014 Andrew highlighted a dual-layer pattern where a meta-agent optimises/trains specialist task agents that become masters of a narrow domain",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n45",
+      "label": "v3m22 \u00b7 TheBrain-style 3D side-map prototype created",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m22",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-18T19:16:00+01:00 \u2014 Built a separate mindmap lab prototype focused on interactive node-centric navigation, parent/child/jump structure, and 2D/3D force layouts for harness optimisation exploration",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n46",
+      "label": "v3m23 \u00b7 Red/Green philosophy added to side-map",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m23",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-18T19:18:00+01:00 \u2014 Integrated Red/Green visual mode into the side-map prototype to distinguish scale-ready paths from risk/review zones in agent harness design",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n47",
+      "label": "v3m24 \u00b7 No-drift discipline set as permanent",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m24",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-18T19:31:00+01:00 \u2014 Andrew set incremental improvement with zero unintended change as a permanent operating rule; removed optionality/toggle framing for Red-Green behaviour in side-map prototype",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n48",
+      "label": "v3m25 \u00b7 Scratch side-map rebuilt for clarity",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m25",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-18T19:41:00+01:00 \u2014 Rebuilt side-map from scratch with white background, single-root start, horizontal oval blue nodes, floating labels, and direct add parent/child/jump controls",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n49",
+      "label": "v3m26 \u00b7 Nodes-only top-half viewport",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m26",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-18T23:32:00+01:00 \u2014 Adjusted side-map to keep all node rendering in top half with independent zoom scope, while selectors/controls remain fixed in a separate lower pane",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n50",
+      "label": "v3m27 \u00b7 Runtime interruption and recovery",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m27",
+          "title": "Incident",
+          "url": "",
+          "note": "2026-04-22T07:09:00+01:00 \u2014 Andrew reported the assistant had gone down and confirmed service was brought back up",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n51",
+      "label": "v3m28 \u00b7 James branch handoff adopted",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m28",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-22T07:12:00+01:00 \u2014 Synced from James-prefixed scratch-map (`j-mindmap-lab-thebrain-3d.html`) and set rule that each collaborator starts from the other's latest version before continuing",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n52",
+      "label": "v3m29 \u00b7 Nested-map upgrade identified",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m29",
+          "title": "Insight",
+          "url": "",
+          "note": "2026-04-22T07:14:00+01:00 \u2014 Diff review showed a major shift from flat scratchpad to nested/fractal navigation with enter/exit levels, breadcrumb trail, draggable split, and tabbed control panels",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n53",
+      "label": "v3m30 \u00b7 Dual workstream merge strategy required",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m30",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-22T07:21:00+01:00 \u2014 Andrew defined two concurrent tracks\u2014software development and map population\u2014and agreed to formal merge guardrails to prevent conflicts/data loss during parallel work",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n54",
+      "label": "v3m31 \u00b7 Global Configurator baseline separated from content",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m31",
+          "title": "Milestone",
+          "url": "",
+          "note": "2026-04-22T07:39:00+01:00 \u2014 Created Global Configurator baseline map with requested top-level Andrew/work/personal/agents/Andy structure and moved starter content into external JSON (`prototypes/data/global-configurator.base.json`) to separate software from population data",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n55",
+      "label": "v3m32 \u00b7 Concurrency design deferred; proposals documented",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m32",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-22T07:53:00+01:00 \u2014 Andrew chose to continue single-editor mode for now and requested proposal logging only; documented future merge/concurrency options without implementing process changes",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n56",
+      "label": "v3m33 \u00b7 Global Configurator mobile-style tabs and scoped save flow",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m33",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-22T08:02:00+01:00 \u2014 Andrew requested mobile-style lower controls inspired by the parametric configurator and set a two-tab model: Save (JSON import/export) and Main Control (parent/child/jump edits), with save scope bound to current nested map level",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n57",
+      "label": "v3m34 \u00b7 Global Configurator reset to generic base",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m34",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-22T19:05:00+01:00 \u2014 Stripped map content back to base state by removing predefined child/jump structure and replacing specific names with a single generic default focus node",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n58",
+      "label": "v3m35 \u00b7 Map-everything protocol formalized",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m35",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-22T19:20:00+01:00 \u2014 Andrew requested full-spectrum mapping in Global Configurator; documented collaboration protocol and everything-mapping model to standardize app/data workflow and capture cadence",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n59",
+      "label": "v3m36 \u00b7 Agent-centric language removed from mapping docs",
+      "nested": null,
+      "resources": [
+        {
+          "id": "res-v3m36",
+          "title": "Decision",
+          "url": "",
+          "note": "2026-04-22T19:28:00+01:00 \u2014 Andrew reiterated the map is for everything, not just agents; updated collaboration and mapping model docs to explicitly frame personal/work/projects/decisions/resources as first-class scope with agents/tools as one category",
+          "addedAt": "2026-04-22T19:34:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n14",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n15",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n16",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n17",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n18",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n19",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n20",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n21",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n22",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n23",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n24",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n25",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n26",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n27",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n28",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n29",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n30",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n31",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n32",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n33",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n34",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n35",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n36",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n37",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n38",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n39",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n40",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n41",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n42",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n43",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n44",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n45",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n46",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n47",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n48",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n49",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n50",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n51",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n52",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n53",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n54",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n55",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n56",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n57",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n58",
+      "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n59",
+      "type": "child"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 59
+}
