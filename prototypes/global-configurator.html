@@ -595,7 +595,8 @@
     const TRANSITION_END = 7.2;      // Fully switch to nested level much later
     const TRANSITION_START = 5.4;    // Start nested preview a little sooner
     const AUTO_CREATE_NESTED_AT = 6.0; // If missing, create nested map around boundary-disappear onset
-    const EXIT_THRESHOLD = 0.35;     // Exit to parent level
+    const EXIT_PREVIEW_START = 0.95; // Start showing parent-level reverse preview while zooming out
+    const EXIT_THRESHOLD = 0.35;     // Commit exit to parent level
 
     // ===== DOM ELEMENTS =====
     const svg = document.getElementById('stage');
@@ -666,13 +667,15 @@
 
       const prev = navStack.pop();
       currentMindmap = prev.mindmap;
-      currentMindmap.focusId = prev.nodeId; // Focus the node we exited from
+      currentMindmap.focusId = prev.nodeId; // Focus container node we exited from
       currentDepth = navStack.length;
-      scale = 1;
+      // Mirror zoom-in behavior in reverse: land near container-level entry scale, not 1x.
+      scale = TRANSITION_END - 0.05;
+      enterArmed = false;
 
       render();
       updateBreadcrumb();
-      showZoomHint('Exited to parent level ↑');
+      showZoomHint('Exited to container level ↑');
     }
 
     function jumpToLevel(levelIndex) {
@@ -1009,28 +1012,44 @@
       }
 
       if (scale <= EXIT_THRESHOLD) {
-        // Zoomed out - exit to parent level
+        // Commit exit at lower threshold after reverse preview band.
         exitNode();
         return;
       }
 
+      // Reverse transition while zooming out: smoothly preview container level
+      if (navStack.length > 0 && scale < EXIT_PREVIEW_START) {
+        const reverse = (EXIT_PREVIEW_START - scale) / (EXIT_PREVIEW_START - EXIT_THRESHOLD);
+        const childOpacity = Math.max(0, 1 - reverse);
+        const containerOpacity = Math.min(1, reverse);
+
+        // Current nested level fades out
+        const childLayer = renderMindmapLayer(currentMindmap, currentDepth, Math.max(0.55, scale), childOpacity);
+        svg.appendChild(childLayer);
+
+        // Container level fades in and scales toward its click-in zoom range
+        const prev = navStack[navStack.length - 1];
+        const containerMindmap = prev.mindmap;
+        const containerScale = TRANSITION_START + reverse * (TRANSITION_END - TRANSITION_START);
+        const containerLayer = renderMindmapLayer(containerMindmap, currentDepth - 1, containerScale, containerOpacity);
+        svg.appendChild(containerLayer);
+
       // Render current level
-      if (scale < TRANSITION_START) {
-        // Below transition - just show current level
+      } else if (scale < TRANSITION_START) {
+        // Below forward transition - show current level
         const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0);
         svg.appendChild(layer);
       } else {
-        // In transition zone - show both levels with crossfade
+        // Forward transition zone - show current + nested preview crossfade
         const progress = (scale - TRANSITION_START) / (TRANSITION_END - TRANSITION_START);
         const parentOpacity = Math.max(0, 1 - progress);
         const childOpacity = Math.min(1, progress);
 
-        // Render current (parent) level - fading out
+        // Render current level - fading out
         const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
         svg.appendChild(parentLayer);
 
-        // Render nested (child) level preview.
-        // If missing, auto-create near the boundary-disappear zone.
+        // Render nested preview; auto-create only near boundary threshold
         const focusedNode = getFocusedNode();
         if (focusedNode) {
           if (!focusedNode.nested && scale >= AUTO_CREATE_NESTED_AT) {
@@ -1038,7 +1057,6 @@
           }
           if (focusedNode.nested) {
             const nested = focusedNode.nested;
-            // Child layer starts tiny and grows during transition.
             const childScale = 0.08 + (progress * 0.42); // ~0.08 -> ~0.50
             const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
             svg.appendChild(childLayer);
