@@ -1,0 +1,242 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Video Insights: AI Agent Frameworks",
+      "nested": null,
+      "resources": [
+        {
+          "id": "r-video",
+          "title": "Source video",
+          "url": "https://youtu.be/R8S7O2Fvdt4",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "Key Insights",
+      "nested": null
+    },
+    {
+      "id": "n3",
+      "label": "Next Actions",
+      "nested": null
+    },
+    {
+      "id": "n4",
+      "label": "Open Questions",
+      "nested": null
+    },
+    {
+      "id": "n5",
+      "label": "Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i1",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Framework choice should follow problem constraints, not hype cycles.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i2",
+          "title": "Insight detail",
+          "url": "",
+          "note": "State management, memory strategy, and tool reliability matter most.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i3",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Lightweight orchestration often beats heavy framework lock-in early.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i4",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Observability is mandatory for debugging multi-step agent flows.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i5",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Evaluation loops are needed to prevent silent quality drift.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Action 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "a1",
+          "title": "Action detail",
+          "url": "",
+          "note": "Define framework selection checklist for each new workflow.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "Action 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "a2",
+          "title": "Action detail",
+          "url": "",
+          "note": "Instrument runs with structured logs and outcome labels.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Action 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "a3",
+          "title": "Action detail",
+          "url": "",
+          "note": "Keep core logic portable across framework boundaries.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "Question 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "q1",
+          "title": "Question detail",
+          "url": "",
+          "note": "Which minimum framework features are non-negotiable?",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "Question 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "q2",
+          "title": "Question detail",
+          "url": "",
+          "note": "Where does custom orchestration beat packaged frameworks?",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n4",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n4",
+      "to": "n14",
+      "type": "child"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 14
+}

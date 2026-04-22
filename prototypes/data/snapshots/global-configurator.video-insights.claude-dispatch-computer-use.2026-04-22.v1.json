@@ -1,0 +1,242 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Video Insights: Claude Dispatch & Computer Use",
+      "nested": null,
+      "resources": [
+        {
+          "id": "r-video",
+          "title": "Source video",
+          "url": "https://youtu.be/3e7gmNPr5Vo",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "Key Insights",
+      "nested": null
+    },
+    {
+      "id": "n3",
+      "label": "Next Actions",
+      "nested": null
+    },
+    {
+      "id": "n4",
+      "label": "Open Questions",
+      "nested": null
+    },
+    {
+      "id": "n5",
+      "label": "Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i1",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Asynchronous dispatch allows work to continue without constant supervision.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i2",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Computer-use tools extend agents from chat to real UI execution.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i3",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Task decomposition and checkpoints are essential for long-running jobs.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i4",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Guardrails and approval gates reduce high-impact automation risk.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "i5",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Clear success criteria improve autonomous completion quality.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Action 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "a1",
+          "title": "Action detail",
+          "url": "",
+          "note": "Define dispatch-style task packet format (goal, constraints, outputs).",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "Action 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "a2",
+          "title": "Action detail",
+          "url": "",
+          "note": "Add preflight and postflight checklist for UI automation runs.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Action 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "a3",
+          "title": "Action detail",
+          "url": "",
+          "note": "Track autonomous run outcomes in chronology map.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "Question 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "q1",
+          "title": "Question detail",
+          "url": "",
+          "note": "Which tasks should remain human-in-the-loop?",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "Question 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "q2",
+          "title": "Question detail",
+          "url": "",
+          "note": "What failure patterns require auto-stop?",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n4",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n4",
+      "to": "n14",
+      "type": "child"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 14
+}
