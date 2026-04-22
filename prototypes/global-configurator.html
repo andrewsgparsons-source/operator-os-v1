@@ -590,12 +590,10 @@
     let scale = 1;
 
     // Transition thresholds
-    // Delay nested "click-in" until the focused node boundary is effectively off-screen.
-    const NODE_BASE_RX = 95; // Matches nodeShape ellipse rx
-    const ENTER_CLICK_SCALE = (W / 2 / NODE_BASE_RX) * 1.08; // ~6.8 on 1200px viewBox
-    const TRANSITION_END = ENTER_CLICK_SCALE;                // Fully switched to nested level
-    const TRANSITION_START = Math.max(1.5, TRANSITION_END - 0.9); // Short crossfade right before switch
-    const EXIT_THRESHOLD = 0.35;    // Exit to parent level
+    // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
+    const TRANSITION_END = 7.2;      // Fully switch to nested level much later
+    const TRANSITION_START = 6.1;    // Begin subtle nested preview shortly before switch
+    const EXIT_THRESHOLD = 0.35;     // Exit to parent level
 
     // ===== DOM ELEMENTS =====
     const svg = document.getElementById('stage');
@@ -1030,9 +1028,8 @@
         const focusedNode = getFocusedNode();
         if (focusedNode) {
           const nested = ensureNestedMindmap(focusedNode);
-          // Child layer should be scaled relative to parent zoom
-          // As parent zooms from 1.5→3.5x, child goes from 0→1x effectively
-          const childScale = scale * 0.4; // Adjust this multiplier for desired nested scale
+          // Child layer starts tiny and grows during transition.
+          const childScale = 0.08 + (progress * 0.42); // ~0.08 -> ~0.50
           const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
           svg.appendChild(childLayer);
         }
