@@ -612,8 +612,7 @@
       currentMindmap = node.nested;
       currentDepth = navStack.length;
       scale = 1;
-      tx = 0;
-      ty = 0;
+      // tx/ty will be recalculated in render() to keep focused node centered
 
       render();
       updateBreadcrumb();
@@ -631,8 +630,7 @@
       currentMindmap.focusId = prev.nodeId; // Focus the node we exited from
       currentDepth = navStack.length;
       scale = 1;
-      tx = 0;
-      ty = 0;
+      // tx/ty will be recalculated in render() to keep focused node centered
 
       render();
       updateBreadcrumb();
@@ -657,8 +655,7 @@
       }
 
       scale = 1;
-      tx = 0;
-      ty = 0;
+      // tx/ty will be recalculated in render() to keep focused node centered
       render();
       updateBreadcrumb();
     }
@@ -849,13 +846,6 @@
       });
     }
 
-    function focusTransformOnNode(pos, fid) {
-      const p = pos[fid];
-      if (!p) return;
-      tx = center.x - p.x;
-      ty = center.y - p.y;
-    }
-
     function updateStats() {
       statDepth.textContent = currentDepth;
       statNodes.textContent = currentMindmap.nodes.length;
@@ -868,7 +858,16 @@
       focusName.textContent = focus?.label || currentMindmap.focusId;
 
       const pos = place(currentMindmap.focusId);
-      focusTransformOnNode(pos, currentMindmap.focusId);
+      
+      // Calculate transform to keep focused node centered at current scale
+      const focusPos = pos[currentMindmap.focusId];
+      if (focusPos) {
+        // To keep focused node at screen center:
+        // We want: focusPos * scale + translate = center
+        // So: translate = center - (focusPos * scale)
+        tx = center.x - (focusPos.x * scale);
+        ty = center.y - (focusPos.y * scale);
+      }
 
       svg.innerHTML = '';
       svg.appendChild(defs(colors));
