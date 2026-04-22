@@ -587,6 +587,15 @@
     let scale = 1;
     let layoutMode = 'topdown';
     let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
+
+    // Motion system (TheBrain-like focus transitions)
+    const MOTION_MS = 320;
+    let layoutAnimFrom = null;
+    let layoutAnimTo = null;
+    let layoutAnimStart = 0;
+    let layoutAnimActive = false;
+    let lastLayoutSignature = '';
+    let lastResolvedPositions = null;
     let aboveEnterThreshold = false; // Hysteresis guard: trigger once per threshold crossing
     let entryUsedThisGesture = false; // Hard guard: one level entry per zoom gesture
 
@@ -852,6 +861,59 @@
       return pos;
     }
 
+    function layoutSignature(mindmap, depth) {
+      return [
+        depth,
+        layoutMode,
+        mindmap.focusId,
+        mindmap.nodes.map(n => n.id).join(','),
+        mindmap.links.length
+      ].join('|');
+    }
+
+    function resolveAnimatedPositions(targetPos, signature) {
+      const now = performance.now();
+      if (!lastLayoutSignature) {
+        lastLayoutSignature = signature;
+        lastResolvedPositions = targetPos;
+        return targetPos;
+      }
+
+      if (signature !== lastLayoutSignature) {
+        layoutAnimFrom = lastResolvedPositions || targetPos;
+        layoutAnimTo = targetPos;
+        layoutAnimStart = now;
+        layoutAnimActive = true;
+        lastLayoutSignature = signature;
+      }
+
+      if (!layoutAnimActive || !layoutAnimFrom || !layoutAnimTo) {
+        lastResolvedPositions = targetPos;
+        return targetPos;
+      }
+
+      const t = Math.min(1, (now - layoutAnimStart) / MOTION_MS);
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const out = {};
+
+      Object.keys(layoutAnimTo).forEach(id => {
+        const a = layoutAnimFrom[id] || layoutAnimTo[id];
+        const b = layoutAnimTo[id];
+        out[id] = {
+          x: a.x + (b.x - a.x) * ease,
+          y: a.y + (b.y - a.y) * ease
+        };
+      });
+
+      lastResolvedPositions = out;
+      if (t >= 1) {
+        layoutAnimActive = false;
+        layoutAnimFrom = null;
+        layoutAnimTo = null;
+      }
+      return out;
+    }
+
     // ===== RENDERING =====
     function line(x1, y1, x2, y2, color, dash = false) {
       const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -924,9 +986,9 @@
       return d;
     }
 
-    function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null) {
+    function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null, positionsOverride = null) {
       const colors = getColorScheme(depth);
-      const pos = place(mindmap.focusId, mindmap);
+      const pos = positionsOverride || place(mindmap.focusId, mindmap);
       
       // Calculate transform to keep focused node centered
       const focusPos = focusPosOverride || pos[mindmap.focusId];
@@ -1055,6 +1117,10 @@
         svg.appendChild(defs(getColorScheme(d), d));
       }
 
+      const currentSignature = layoutSignature(currentMindmap, currentDepth);
+      const currentTargetPos = place(currentMindmap.focusId, currentMindmap);
+      const currentAnimatedPos = resolveAnimatedPositions(currentTargetPos, currentSignature);
+
       // Determine what to render based on scale
       if (scale >= TRANSITION_END && enterArmed && !aboveEnterThreshold && !entryUsedThisGesture) {
         // Fully zoomed in: trigger once per threshold crossing and once per gesture
@@ -1083,7 +1149,7 @@
         const containerOpacity = Math.min(1, reverse);
 
         // Current nested level fades out
-        const childLayer = renderMindmapLayer(currentMindmap, currentDepth, Math.max(0.55, scale), childOpacity);
+        const childLayer = renderMindmapLayer(currentMindmap, currentDepth, Math.max(0.55, scale), childOpacity, null, currentAnimatedPos);
         svg.appendChild(childLayer);
 
         // Container level fades in and scales toward its click-in zoom range
@@ -1096,7 +1162,7 @@
       // Render current level
       } else if (scale < TRANSITION_START) {
         // Below forward transition - show current level
-        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0);
+        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0, null, currentAnimatedPos);
         svg.appendChild(layer);
       } else {
         // Forward transition zone - show current + nested preview crossfade
@@ -1105,7 +1171,7 @@
         const childOpacity = Math.min(1, progress);
 
         // Render current level - fading out
-        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
+        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity, null, currentAnimatedPos);
         svg.appendChild(parentLayer);
 
         // Render nested preview; auto-create only near boundary threshold
@@ -1121,6 +1187,10 @@
             svg.appendChild(childLayer);
           }
         }
+      }
+
+      if (layoutAnimActive) {
+        requestAnimationFrame(render);
       }
 
       renderQuick();
