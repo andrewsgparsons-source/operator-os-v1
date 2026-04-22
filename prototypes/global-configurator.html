@@ -213,34 +213,28 @@
     /* ===== TAB NAVIGATION ===== */
     #tabNav {
       flex: 0 0 auto;
-      display: flex;
-      gap: 6px;
-      padding: 12px 12px 0 12px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      white-space: nowrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      overflow: hidden;
       background: var(--bg);
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    #tabNav::-webkit-scrollbar {
-      display: none;
     }
 
     .tab-pill {
-      flex: 0 0 auto;
-      padding: 8px 16px;
+      width: 100%;
+      padding: 10px 12px;
       border: 1.5px solid var(--border);
-      border-radius: 20px;
+      border-radius: 12px;
       background: var(--bg-panel);
       color: var(--text-secondary);
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all var(--transition);
       outline: none;
       -webkit-tap-highlight-color: transparent;
+      text-align: center;
     }
 
     .tab-pill.active {
