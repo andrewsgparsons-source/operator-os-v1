@@ -1,0 +1,133 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Session Summary \u2014 2026-04-22",
+      "nested": null,
+      "resources": [
+        {
+          "id": "audio-1",
+          "title": "Audio Debrief",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/media/debrief-2026-04-22.mp3",
+          "note": "Listen-first summary of today\u2019s progress and next steps.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        },
+        {
+          "id": "sum-1",
+          "title": "Core Achievement",
+          "url": "",
+          "note": "Global Configurator evolved from prototype to operating map system with app/data separation, import pipeline, and map-everything scope.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "What We Built",
+      "nested": null,
+      "resources": [
+        {
+          "id": "wb-1",
+          "title": "Key build outcomes",
+          "url": "",
+          "note": "Mobile tab UX, Save/Main/Resources, layout modes, visible levels, free-pan camera, smoother focus motion.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n3",
+      "label": "Import & Interop",
+      "nested": null,
+      "resources": [
+        {
+          "id": "io-1",
+          "title": "Import pathways",
+          "url": "",
+          "note": "Converted TheBrain and GitMind exports to Global Configurator JSON; preserved notes/resources where present.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Key Insights",
+      "nested": null,
+      "resources": [
+        {
+          "id": "ki-1",
+          "title": "Insight",
+          "url": "",
+          "note": "Separation of software and content is foundational for safe collaboration and long-term scaling.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        },
+        {
+          "id": "ki-2",
+          "title": "Insight",
+          "url": "",
+          "note": "Interaction quality (zoom, transitions, navigation) is core to cognition, not cosmetic.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        },
+        {
+          "id": "ki-3",
+          "title": "Insight",
+          "url": "",
+          "note": "Map-everything framing is now explicit: personal, work, projects, decisions, resources, and agents as one category.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n5",
+      "label": "Where Next",
+      "nested": null,
+      "resources": [
+        {
+          "id": "wn-1",
+          "title": "Next step",
+          "url": "",
+          "note": "Lock schema v1 for nodes/links/resources/chronology.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        },
+        {
+          "id": "wn-2",
+          "title": "Next step",
+          "url": "",
+          "note": "Add native chronology tab + metadata editor.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        },
+        {
+          "id": "wn-3",
+          "title": "Next step",
+          "url": "",
+          "note": "Add import diagnostics and snapshot index for governance.",
+          "addedAt": "2026-04-22T23:59:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n5",
+      "type": "child"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 5
+}
