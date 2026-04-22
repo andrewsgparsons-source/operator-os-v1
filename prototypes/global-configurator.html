@@ -873,11 +873,12 @@
 
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', x);
-      text.setAttribute('y', y - 42);
+      text.setAttribute('y', y + 5);
       text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('font-size', focused ? '17' : '14');
-      text.setAttribute('font-weight', focused ? '700' : '500');
-      text.setAttribute('fill', colors.primary);
+      text.setAttribute('dominant-baseline', 'middle');
+      text.setAttribute('font-size', focused ? '15' : '13');
+      text.setAttribute('font-weight', focused ? '700' : '600');
+      text.setAttribute('fill', focused ? '#143D6F' : '#1E5BA8');
       text.textContent = n.label;
 
       const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
