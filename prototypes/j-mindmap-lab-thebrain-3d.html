@@ -504,8 +504,8 @@
         <div class="control-box">
           <h2>Nested Mindmaps</h2>
           <div class="subtitle">
-            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom In:</strong> Zoom into the focused node beyond 3× to enter its nested mindmap</p>
-            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom Out:</strong> Zoom out below 0.4× to exit to parent level</p>
+            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom In:</strong> Zoom continuously into the focused node to see its nested mindmap</p>
+            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom Out:</strong> Zoom out to exit to parent level</p>
             <p style="margin: 0 0 8px 0;"><strong>📍 Breadcrumbs:</strong> Click any level in the trail to jump there</p>
             <p style="margin: 0;"><strong>🎨 Colors:</strong> Each nesting level has a unique color scheme</p>
           </div>
@@ -559,8 +559,11 @@
     const W = 1200, H = 760;
     const center = { x: W / 2, y: H / 2 };
     let scale = 1;
-    let tx = 0;
-    let ty = 0;
+
+    // Transition thresholds
+    const TRANSITION_START = 1.5;  // Start showing nested content
+    const TRANSITION_END = 3.5;    // Fully switched to nested level
+    const EXIT_THRESHOLD = 0.4;    // Exit to parent level
 
     // ===== DOM ELEMENTS =====
     const svg = document.getElementById('stage');
@@ -579,8 +582,8 @@
       return 'n' + currentMindmap.seq;
     }
 
-    function getNode(id) {
-      return currentMindmap.nodes.find(n => n.id === id);
+    function getNode(id, mindmap = currentMindmap) {
+      return mindmap.nodes.find(n => n.id === id);
     }
 
     function getFocusedNode() {
@@ -589,15 +592,10 @@
 
     function hasNestedContent(nodeId) {
       const node = getNode(nodeId);
-      return node && node.nested && (node.nested.nodes.length > 1 || node.nested.links.length > 0);
+      return node && node.nested && (node.nested.nodes.length > 0 || node.nested.links.length > 0);
     }
 
-    // ===== NESTED NAVIGATION =====
-    function enterNode(nodeId) {
-      const node = getNode(nodeId);
-      if (!node) return;
-
-      // Create nested mindmap if it doesn't exist
+    function ensureNestedMindmap(node) {
       if (!node.nested) {
         node.nested = {
           nodes: [{ id: 'n1', label: node.label, nested: null }],
@@ -606,13 +604,21 @@
           seq: 1
         };
       }
+      return node.nested;
+    }
+
+    // ===== NESTED NAVIGATION =====
+    function enterNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      ensureNestedMindmap(node);
 
       // Push current state to nav stack
       navStack.push({ mindmap: currentMindmap, nodeId: nodeId });
       currentMindmap = node.nested;
       currentDepth = navStack.length;
       scale = 1;
-      // tx/ty will be recalculated in render() to keep focused node centered
 
       render();
       updateBreadcrumb();
@@ -630,7 +636,6 @@
       currentMindmap.focusId = prev.nodeId; // Focus the node we exited from
       currentDepth = navStack.length;
       scale = 1;
-      // tx/ty will be recalculated in render() to keep focused node centered
 
       render();
       updateBreadcrumb();
@@ -641,12 +646,10 @@
       if (levelIndex < 0 || levelIndex > navStack.length) return;
 
       if (levelIndex === 0) {
-        // Jump to root
         navStack = [];
         currentMindmap = rootMindmap;
         currentDepth = 0;
       } else {
-        // Jump to specific level
         const targetStack = navStack.slice(0, levelIndex);
         const targetState = targetStack[targetStack.length - 1];
         navStack = targetStack;
@@ -655,7 +658,6 @@
       }
 
       scale = 1;
-      // tx/ty will be recalculated in render() to keep focused node centered
       render();
       updateBreadcrumb();
     }
@@ -663,14 +665,12 @@
     function updateBreadcrumb() {
       breadcrumb.innerHTML = '';
 
-      // Root
       const rootItem = document.createElement('span');
       rootItem.className = 'breadcrumb-item';
       rootItem.textContent = '🏠 Root';
       rootItem.onclick = () => jumpToLevel(0);
       breadcrumb.appendChild(rootItem);
 
-      // Stack path
       navStack.forEach((item, idx) => {
         const sep = document.createElement('span');
         sep.className = 'breadcrumb-sep';
@@ -720,26 +720,26 @@
       return 'Jump idea';
     }
 
-    function relationship(fid) {
-      const parentLink = currentMindmap.links.find(l =>
+    function relationship(fid, mindmap) {
+      const parentLink = mindmap.links.find(l =>
         l.to === fid && (l.type === 'parent' || l.type === 'child')
       );
       const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
 
-      const children = currentMindmap.links
+      const children = mindmap.links
         .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
         .map(l => l.to)
         .filter(id => id !== parent);
 
-      const jumps = currentMindmap.links
+      const jumps = mindmap.links
         .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
         .map(l => l.from === fid ? l.to : l.from);
 
       return { parent, children, jumps };
     }
 
-    function place(fid) {
-      const rel = relationship(fid);
+    function place(fid, mindmap) {
+      const rel = relationship(fid, mindmap);
       const pos = {};
       pos[fid] = { x: center.x, y: center.y };
 
@@ -773,7 +773,7 @@
       return el;
     }
 
-    function nodeShape(n, x, y, focused, colors) {
+    function nodeShape(n, x, y, focused, colors, showNested) {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.style.cursor = 'pointer';
       g.addEventListener('click', () => {
@@ -802,7 +802,7 @@
       g.appendChild(e);
 
       // Nested indicator
-      if (hasNestedContent(n.id)) {
+      if (showNested && hasNestedContent(n.id)) {
         const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         indicator.setAttribute('cx', x + (focused ? 70 : 62));
         indicator.setAttribute('cy', y - (focused ? 18 : 16));
@@ -816,10 +816,10 @@
       return g;
     }
 
-    function defs(colors) {
+    function defs(colors, depth) {
       const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
       const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-      grad.setAttribute('id', `grad-${currentDepth}`);
+      grad.setAttribute('id', `grad-${depth}`);
       grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
       grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
 
@@ -830,6 +830,41 @@
 
       grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
       return d;
+    }
+
+    function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null) {
+      const colors = getColorScheme(depth);
+      const pos = place(mindmap.focusId, mindmap);
+      
+      // Calculate transform to keep focused node centered
+      const focusPos = focusPosOverride || pos[mindmap.focusId];
+      let tx = 0, ty = 0;
+      if (focusPos) {
+        tx = center.x - (focusPos.x * layerScale);
+        ty = center.y - (focusPos.y * layerScale);
+      }
+
+      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${layerScale})`);
+      layer.setAttribute('opacity', layerOpacity);
+
+      // Draw links
+      mindmap.links.forEach(l => {
+        const a = pos[l.from], b = pos[l.to];
+        if (!a || !b) return;
+        const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
+        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+      });
+
+      // Draw nodes
+      Object.entries(pos).forEach(([id, p]) => {
+        const n = getNode(id, mindmap);
+        if (!n) return;
+        const showNested = (layerOpacity > 0.5); // Only show nested indicators when layer is dominant
+        layer.appendChild(nodeShape(n, p.x, p.y, id === mindmap.focusId, colors, showNested));
+      });
+
+      return layer;
     }
 
     function renderQuick() {
@@ -853,71 +888,66 @@
     }
 
     function render() {
-      const colors = getColorScheme(currentDepth);
       const focus = getFocusedNode();
       focusName.textContent = focus?.label || currentMindmap.focusId;
 
-      const pos = place(currentMindmap.focusId);
+      svg.innerHTML = '';
       
-      // Calculate transform to keep focused node centered at current scale
-      const focusPos = pos[currentMindmap.focusId];
-      if (focusPos) {
-        // To keep focused node at screen center:
-        // We want: focusPos * scale + translate = center
-        // So: translate = center - (focusPos * scale)
-        tx = center.x - (focusPos.x * scale);
-        ty = center.y - (focusPos.y * scale);
+      // Add all color scheme defs
+      for (let d = 0; d <= Math.min(currentDepth + 1, colorSchemes.length); d++) {
+        svg.appendChild(defs(getColorScheme(d), d));
       }
 
-      svg.innerHTML = '';
-      svg.appendChild(defs(colors));
+      // Determine what to render based on scale
+      if (scale >= TRANSITION_END) {
+        // Fully zoomed in - check if we should switch to nested level
+        const focusedNode = getFocusedNode();
+        if (focusedNode && hasNestedContent(focusedNode.id)) {
+          enterNode(focusedNode.id);
+          return;
+        }
+      }
 
-      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      layer.setAttribute('id', 'nodeLayer');
-      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+      if (scale <= EXIT_THRESHOLD) {
+        // Zoomed out - exit to parent level
+        exitNode();
+        return;
+      }
 
-      currentMindmap.links.forEach(l => {
-        const a = pos[l.from], b = pos[l.to];
-        if (!a || !b) return;
-        const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
-        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
-      });
+      // Render current level
+      if (scale < TRANSITION_START) {
+        // Below transition - just show current level
+        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0);
+        svg.appendChild(layer);
+      } else {
+        // In transition zone - show both levels with crossfade
+        const progress = (scale - TRANSITION_START) / (TRANSITION_END - TRANSITION_START);
+        const parentOpacity = Math.max(0, 1 - progress);
+        const childOpacity = Math.min(1, progress);
 
-      Object.entries(pos).forEach(([id, p]) => {
-        const n = getNode(id);
-        if (!n) return;
-        layer.appendChild(nodeShape(n, p.x, p.y, id === currentMindmap.focusId, colors));
-      });
+        // Render current (parent) level - fading out
+        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
+        svg.appendChild(parentLayer);
 
-      svg.appendChild(layer);
+        // Render nested (child) level if it exists - fading in
+        const focusedNode = getFocusedNode();
+        if (focusedNode) {
+          const nested = ensureNestedMindmap(focusedNode);
+          // Child layer should be scaled relative to parent zoom
+          // As parent zooms from 1.5→3.5x, child goes from 0→1x effectively
+          const childScale = scale * 0.4; // Adjust this multiplier for desired nested scale
+          const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
+          svg.appendChild(childLayer);
+        }
+      }
+
       renderQuick();
       updateStats();
     }
 
     // ===== ZOOM CONTROLS =====
-    const ZOOM_ENTER_THRESHOLD = 3.0;
-    const ZOOM_EXIT_THRESHOLD = 0.4;
-
     function setScale(next) {
-      const prevScale = scale;
       scale = Math.max(0.3, Math.min(5.0, next));
-
-      // Check zoom thresholds
-      if (prevScale < ZOOM_ENTER_THRESHOLD && scale >= ZOOM_ENTER_THRESHOLD) {
-        // Crossed enter threshold
-        const focused = getFocusedNode();
-        if (focused) {
-          enterNode(focused.id);
-          return;
-        }
-      }
-
-      if (prevScale > ZOOM_EXIT_THRESHOLD && scale <= ZOOM_EXIT_THRESHOLD) {
-        // Crossed exit threshold
-        exitNode();
-        return;
-      }
-
       render();
     }
 
