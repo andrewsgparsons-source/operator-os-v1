@@ -1,0 +1,1366 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Visual-First Interaction",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:11.4592548 | modified=2026-04-22T21:12:11.4592548",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "Bespoke shed company",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2025-12-30T11:25:56.6709969 | modified=2025-12-30T11:26:18.9278979",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        },
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "**Create a clear, presentation-ready mind map with balanced depth and readable labels.**\n** Use descriptive node names, logical grouping, and minimal repetition.**\n---\n### **Central Node**\n**Bespoke Sheds \u2014 Automated Physical Infrastructure**\n---\n### **Vision & North Star**\n* Core purpose: turning human intent into made-to-order buildings\n* Technical North Star: intent \u2192 automated physical infrastructure\n* Plain-language North Star:\n\t* \u201cYou explain what you want to use a space for, and a custom building is designed and built for you\u201d\n* Long-term system, not a single product\n---\n### **Core Principles**\n* Intent-first design (use before specifications)\n* Single source of truth (parametric 3D model)\n* Visual cognition over text-heavy interfaces\n* Manufacturing realism and constraint awareness\n* No-drift, deterministic engineering discipline\n---\n### **System Architecture**\n* **Customer Interface**\n\t* Visual, web-based configurator\n\t* Intent-driven inputs\n* **Design Intelligence**\n\t* Parametric rules\n\t* Structural feasibility\n\t* Cost feedback\n* **Commitment & Ordering**\n\t* Pricing lock\n\t* Versioned design snapshot\n* **Manufacturing Translation**\n\t* Bills of materials\n\t* Cutting lists\n\t* CNC-ready outputs\n* **Delivery & Installation**\n\t* Logistics planning\n\t* Assembly sequencing\n* **Future Automation**\n\t* CNC optimisation\n\t* Robotics\n\t* Modular systems\n---\n### **Technical Foundation (Current State)**\n* Working parametric 3D engine\n* Wall, roof, base, insulation logic\n* Manufacturing-aware BOM generation\n* Accurate cutting lists with real constraints\n* Stable, inspectable codebase\n---\n### **Roadmap (Living & Capability-Based)**\n* Foundations (largely complete)\n* Intent \u2192 Design simplification\n* Design \u2192 Commitment (commercial viability)\n* Production optimisation\n* Physical automation (long horizon)\n---\n### **Vertical Use-Cases**\n* Garden offices and workshops\n* Wellness spaces\n* Production sheds\n\t* Food\n\t* Drink\n\t* Controlled environments\n* Future micro-infrastructure modules\n---\n### **Narrative & Communication**\n* Customer messaging: explain use, not specs\n* Partner messaging: efficiency and automation\n* Investor messaging: scalable system architecture\n* Public language rules\n\t* Avoid jargon\n\t* Avoid AI hype\n\t* Anchor explanations in real-world use\n---\n### **Funding & Partnerships**\n* Materials and tooling sponsorship\n* Manufacturing and fabrication partners\n* Strategic angel investors\n* Grants and innovation funding\n* Content-led sponsorship opportunities\n---\n### **Operating Model**\n* Project Memory Schema for continuity\n* Layer-based system thinking\n* Visual-first planning and explanation\n* Strict scope and change discipline\n* Long-term system execution mindset",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n3",
+      "label": "CNC Optimisation",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:40.4818362 | modified=2026-04-22T21:12:40.4818362",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Content-Led Sponsorship",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:13.3626342 | modified=2026-04-22T21:13:13.3626342",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n5",
+      "label": "Food & Drink Structures",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:58.2583845 | modified=2026-04-22T21:12:58.2583846",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Public Language Rules",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:08.8140311 | modified=2026-04-22T21:13:08.8140311",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "Physical Automation (Long Horizon)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:56.4696884 | modified=2026-04-22T21:12:56.4696884",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "Deterministic Engineering Discipline",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:12.4418631 | modified=2026-04-22T21:12:12.4418631",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "Customer Messaging",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:07.3399799 | modified=2026-04-22T21:13:07.3399799",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Garden Offices & Workshops",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:56.9368282 | modified=2026-04-22T21:12:56.9368282",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "Stable, Inspectable Codebase",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:54.060628 | modified=2026-04-22T21:12:54.060628",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Partner Messaging",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:07.8064897 | modified=2026-04-22T21:13:07.8064897",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "Constraint-True Cutting Lists",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:53.6279294 | modified=2026-04-22T21:12:53.6279294",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "Layer-Based System Thinking",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:14.7090691 | modified=2026-04-22T21:13:14.7090691",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n15",
+      "label": "Future Micro-Infrastructure Modules",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:59.2480182 | modified=2026-04-22T21:12:59.2480183",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n16",
+      "label": "Investor Messaging",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:08.2719161 | modified=2026-04-22T21:13:08.2719161",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n17",
+      "label": "Wellness & Retreat Spaces",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:57.3818803 | modified=2026-04-22T21:12:57.3818803",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n18",
+      "label": "Materials & Tooling Sponsorship",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:09.2713929 | modified=2026-04-22T21:13:09.2713929",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n19",
+      "label": "Assembly Sequencing",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:40.027501 | modified=2026-04-22T21:12:40.0275011",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n20",
+      "label": "Plain-Language Promise",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:09.4491551 | modified=2026-04-22T21:12:09.4491551",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n21",
+      "label": "Design \u2192 Commercial Commitment",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:55.4394646 | modified=2026-04-22T21:12:55.4394647",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n22",
+      "label": "Core Principles",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:33.1880147 | modified=2026-04-22T21:11:33.1880148",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n23",
+      "label": "Real-Time Cost Feedback",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:33.5813908 | modified=2026-04-22T21:12:33.5813909",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n24",
+      "label": "Structural Feasibility Checks",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:31.0815058 | modified=2026-04-22T21:12:31.0815058",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n25",
+      "label": "Controlled Environments",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:58.7162399 | modified=2026-04-22T21:12:58.7162399",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n26",
+      "label": "Customer Interface Layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:17.2437553 | modified=2026-04-22T21:12:17.2437553",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n27",
+      "label": "Manufacturing-Aware BOM",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:53.1772729 | modified=2026-04-22T21:12:53.1772729",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n28",
+      "label": "Project Memory Schema",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:13.9847904 | modified=2026-04-22T21:13:13.9847904",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n29",
+      "label": "Design Intelligence Layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:17.6931484 | modified=2026-04-22T21:12:17.6931484",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n30",
+      "label": "Vertical Use-Cases",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:53.5115713 | modified=2026-04-22T21:11:53.5115713",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n31",
+      "label": "CNC-Ready Outputs",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:38.7710756 | modified=2026-04-22T21:12:38.7710756",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n32",
+      "label": "Visual-First Planning",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:15.3439198 | modified=2026-04-22T21:13:15.3439198",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n33",
+      "label": "Modular Systems",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:41.8814348 | modified=2026-04-22T21:12:41.8814348",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n34",
+      "label": "Envelope & Fabric Elements",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:52.7566147 | modified=2026-04-22T21:12:52.7566147",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n35",
+      "label": "Intent \u2192 Design Simplification",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:54.9888859 | modified=2026-04-22T21:12:54.9888859",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n36",
+      "label": "Grants & Innovation Funding",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:12.7732301 | modified=2026-04-22T21:13:12.7732302",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n37",
+      "label": "Narrative & Communication",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:00.3465731 | modified=2026-04-22T21:12:00.3465731",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n38",
+      "label": "Bespoke Sheds \u2014 Automated Physical Infrastructure",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:05.2411236 | modified=2026-04-22T21:11:05.6457762",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "Icon.png",
+          "url": "Icon.png",
+          "note": "type=5",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n39",
+      "label": "Production Sheds",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:57.8187232 | modified=2026-04-22T21:12:57.8187232",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n40",
+      "label": "Versioned Design Snapshots",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:37.0756979 | modified=2026-04-22T21:12:37.0756979",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n41",
+      "label": "Operating Model",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:01.3830584 | modified=2026-04-22T21:12:01.3830584",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n42",
+      "label": "System Architecture",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:38.0380003 | modified=2026-04-22T21:11:38.0380003",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n43",
+      "label": "Manufacturing & Fabrication Partners",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:09.8567754 | modified=2026-04-22T21:13:09.8567755",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n44",
+      "label": "Funding & Partnerships",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:00.9040789 | modified=2026-04-22T21:12:00.9040789",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n45",
+      "label": "Manufacturing & Constraints Aware",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:11.9738104 | modified=2026-04-22T21:12:11.9738104",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n46",
+      "label": "Visual Configurator (Web)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:28.7304987 | modified=2026-04-22T21:12:28.7304988",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n47",
+      "label": "Robotics Integration",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:41.2846379 | modified=2026-04-22T21:12:41.2846379",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n48",
+      "label": "Delivery & Installation Layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:19.0846141 | modified=2026-04-22T21:12:19.0846141",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n49",
+      "label": "Parametric 3D Engine",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:52.243086 | modified=2026-04-22T21:12:52.2430861",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n50",
+      "label": "Bills of Materials",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:37.7939461 | modified=2026-04-22T21:12:37.7939462",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n51",
+      "label": "Production Optimisation",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:55.988144 | modified=2026-04-22T21:12:55.9881441",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n52",
+      "label": "Long-Term System Vision",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:09.9336484 | modified=2026-04-22T21:12:09.9336484",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n53",
+      "label": "Logistics Planning",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:39.4534189 | modified=2026-04-22T21:12:39.4534189",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n54",
+      "label": "Manufacturing Translation Layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:18.6352042 | modified=2026-04-22T21:12:18.6352042",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n55",
+      "label": "Commitment & Ordering Layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:18.1587907 | modified=2026-04-22T21:12:18.1587907",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n56",
+      "label": "Technical Foundation (Current State)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:42.6064533 | modified=2026-04-22T21:11:42.6064534",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n57",
+      "label": "Roadmap (Living & Capability-Based)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:47.0161459 | modified=2026-04-22T21:11:47.016146",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n58",
+      "label": "Single Source of Truth Model",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:10.9350486 | modified=2026-04-22T21:12:10.9350486",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n59",
+      "label": "Core Purpose: Human Intent \u2192 Buildings",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:08.4941546 | modified=2026-04-22T21:12:08.4941547",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n60",
+      "label": "Intent-First Design",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:10.4401197 | modified=2026-04-22T21:12:10.4401197",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n61",
+      "label": "Technical North Star: Intent \u2192 Automated Infrastructure",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:08.9487883 | modified=2026-04-22T21:12:08.9487884",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n62",
+      "label": "Parametric Rules Engine",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:29.7524504 | modified=2026-04-22T21:12:29.7524504",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n63",
+      "label": "Vision & North Star",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:11:24.7181175 | modified=2026-04-22T21:11:24.7181176",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n64",
+      "label": "Strategic Angel Investors",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:10.5100155 | modified=2026-04-22T21:13:10.5100155",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n65",
+      "label": "Future Automation Layer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:19.6019155 | modified=2026-04-22T21:12:19.6019155",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n66",
+      "label": "Cutting Lists",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:38.3041887 | modified=2026-04-22T21:12:38.3041888",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n67",
+      "label": "Scope & Change Discipline",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:15.8337228 | modified=2026-04-22T21:13:15.8337229",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n68",
+      "label": "Pricing Lock Mechanism",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:35.3716816 | modified=2026-04-22T21:12:35.3716817",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n69",
+      "label": "Foundations (Mostly Complete)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:54.5477544 | modified=2026-04-22T21:12:54.5477544",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n70",
+      "label": "Long-Term System Execution",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:13:16.4175242 | modified=2026-04-22T21:13:16.4175243",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n71",
+      "label": "Intent-Driven Inputs",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2026-04-22T21:12:29.2560792 | modified=2026-04-22T21:12:29.2560793",
+          "addedAt": "2026-04-22T22:54:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n56",
+      "to": "n49",
+      "type": "child"
+    },
+    {
+      "from": "n44",
+      "to": "n36",
+      "type": "child"
+    },
+    {
+      "from": "n56",
+      "to": "n27",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n63",
+      "type": "child"
+    },
+    {
+      "from": "n41",
+      "to": "n70",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n51",
+      "type": "child"
+    },
+    {
+      "from": "n30",
+      "to": "n39",
+      "type": "child"
+    },
+    {
+      "from": "n48",
+      "to": "n53",
+      "type": "child"
+    },
+    {
+      "from": "n37",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n30",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n54",
+      "to": "n66",
+      "type": "child"
+    },
+    {
+      "from": "n65",
+      "to": "n33",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n35",
+      "type": "child"
+    },
+    {
+      "from": "n42",
+      "to": "n48",
+      "type": "child"
+    },
+    {
+      "from": "n30",
+      "to": "n25",
+      "type": "child"
+    },
+    {
+      "from": "n41",
+      "to": "n32",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n44",
+      "type": "child"
+    },
+    {
+      "from": "n29",
+      "to": "n23",
+      "type": "child"
+    },
+    {
+      "from": "n54",
+      "to": "n50",
+      "type": "child"
+    },
+    {
+      "from": "n56",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n30",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n55",
+      "to": "n68",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n63",
+      "to": "n20",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n69",
+      "type": "child"
+    },
+    {
+      "from": "n63",
+      "to": "n61",
+      "type": "child"
+    },
+    {
+      "from": "n37",
+      "to": "n16",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n1",
+      "type": "child"
+    },
+    {
+      "from": "n42",
+      "to": "n65",
+      "type": "child"
+    },
+    {
+      "from": "n65",
+      "to": "n47",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n22",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n42",
+      "type": "child"
+    },
+    {
+      "from": "n48",
+      "to": "n19",
+      "type": "child"
+    },
+    {
+      "from": "n42",
+      "to": "n29",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n45",
+      "type": "child"
+    },
+    {
+      "from": "n56",
+      "to": "n34",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n37",
+      "type": "child"
+    },
+    {
+      "from": "n63",
+      "to": "n52",
+      "type": "child"
+    },
+    {
+      "from": "n37",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n56",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n71",
+      "type": "child"
+    },
+    {
+      "from": "n63",
+      "to": "n59",
+      "type": "child"
+    },
+    {
+      "from": "n29",
+      "to": "n24",
+      "type": "child"
+    },
+    {
+      "from": "n41",
+      "to": "n67",
+      "type": "child"
+    },
+    {
+      "from": "n29",
+      "to": "n62",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n58",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n60",
+      "type": "child"
+    },
+    {
+      "from": "n55",
+      "to": "n40",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n46",
+      "type": "child"
+    },
+    {
+      "from": "n44",
+      "to": "n43",
+      "type": "child"
+    },
+    {
+      "from": "n41",
+      "to": "n28",
+      "type": "child"
+    },
+    {
+      "from": "n44",
+      "to": "n64",
+      "type": "child"
+    },
+    {
+      "from": "n54",
+      "to": "n31",
+      "type": "child"
+    },
+    {
+      "from": "n42",
+      "to": "n54",
+      "type": "child"
+    },
+    {
+      "from": "n37",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n65",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n42",
+      "to": "n55",
+      "type": "child"
+    },
+    {
+      "from": "n44",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n38",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n21",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n41",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n56",
+      "type": "child"
+    },
+    {
+      "from": "n42",
+      "to": "n26",
+      "type": "child"
+    },
+    {
+      "from": "n30",
+      "to": "n15",
+      "type": "child"
+    },
+    {
+      "from": "n41",
+      "to": "n14",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n57",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n30",
+      "type": "child"
+    },
+    {
+      "from": "n44",
+      "to": "n18",
+      "type": "child"
+    },
+    {
+      "from": "n30",
+      "to": "n17",
+      "type": "child"
+    }
+  ],
+  "focusId": "n38",
+  "seq": 71
+}
