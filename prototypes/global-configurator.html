@@ -669,9 +669,9 @@
       currentMindmap = prev.mindmap;
       currentMindmap.focusId = prev.nodeId; // Focus container node we exited from
       currentDepth = navStack.length;
-      // Mirror zoom-in behavior in reverse: land near container-level entry scale, not 1x.
-      scale = TRANSITION_END - 0.05;
-      enterArmed = false;
+      // Clean settle on previous level root-view scale to avoid re-showing same nested preview.
+      scale = 1;
+      enterArmed = true;
 
       render();
       updateBreadcrumb();
@@ -1072,8 +1072,10 @@
     // ===== ZOOM CONTROLS =====
     function setScale(next) {
       const MAX_SCALE = Math.max(8.0, TRANSITION_END + 1.0);
+      const prevScale = scale;
       scale = Math.max(0.3, Math.min(MAX_SCALE, next));
-      if (scale <= 1.2) enterArmed = true; // Rearm only after zoom returns near base level
+      // Rearm based on where the gesture starts, so fast pinch-in from ~1x still allows deeper levels.
+      if (prevScale <= 1.2 || scale <= 1.2) enterArmed = true;
       render();
     }
 
