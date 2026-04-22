@@ -483,6 +483,12 @@
         <div class="control-box">
           <h2>Main Control</h2>
           <div class="subtitle">Create and connect nodes for the current map level.</div>
+          <label for="layoutMode" class="subtitle" style="display:block;margin-bottom:6px;">View mode</label>
+          <select id="layoutMode" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="topdown">Top-down</option>
+            <option value="list">List (children on right)</option>
+            <option value="radial">Radial</option>
+          </select>
           <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
           <button id="addChild">+ Add Child to Focus</button>
           <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
@@ -579,6 +585,7 @@
     const W = 1200, H = 760;
     const center = { x: W / 2, y: H / 2 };
     let scale = 1;
+    let layoutMode = 'topdown';
     let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
     let aboveEnterThreshold = false; // Hysteresis guard: trigger once per threshold crossing
     let entryUsedThisGesture = false; // Hard guard: one level entry per zoom gesture
@@ -596,6 +603,7 @@
     const input = document.getElementById('nodeLabel');
     const focusName = document.getElementById('focusName');
     const quickNodes = document.getElementById('quickNodes');
+    const layoutModeSelect = document.getElementById('layoutMode');
     const statDepth = document.getElementById('statDepth');
     const statNodes = document.getElementById('statNodes');
     const statLinks = document.getElementById('statLinks');
@@ -755,29 +763,77 @@
     }
 
     function relationship(fid, mindmap) {
-      const parentLink = mindmap.links.find(l =>
-        l.to === fid && (l.type === 'parent' || l.type === 'child')
-      );
-      const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
+      const parents = mindmap.links
+        .filter(l => l.to === fid && (l.type === 'parent' || l.type === 'child'))
+        .map(l => l.from)
+        .filter((id, i, arr) => id && arr.indexOf(id) === i);
+      const parent = parents[0] || null;
 
       const children = mindmap.links
         .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
         .map(l => l.to)
-        .filter(id => id !== parent);
+        .filter(id => !parents.includes(id));
 
       const jumps = mindmap.links
         .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
         .map(l => l.from === fid ? l.to : l.from);
 
-      return { parent, children, jumps };
+      return { parent, parents, children, jumps };
     }
 
     function place(fid, mindmap) {
       const rel = relationship(fid, mindmap);
       const pos = {};
+
+      if (layoutMode === 'list') {
+        const fx = center.x - 220;
+        const fy = center.y;
+        pos[fid] = { x: fx, y: fy };
+
+        rel.parents.forEach((id, i) => {
+          const spread = (rel.parents.length - 1) * 160;
+          pos[id] = { x: fx - spread / 2 + i * 160, y: fy - 180 };
+        });
+
+        rel.children.forEach((id, i) => {
+          pos[id] = { x: fx + 430, y: fy - 120 + i * 90 };
+        });
+
+        rel.jumps.forEach((id, i) => {
+          pos[id] = { x: fx + 120, y: fy + 170 + i * 70 };
+        });
+        return pos;
+      }
+
+      if (layoutMode === 'radial') {
+        pos[fid] = { x: center.x, y: center.y };
+
+        rel.parents.forEach((id, i) => {
+          const spread = (rel.parents.length - 1) * 170;
+          pos[id] = { x: center.x - spread / 2 + i * 170, y: center.y - 220 };
+        });
+
+        const radius = 220;
+        rel.children.forEach((id, i) => {
+          const a = (Math.PI * 2 * i) / Math.max(1, rel.children.length) - Math.PI / 2;
+          pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+        });
+
+        rel.jumps.forEach((id, i) => {
+          const a = (Math.PI * 2 * i) / Math.max(1, rel.jumps.length);
+          pos[id] = { x: center.x + Math.cos(a) * 320, y: center.y + Math.sin(a) * 320 };
+        });
+        return pos;
+      }
+
+      // top-down (default)
       pos[fid] = { x: center.x, y: center.y };
 
-      if (rel.parent) pos[rel.parent] = { x: center.x, y: center.y - 180 };
+      rel.parents.forEach((id, i) => {
+        const spread = (rel.parents.length - 1) * 170;
+        const x = center.x - spread / 2 + i * 170;
+        pos[id] = { x, y: center.y - 180 };
+      });
 
       rel.children.forEach((id, i) => {
         const spread = (rel.children.length - 1) * 170;
@@ -1156,6 +1212,11 @@
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addNodeWith('child');
+    });
+
+    layoutModeSelect.addEventListener('change', (e) => {
+      layoutMode = e.target.value;
+      render();
     });
 
     // ===== NODE-RESOURCE LIBRARY (FOCUSED NODE) =====
