@@ -489,6 +489,13 @@
             <option value="list">List (children on right)</option>
             <option value="radial">Radial</option>
           </select>
+          <label for="levelsVisible" class="subtitle" style="display:block;margin-bottom:6px;">Visible relationship levels</label>
+          <select id="levelsVisible" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="1">1 level</option>
+            <option value="2">2 levels</option>
+            <option value="3">3 levels</option>
+            <option value="4">4 levels</option>
+          </select>
           <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
           <button id="addChild">+ Add Child to Focus</button>
           <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
@@ -586,6 +593,7 @@
     const center = { x: W / 2, y: H / 2 };
     let scale = 1;
     let layoutMode = 'topdown';
+    let hierarchyLevelsVisible = 1;
     let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
 
     // Motion system (TheBrain-like focus transitions)
@@ -613,6 +621,7 @@
     const focusName = document.getElementById('focusName');
     const quickNodes = document.getElementById('quickNodes');
     const layoutModeSelect = document.getElementById('layoutMode');
+    const levelsVisibleSelect = document.getElementById('levelsVisible');
     const statDepth = document.getElementById('statDepth');
     const statNodes = document.getElementById('statNodes');
     const statLinks = document.getElementById('statLinks');
@@ -790,26 +799,86 @@
       return { parent, parents, children, jumps };
     }
 
+    function childrenOf(nodeId, mindmap) {
+      return mindmap.links
+        .filter(l => l.from === nodeId && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.to);
+    }
+
+    function parentsOf(nodeId, mindmap) {
+      return mindmap.links
+        .filter(l => l.to === nodeId && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.from);
+    }
+
+    function collectHierarchy(fid, mindmap, maxLevels) {
+      const descendants = [];
+      const ancestors = [];
+      const visible = new Set([fid]);
+
+      let currentDown = [fid];
+      for (let d = 1; d <= maxLevels; d++) {
+        const next = [];
+        currentDown.forEach(id => {
+          childrenOf(id, mindmap).forEach(cid => {
+            if (!visible.has(cid)) {
+              visible.add(cid);
+              next.push(cid);
+            }
+          });
+        });
+        if (!next.length) break;
+        descendants.push(next);
+        currentDown = next;
+      }
+
+      let currentUp = [fid];
+      for (let d = 1; d <= maxLevels; d++) {
+        const next = [];
+        currentUp.forEach(id => {
+          parentsOf(id, mindmap).forEach(pid => {
+            if (!visible.has(pid)) {
+              visible.add(pid);
+              next.push(pid);
+            }
+          });
+        });
+        if (!next.length) break;
+        ancestors.push(next);
+        currentUp = next;
+      }
+
+      return { visible, descendants, ancestors };
+    }
+
     function place(fid, mindmap) {
       const rel = relationship(fid, mindmap);
+      const { visible, descendants, ancestors } = collectHierarchy(fid, mindmap, hierarchyLevelsVisible);
       const pos = {};
 
       if (layoutMode === 'list') {
-        const fx = center.x - 220;
+        const fx = center.x - 260;
         const fy = center.y;
         pos[fid] = { x: fx, y: fy };
 
-        rel.parents.forEach((id, i) => {
-          const spread = (rel.parents.length - 1) * 160;
-          pos[id] = { x: fx - spread / 2 + i * 160, y: fy - 180 };
+        ancestors.forEach((nodesAtLevel, lvlIdx) => {
+          const y = fy - 170 * (lvlIdx + 1);
+          const spread = (nodesAtLevel.length - 1) * 160;
+          nodesAtLevel.forEach((id, i) => {
+            pos[id] = { x: fx - spread / 2 + i * 160, y };
+          });
         });
 
-        rel.children.forEach((id, i) => {
-          pos[id] = { x: fx + 430, y: fy - 120 + i * 90 };
+        descendants.forEach((nodesAtLevel, lvlIdx) => {
+          const x = fx + 320 * (lvlIdx + 1);
+          const startY = fy - ((nodesAtLevel.length - 1) * 80) / 2;
+          nodesAtLevel.forEach((id, i) => {
+            pos[id] = { x, y: startY + i * 80 };
+          });
         });
 
         rel.jumps.forEach((id, i) => {
-          pos[id] = { x: fx + 120, y: fy + 170 + i * 70 };
+          if (visible.has(id) && !pos[id]) pos[id] = { x: fx + 100, y: fy + 160 + i * 60 };
         });
         return pos;
       }
@@ -817,45 +886,50 @@
       if (layoutMode === 'radial') {
         pos[fid] = { x: center.x, y: center.y };
 
-        rel.parents.forEach((id, i) => {
-          const spread = (rel.parents.length - 1) * 170;
-          pos[id] = { x: center.x - spread / 2 + i * 170, y: center.y - 220 };
+        ancestors.forEach((nodesAtLevel, lvlIdx) => {
+          const y = center.y - 190 - (lvlIdx * 110);
+          const spread = (nodesAtLevel.length - 1) * 170;
+          nodesAtLevel.forEach((id, i) => {
+            pos[id] = { x: center.x - spread / 2 + i * 170, y };
+          });
         });
 
-        const radius = 220;
-        rel.children.forEach((id, i) => {
-          const a = (Math.PI * 2 * i) / Math.max(1, rel.children.length) - Math.PI / 2;
-          pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+        descendants.forEach((nodesAtLevel, lvlIdx) => {
+          const radius = 220 + (lvlIdx * 120);
+          nodesAtLevel.forEach((id, i) => {
+            const a = (Math.PI * 2 * i) / Math.max(1, nodesAtLevel.length) - Math.PI / 2;
+            pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+          });
         });
 
-        rel.jumps.forEach((id, i) => {
-          const a = (Math.PI * 2 * i) / Math.max(1, rel.jumps.length);
-          pos[id] = { x: center.x + Math.cos(a) * 320, y: center.y + Math.sin(a) * 320 };
-        });
         return pos;
       }
 
       // top-down (default)
       pos[fid] = { x: center.x, y: center.y };
 
-      rel.parents.forEach((id, i) => {
-        const spread = (rel.parents.length - 1) * 170;
-        const x = center.x - spread / 2 + i * 170;
-        pos[id] = { x, y: center.y - 180 };
+      ancestors.forEach((nodesAtLevel, lvlIdx) => {
+        const y = center.y - 180 * (lvlIdx + 1);
+        const spread = (nodesAtLevel.length - 1) * 170;
+        nodesAtLevel.forEach((id, i) => {
+          pos[id] = { x: center.x - spread / 2 + i * 170, y };
+        });
       });
 
-      rel.children.forEach((id, i) => {
-        const spread = (rel.children.length - 1) * 170;
-        const x = center.x - spread / 2 + i * 170;
-        pos[id] = { x, y: center.y + 180 };
+      descendants.forEach((nodesAtLevel, lvlIdx) => {
+        const y = center.y + 180 * (lvlIdx + 1);
+        const spread = (nodesAtLevel.length - 1) * 170;
+        nodesAtLevel.forEach((id, i) => {
+          pos[id] = { x: center.x - spread / 2 + i * 170, y };
+        });
       });
 
       rel.jumps.forEach((id, i) => {
-        const side = i % 2 === 0 ? -1 : 1;
-        const rank = Math.floor(i / 2);
-        const x = center.x + side * (240 + rank * 150);
-        const y = center.y + (side < 0 ? -80 : 80);
-        pos[id] = { x, y };
+        if (visible.has(id) && !pos[id]) {
+          const side = i % 2 === 0 ? -1 : 1;
+          const rank = Math.floor(i / 2);
+          pos[id] = { x: center.x + side * (240 + rank * 150), y: center.y + (side < 0 ? -80 : 80) };
+        }
       });
 
       return pos;
@@ -865,6 +939,7 @@
       return [
         depth,
         layoutMode,
+        hierarchyLevelsVisible,
         mindmap.focusId,
         mindmap.nodes.map(n => n.id).join(','),
         mindmap.links.length
@@ -1288,6 +1363,11 @@
 
     layoutModeSelect.addEventListener('change', (e) => {
       layoutMode = e.target.value;
+      render();
+    });
+
+    levelsVisibleSelect.addEventListener('change', (e) => {
+      hierarchyLevelsVisible = Math.max(1, Math.min(4, Number(e.target.value) || 1));
       render();
     });
 
