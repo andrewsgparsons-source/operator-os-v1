@@ -590,6 +590,8 @@
     let scale = 1;
     let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
     let aboveEnterThreshold = false; // Hysteresis guard: trigger once per threshold crossing
+    const ENTER_COOLDOWN_MS = 550;   // Prevent multi-level cascade from one continuous pinch
+    let lastEnterAt = 0;
 
     // Transition thresholds
     // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
@@ -655,6 +657,7 @@
       scale = 1;
       enterArmed = true;
       aboveEnterThreshold = false;
+      lastEnterAt = Date.now();
 
       render();
       updateBreadcrumb();
@@ -1003,8 +1006,9 @@
       }
 
       // Determine what to render based on scale
-      if (scale >= TRANSITION_END && enterArmed && !aboveEnterThreshold) {
-        // Fully zoomed in: trigger once per threshold crossing
+      const enterReady = (Date.now() - lastEnterAt) > ENTER_COOLDOWN_MS;
+      if (scale >= TRANSITION_END && enterArmed && !aboveEnterThreshold && enterReady) {
+        // Fully zoomed in: trigger once per threshold crossing (+ cooldown)
         const focusedNode = getFocusedNode();
         if (focusedNode) {
           if (!focusedNode.nested) ensureNestedMindmap(focusedNode);
