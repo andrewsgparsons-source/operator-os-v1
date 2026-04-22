@@ -1,0 +1,436 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Chat Map: MiniMax M2 local deployment costs + orchestration ceiling",
+      "nested": null,
+      "resources": [
+        {
+          "id": "d1",
+          "title": "Decision",
+          "url": "",
+          "note": "Local M2 hosting not cost-justified for Andrew's use case \u2014 MiniMax API at ~$0.30/M tokens vastly cheaper than \u00a3100k+ capex for H100 setup",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "d2",
+          "title": "Decision",
+          "url": "",
+          "note": "Mac Studio M5 Ultra (when released) is the only viable consumer local option \u2014 Current M4 Max tops at 128GB; M3 Ultra at 96GB \u2014 both borderline for 3-bit quant",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "d3",
+          "title": "Decision",
+          "url": "",
+          "note": "Orchestration debt is Andrew's primary AI risk, not hardware gap \u2014 Passive vs active AI use is the real underclass divider",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "q1",
+          "title": "Open Question",
+          "url": "",
+          "note": "Is the My3DBuild guided tour running in Babylon.js in browser?",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "q2",
+          "title": "Open Question",
+          "url": "",
+          "note": "Can Playwright close the visual feedback loop for animation validation?",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "q3",
+          "title": "Open Question",
+          "url": "",
+          "note": "Which Wealthy Far domain benefits most from better orchestration right now?",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "q4",
+          "title": "Open Question",
+          "url": "",
+          "note": "What specific RSI event or content triggered the underclass anxiety?",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "a1",
+          "title": "Next Action",
+          "url": "",
+          "note": "Prototype screenshot + vision model eval loop for guided tour animation (owner: Andrew + James, priority: high)",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "a2",
+          "title": "Next Action",
+          "url": "",
+          "note": "Write tight acceptance criteria spec before next animation iteration (owner: Andrew, priority: high)",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "a3",
+          "title": "Next Action",
+          "url": "",
+          "note": "Evaluate Playwright for Babylon.js animation recording and auto-eval (owner: Andrew, priority: medium)",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "a4",
+          "title": "Next Action",
+          "url": "",
+          "note": "Monitor M5 Ultra Mac Studio release (expected summer 2026) (owner: Andrew, priority: low)",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "ref-1",
+          "title": "MiniMax M2 GitHub",
+          "url": "https://github.com/MiniMax-AI/MiniMax-M2",
+          "note": "",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "ref-2",
+          "title": "Unsloth MiniMax M2.5 GGUF",
+          "url": "https://unsloth.ai/docs/models/minimax-m25",
+          "note": "",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "ref-3",
+          "title": "vLLM MiniMax Deployment Guide",
+          "url": "https://docs.vllm.ai/projects/recipes/en/latest/MiniMax/MiniMax-M2.html",
+          "note": "",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "ref-4",
+          "title": "MiniMax M2 on LM Studio",
+          "url": "https://lmstudio.ai/models/minimax-m2",
+          "note": "",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "ref-5",
+          "title": "MiniMax API pricing",
+          "url": "https://platform.minimax.io",
+          "note": "",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "MiniMax M2 / M2.1 / M2.5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "model",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        },
+        {
+          "id": "meta-notes",
+          "title": "Notes",
+          "url": "",
+          "note": "230B total, 10B active MoE",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n3",
+      "label": "Local LLM Deployment",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "concept",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Mac Studio M4 Max 128GB",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "option",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n5",
+      "label": "Multi-GPU PC (2x RTX 4090)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "option",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "4x H100 Server",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "option",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "MiniMax API",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "option",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "James / OpenClaw Agent",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "entity",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "My3DBuild Guided Tour Animation",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "task",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Vision Model Feedback Loop",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "solution",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "Orchestration Debt",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "risk",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Recursive Self-Improvement / Underclass Risk",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "concern",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "Playwright / Puppeteer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "tool",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "Babylon.js",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-type",
+          "title": "Type",
+          "url": "",
+          "note": "tool",
+          "addedAt": "2026-04-22T22:26:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n14",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n3",
+      "type": "parent"
+    },
+    {
+      "from": "n3",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n7",
+      "type": "jump"
+    },
+    {
+      "from": "n8",
+      "to": "n9",
+      "type": "jump"
+    },
+    {
+      "from": "n9",
+      "to": "n10",
+      "type": "jump"
+    },
+    {
+      "from": "n10",
+      "to": "n13",
+      "type": "jump"
+    },
+    {
+      "from": "n10",
+      "to": "n14",
+      "type": "jump"
+    },
+    {
+      "from": "n8",
+      "to": "n11",
+      "type": "jump"
+    },
+    {
+      "from": "n12",
+      "to": "n11",
+      "type": "jump"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 14
+}
