@@ -214,7 +214,7 @@
     #tabNav {
       flex: 0 0 auto;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
       padding: 12px;
       overflow: hidden;
@@ -454,6 +454,7 @@
     <nav id="tabNav">
       <button class="tab-pill active" data-tab="save">Save</button>
       <button class="tab-pill" data-tab="main">Main Control</button>
+      <button class="tab-pill" data-tab="resources">Resources</button>
     </nav>
 
     <!-- CONTROLS PANE -->
@@ -492,6 +493,22 @@
           <h2>Quick Navigate</h2>
           <div class="subtitle">Tap any node to focus</div>
           <div id="quickNodes" class="chips"></div>
+        </div>
+      </div>
+
+      <!-- RESOURCES TAB -->
+      <div class="tab-content" data-tab="resources">
+        <div class="control-box">
+          <h2>Node Resources</h2>
+          <div class="subtitle" id="resourcesScope">Resources dedicated to the current focused node.</div>
+          <input type="text" id="resourceTitle" placeholder="Resource title" />
+          <input type="text" id="resourceUrl" placeholder="Resource URL (optional)" style="margin-top:8px" />
+          <input type="text" id="resourceNote" placeholder="Short note (optional)" style="margin-top:8px" />
+          <button id="addResource" style="margin-top:8px">+ Add Resource to Focused Node</button>
+        </div>
+        <div class="control-box">
+          <h2>Current Node Library</h2>
+          <div id="resourceList" class="subtitle">No resources yet for this node.</div>
         </div>
       </div>
     </section>
@@ -899,6 +916,71 @@
       statLinks.textContent = currentMindmap.links.length;
     }
 
+    function renderResources() {
+      const focus = getFocusedNode();
+      const scope = document.getElementById('resourcesScope');
+      const list = document.getElementById('resourceList');
+      if (!focus) {
+        scope.textContent = 'No focused node.';
+        list.textContent = 'No resources yet for this node.';
+        return;
+      }
+
+      if (!Array.isArray(focus.resources)) focus.resources = [];
+      scope.textContent = `Resources dedicated to focused node: ${focus.label}`;
+
+      if (!focus.resources.length) {
+        list.textContent = 'No resources yet for this node.';
+        return;
+      }
+
+      list.innerHTML = '';
+      focus.resources.forEach((r, idx) => {
+        const row = document.createElement('div');
+        row.style.padding = '10px';
+        row.style.border = '1px solid var(--border)';
+        row.style.borderRadius = '8px';
+        row.style.marginBottom = '8px';
+        row.style.background = 'var(--bg-panel)';
+
+        const title = document.createElement('div');
+        title.style.fontWeight = '700';
+        title.textContent = r.title || `Resource ${idx + 1}`;
+        row.appendChild(title);
+
+        if (r.url) {
+          const link = document.createElement('a');
+          link.href = r.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = r.url;
+          link.style.display = 'block';
+          link.style.marginTop = '4px';
+          link.style.wordBreak = 'break-all';
+          row.appendChild(link);
+        }
+
+        if (r.note) {
+          const note = document.createElement('div');
+          note.style.marginTop = '4px';
+          note.textContent = r.note;
+          row.appendChild(note);
+        }
+
+        const del = document.createElement('button');
+        del.className = 'secondary';
+        del.style.marginTop = '8px';
+        del.textContent = 'Remove';
+        del.onclick = () => {
+          focus.resources.splice(idx, 1);
+          renderResources();
+        };
+        row.appendChild(del);
+
+        list.appendChild(row);
+      });
+    }
+
     function render() {
       const focus = getFocusedNode();
       focusName.textContent = focus?.label || currentMindmap.focusId;
@@ -955,6 +1037,7 @@
 
       renderQuick();
       updateStats();
+      renderResources();
     }
 
     // ===== ZOOM CONTROLS =====
@@ -1025,6 +1108,34 @@
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addNodeWith('child');
     });
+
+    // ===== NODE-RESOURCE LIBRARY (FOCUSED NODE) =====
+    document.getElementById('addResource').onclick = () => {
+      const focus = getFocusedNode();
+      if (!focus) return;
+
+      const titleEl = document.getElementById('resourceTitle');
+      const urlEl = document.getElementById('resourceUrl');
+      const noteEl = document.getElementById('resourceNote');
+
+      const title = (titleEl.value || '').trim();
+      const url = (urlEl.value || '').trim();
+      const note = (noteEl.value || '').trim();
+
+      if (!title) {
+        alert('Please add a resource title.');
+        return;
+      }
+
+      if (!Array.isArray(focus.resources)) focus.resources = [];
+      focus.resources.push({ id: `r${Date.now()}`, title, url, note, addedAt: new Date().toISOString() });
+
+      titleEl.value = '';
+      urlEl.value = '';
+      noteEl.value = '';
+      renderResources();
+      showZoomHint('Resource added to focused node');
+    };
 
     // ===== SAVE / LOAD (CURRENT MAP SCOPE) =====
     function exportCurrentMapJson() {
