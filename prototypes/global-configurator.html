@@ -889,8 +889,9 @@
       e.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
       e.setAttribute('stroke-width', focused ? '3' : '2');
 
-      g.appendChild(text);
       g.appendChild(e);
+      text.style.pointerEvents = 'none';
+      g.appendChild(text);
 
       // Nested indicator
       if (showNested && hasNestedContent(n.id)) {
