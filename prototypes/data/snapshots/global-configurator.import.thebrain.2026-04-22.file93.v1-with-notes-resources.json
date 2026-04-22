@@ -1,0 +1,325 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Organisational strategy",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T17:53:57.002864 | modified=2019-12-29T17:58:38.456702",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "notes.html",
+          "url": "notes.html",
+          "note": "type=4",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "RIPPA",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2020-01-04T13:58:14.352463 | modified=2020-01-04T13:58:25.467494",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "RIPPA The Farm Robot Exterminates Pests And Weeds - YouTube",
+          "url": "https://youtu.be/XP7GoNKcTS4",
+          "note": "type=3",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n3",
+      "label": "Crowdfunding",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T17:54:12.973697 | modified=2019-12-29T17:54:12.973698",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Information and system technology",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2020-03-29T06:56:49.611118 | modified=2020-03-29T06:56:49.611123",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n5",
+      "label": "Strategy",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T17:30:58.452365 | modified=2019-12-29T17:35:29.780906",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "notes.html",
+          "url": "notes.html",
+          "note": "type=4",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Genetic algorithm",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2020-03-29T06:57:00.047828 | modified=2026-04-18T22:43:20.1531563",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "The Secret Life Of Chaos: Chaos Theory (Jim Al-Khalili) | Science Documentary | Science - YouTube",
+          "url": "https://youtu.be/p_yOueFMe7c",
+          "note": "type=3",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-2",
+          "title": "Genetic Algorithm Tutorial - How to Code a Genetic Algorithm - YouTube",
+          "url": "https://youtu.be/XP8R0yzAbdo",
+          "note": "type=3",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "Brainstorm ideas",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T18:32:59.347414 | modified=2019-12-29T18:32:59.347421",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "Automated Farming",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T17:29:49.750321 | modified=2019-12-29T17:34:06.10919",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "Vision",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T18:03:16.43968 | modified=2019-12-29T18:23:22.001292",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "notes.html",
+          "url": "notes.html",
+          "note": "type=4",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Small robot company",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2020-01-04T12:57:01.957847 | modified=2020-01-04T12:57:18.570391",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "Revolutionising Food Production with the Small Robot Company - YouTube",
+          "url": "https://www.youtube.com/watch?v=poHDW9J3h-A",
+          "note": "type=3",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "Become robotic application engineer",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T18:33:25.97309 | modified=2019-12-29T18:33:25.973092",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Automated Farming",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2019-12-29T17:31:19.038397 | modified=2019-12-29T17:47:01.918419",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "CNH",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2020-01-04T13:56:51.942425 | modified=2020-01-04T13:57:00.007593",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        },
+        {
+          "id": "att-1",
+          "title": "The CNH Industrial Autonomous Tractor Concept (Full Version) - YouTube",
+          "url": "https://youtu.be/T7Os5Okf3OQ",
+          "note": "type=3",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "Research",
+      "nested": null,
+      "resources": [
+        {
+          "id": "meta-1",
+          "title": "TheBrain metadata",
+          "url": "",
+          "note": "kind=1 | created=2020-01-04T12:56:48.421365 | modified=2020-01-04T12:56:48.421373",
+          "addedAt": "2026-04-22T21:51:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n8",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n7",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n4",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n5",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n5",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n14",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n5",
+      "to": "n1",
+      "type": "child"
+    }
+  ],
+  "focusId": "n5",
+  "seq": 14
+}
