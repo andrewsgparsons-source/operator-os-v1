@@ -593,7 +593,8 @@
     // Transition thresholds
     // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
     const TRANSITION_END = 7.2;      // Fully switch to nested level much later
-    const TRANSITION_START = 6.1;    // Begin subtle nested preview shortly before switch
+    const TRANSITION_START = 5.4;    // Start nested preview a little sooner
+    const AUTO_CREATE_NESTED_AT = 6.0; // If missing, create nested map around boundary-disappear onset
     const EXIT_THRESHOLD = 0.35;     // Exit to parent level
 
     // ===== DOM ELEMENTS =====
@@ -1028,15 +1029,20 @@
         const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
         svg.appendChild(parentLayer);
 
-        // Render nested (child) level preview only if it already exists.
-        // Do not auto-create during preview; creation happens only at click-in threshold.
+        // Render nested (child) level preview.
+        // If missing, auto-create near the boundary-disappear zone.
         const focusedNode = getFocusedNode();
-        if (focusedNode && focusedNode.nested) {
-          const nested = focusedNode.nested;
-          // Child layer starts tiny and grows during transition.
-          const childScale = 0.08 + (progress * 0.42); // ~0.08 -> ~0.50
-          const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
-          svg.appendChild(childLayer);
+        if (focusedNode) {
+          if (!focusedNode.nested && scale >= AUTO_CREATE_NESTED_AT) {
+            ensureNestedMindmap(focusedNode);
+          }
+          if (focusedNode.nested) {
+            const nested = focusedNode.nested;
+            // Child layer starts tiny and grows during transition.
+            const childScale = 0.08 + (progress * 0.42); // ~0.08 -> ~0.50
+            const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
+            svg.appendChild(childLayer);
+          }
         }
       }
 
