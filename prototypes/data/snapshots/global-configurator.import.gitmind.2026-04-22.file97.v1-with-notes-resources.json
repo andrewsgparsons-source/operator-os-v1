@@ -1,0 +1,2633 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Bespoke Sheds — Automated Physical Infrastructure",
+      "nested": null
+    },
+    {
+      "id": "n2",
+      "label": "Vision & North Star",
+      "nested": null
+    },
+    {
+      "id": "n3",
+      "label": "Core purpose: turning human intent into made-to-order buildings",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "“I’m building a system where you explain what you want to use a space for, and a custom building is designed and built for you.”",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Technical North Star: intent → automated physical infrastructure",
+      "nested": null
+    },
+    {
+      "id": "n5",
+      "label": "Plain-language North Star: “You explain what you want to use a space for, and a custom building is designed and built for you”",
+      "nested": null,
+      "resources": [
+        {
+          "id": "relline-b284e7d4eb",
+          "title": "Relation note",
+          "url": "",
+          "note": "customer requirement focus",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Long-term system, not a single product",
+      "nested": null
+    },
+    {
+      "id": "n7",
+      "label": "Core Principles",
+      "nested": null
+    },
+    {
+      "id": "n8",
+      "label": "Single source of truth (parametric 3D model)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "latest parametric model",
+          "url": "https://andrewsgparsons-source.github.io/Parametric-shed2/#view=3d",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "Visual cognition over text-heavy interfaces",
+      "nested": null
+    },
+    {
+      "id": "n10",
+      "label": "Manufacturing realism and constraint awareness",
+      "nested": null
+    },
+    {
+      "id": "n11",
+      "label": "No-drift, deterministic engineering discipline",
+      "nested": null
+    },
+    {
+      "id": "n12",
+      "label": "System Architecture",
+      "nested": null
+    },
+    {
+      "id": "n13",
+      "label": "Customer Interface",
+      "nested": null
+    },
+    {
+      "id": "n14",
+      "label": "Visual, web-based configurator",
+      "nested": null
+    },
+    {
+      "id": "n15",
+      "label": "v0",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "first attempt at an AI generated application",
+          "url": "https://v0.app/chat/shed-builder-app-3-gZRiTrh4BOG#eJXuFmVrcUGhRHCJiNpm1BtwEH9nYH9B",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n16",
+      "label": "Lovable TBD",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "Hyperlink",
+          "url": "https://lovable.dev/?utm_feeditemid=&utm_device=c&utm_term=loveable%20ai&utm_source=google&utm_medium=ppc&utm_campaign=US+-+Search+-+Lovable+-+CORE&campaignid=23072209374&devicetype=c&gclid=Cj0KCQiA6sjKBhCSARIsAJvYcpMthymVhDz6QJklHxgu40KYM1kh2GZPGa1g5h87Iz9qEOBdcuRSPJQaAhXCEALw_wcB&creativeid=777017041387&gad_source=1&gad_campaignid=23072209374&gbraid=0AAAAA-iIxGfgtDjMoG9RuWOCNXT2Dbw4L&gclid=Cj0KCQiA6sjKBhCSARIsAJvYcpMthymVhDz6QJklHxgu40KYM1kh2GZPGa1g5h87Iz9qEOBdcuRSPJQaAhXCEALw_wcB",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n17",
+      "label": "Intent-driven inputs",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "“Instead of picking from a catalogue, you just explain what you need—and we handle the rest.”",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n18",
+      "label": "Design Intelligence",
+      "nested": null
+    },
+    {
+      "id": "n19",
+      "label": "Parametric rules",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "# Parametric Rules + Component Geometry/Position Logic (from pasted files)\n\nUnits:\n\n- All parametric inputs/state values are in **mm**.\n- Babylon geometry is created in **meters** by dividing mm by `1000`.\n\nCoordinates / Axes:\n\n- Base plane spans **X (width)** and **Z (depth)**, starting at origin `(0,0,0)` and extending positive.\n- Y is vertical (up).\n- Most parts are placed by building boxes at an origin corner `{x,y,z}` then setting the mesh position to the box center: \n  - `center = (origin + size/2) / 1000`\n\n---\n\n## 1) Dimension system (base/frame/roof)\n\nState:\n\n- `state.dimMode`: `\"base\" | \"frame\" | \"roof\"`\n- `state.dimGap_mm`: default `40`\n- `state.dimInputs`: \n  - base: `baseW_mm`, `baseD_mm`\n  - frame: `frameW_mm`, `frameD_mm`\n  - roof: `roofW_mm`, `roofD_mm`\n- `state.overhang`: \n  - `uniform_mm` (default 0)\n  - `front_mm/back_mm/left_mm/right_mm` (nullable; if null =&gt; uniform)\n\nResolver (`resolveDims(state)`):\n\n- Resolves side overhangs: \n  - `l_mm, r_mm, f_mm, b_mm` where null sides fallback to `uniform_mm`.\n- `sumX = l_mm + r_mm`, `sumZ = f_mm + b_mm`\n- Outputs: \n  - `base = { w_mm, d_mm }`\n  - `frame = { w_mm, d_mm }`\n  - `roof = { w_mm, d_mm }`\n  - `overhang = { l_mm, r_mm, f_mm, b_mm }`\\\n    Mode rules:\n- If `dimMode === \"base\"`: \n  - `base = inputs.base`\n  - `frame = base + G (both axes)` where `G = dimGap_mm`\n  - `roof  = frame + (sumX, sumZ)`\n- If `dimMode === \"frame\"`: \n  - `frame = inputs.frame`\n  - `base  = frame - G (both axes)`\n  - `roof  = frame + (sumX, sumZ)`\n- If `dimMode === \"roof\"`: \n  - `roof  = inputs.roof`\n  - `frame = roof - (sumX, sumZ)`\n  - `base  = frame - G (both axes)`\n\n---\n\n## 2) Base vs Walls “derived dims”\n\nBase build uses:\n\n- `R = resolveDims(state)`\n- `baseState = { ...state, w: R.base.w_mm, d: R.base.d_mm }`\n\nWalls build uses:\n\n- A wall “outer dims” wrapper around resolved base: \n  - `WALL_OVERHANG_MM = 25`\n  - `wallDims.w_mm = R.base.w_mm + 2*WALL_OVERHANG_MM`\n  - `wallDims.d_mm = R.base.d_mm + 2*WALL_OVERHANG_MM`\n- `wallState = { ...state, w: wallDims.w_mm, d: wallDims.d_mm }`\n- After wall geometry is built, all dynamic meshes whose `name` begins with `\"wall-\"` are shifted: \n  - `dx = -25mm`, `dy = +168mm`, `dz = -25mm`\n  - `WALL_RISE_MM = 168`\n\nMeaning:\n\n- Walls are built as if their footprint is enlarged by 25mm around the base, then shifted so they align visually with the base assembly.\n\n---\n\n## 3) Base assembly components (docs/src/elements/base.js)\n\nGlobal base constants (`CONFIG`):\n\n- Grid tile size: `500 x 500` with height `50`\n- Timber section in base frame: \n  - width (`CONFIG.timber.w`) = `50`\n  - depth (`CONFIG.timber.d`) = `100`\n- Insulation sheet: \n  - `1200 x 2400 x 50`\n- Decking sheet (OSB): \n  - `1220 x 2440 x 18`\n- Joist spacing: \n  - `CONFIG.spacing = 400`\n\nCommon Y levels (mm):\n\n- base grid blocks center Y: `yB = 25` (grid thickness 50)\n- frame center Y: `yF = 100`\n- insulation center Y: `yI = 125`\n- decking center Y: `yD = 159`\n\n### 3.1 Layout orientation logic (getLayout)\n\n- `isWShort = (state.w < state.d)`\n- `rimLen  = isWShort ? state.d : state.w`  (long direction)\n- `joistSpan = isWShort ? state.w : state.d` (short direction)\n- `innerJoistLen = joistSpan - 2*CONFIG.timber.w`  (subtract 50mm each side)\n\nJoist/rim stud lines (positions array in mm):\n\n- Start at `CONFIG.timber.w / 2` (25)\n- Then every `CONFIG.spacing` (400) until `< rimLen - CONFIG.timber.w`\n- End at `rimLen - CONFIG.timber.w / 2`\n\n### 3.2 Base grid tiles\n\nIf `state.vis.base`:\n\n- For each `x` in `[0..state.w)` stepping 500: \n  - tile width `bw = min(500, state.w - x)`\n- For each `z` in `[0..state.d)` stepping 500: \n  - tile depth `bd = min(500, state.d - z)`\n- Create a box: \n  - `width = bw`, `height = 50`, `depth = bd`\n  - positioned at `(x + bw/2, yB, z + bd/2)`.\n\n### 3.3 Timber frame (rims + inner joists)\n\nIf `state.vis.frame`:\\\nMaterial color only; geometry logic:\n\nRim joists:\n\n- Two members at offsets `o` in `[0, joistSpan - 50]`\n- Each rim is a box of: \n  - If `isWShort`: `width=50`, `depth=rimLen`\n  - Else: `width=rimLen`, `depth=50`\n  - `height=100`\n- Positioned: \n  - If `isWShort`: at X `(o+25)`, Z `rimLen/2`\n  - Else: at X `rimLen/2`, Z `(o+25)`\n\nInner joists:\n\n- For each `p` in `positions`: \n  - Box of: \n    - If `isWShort`: `width=innerJoistLen`, `depth=50`\n    - Else: `width=50`, `depth=innerJoistLen`\n    - `height=100`\n  - `mid = (innerJoistLen/2 + 50)`\n  - If `isWShort`: position `(mid, yF, p)`\n  - Else: position `(p, yF, mid)`\n\n### 3.4 Insulation placement\n\nIf `state.vis.ins`:\n\n- For each bay between consecutive `positions[i]` and `positions[i+1]`: \n  - `start = positions[i] + 25`\n  - `currentBayW = (positions[i+1] - 25) - start`\n- For each strip along `innerJoistLen` stepping 2400: \n  - `zL = min(2400, innerJoistLen - z)`\n  - Each insulation piece box: \n    - If `isWShort`: \n      - width = `zL`\n      - depth = `currentBayW`\n    - Else: \n      - width = `currentBayW`\n      - depth = `zL`\n    - height = `50`\n  - Center placement: \n    - `mB = start + currentBayW/2`\n    - `mS = z + zL/2 + 50`\n    - If `isWShort`: `(x=mS, y=yI, z=mB)`\n    - Else: `(x=mB, y=yI, z=mS)`\n\n### 3.5 Decking (OSB) placement (rotation-invariant)\n\nIf `state.vis.deck`:\\\nDefinitions:\n\n- Axis A = **shorter span** (joists span A)\n- Axis B = **longer direction** (OSB 2440 runs along B, perpendicular to joists)\n- `extA = joistSpan`\n- `extB = rimLen`\n\nPiece generation: `computeDeckPiecesAB_NoStagger(extA, extB)`\n\n- Sheet size in AB: \n  - `sheetA = 1220`\n  - `sheetB = 2440`\n- Compute: \n  - `cols = floor(extA / sheetA)`\n  - `rows = floor(extB / sheetB)`\n  - `rectA = cols * sheetA`\n  - `rectB = rows * sheetB`\n  - `remA = extA - rectA`\n  - `remB = extB - rectB`\\\n    Pieces:\n- Full sheets: `rows * cols` of `(aLen=1220, bLen=2440)`\n- Remainder column (if `remA > 0`): `rows` of `(aLen=remA, bLen=2440)`\n- Remainder row (if `remB > 0`): `cols` of `(aLen=1220, bLen=remB)`\n- Corner remainder (if both rems): one piece `(aLen=remA, bLen=remB)`\n\nMapping AB → XZ (`mapABtoXZ(piece, isWShort)`):\n\n- If `isWShort`: A→X, B→Z\n- Else: A→Z, B→X\n\nEach OSB piece:\n\n- width = mapped `wX`\n- depth = mapped `dZ`\n- height = `18`\n- positioned at `(x0 + wX/2, yD, z0 + dZ/2)`\n\n---\n\n## 4) Walls components + framing rules (docs/src/elements/walls.js)\n\nInputs:\n\n- `state.w`, `state.d` are treated as wall outer dims (already resolved in orchestrator)\n- `state.walls.variant`: `\"insulated\" | \"basic\"`\n- `state.walls.height_mm`: wall height\n- Variant profile (`resolveProfile`): \n  - Insulated defaults: `studW=50`, `studH=100`, `spacing=400`\n  - Basic defaults: `studW=50`, `studH=75`, `spacing=null`\n  - Overridden by `state.walls[variant].section.w/h` if valid\n\nKey derived sizes:\n\n- `plateY = studW` (plates are rotated; plate vertical height equals studW)\n- `wallThk = studH` (wall thickness equals studH)\n- `studLen = height - 2*plateY`\n\nWall coordinate conventions:\n\n- Front/Back walls run along X and have thickness along Z.\n- Left/Right walls run along Z and have thickness along X.\n- All parts are built as boxes with `{x,y,z}` origin, positioned by center.\n\n### 4.1 Corner-join rule (no overlap)\n\nGiven wall outer dims:\n\n- `dims.w = floor(state.w)`\n- `dims.d = floor(state.d)`\n- Side wall usable length: \n  - `sideLenZ = dims.d - 2*wallThk` (min 1)\n\nOrigins + lengths:\n\n- Front: \n  - axis `x`, length `dims.w`, origin `{x:0, z:0}`\n- Back: \n  - axis `x`, length `dims.w`, origin `{x:0, z:dims.d - wallThk}`\n- Left: \n  - axis `z`, length `sideLenZ`, origin `{x:0, z:wallThk}`\n- Right: \n  - axis `z`, length `sideLenZ`, origin `{x:dims.w - wallThk, z:wallThk}`\n\n### 4.2 Plates\n\nFor a wall with axis:\n\n- Along X: \n  - bottom plate: `(Lx=length, Ly=plateY, Lz=wallThk)` at `{x:origin.x, y:0, z:origin.z}`\n  - top plate: same size at `{y: height - plateY}`\n- Along Z: \n  - bottom plate: `(Lx=wallThk, Ly=plateY, Lz=length)` at `{x:origin.x, y:0, z:origin.z}`\n  - top plate: same at `{y: height - plateY}`\n\n### 4.3 Stud placement (common)\n\nCorner studs always exist unless removed by door logic (insulated front only in the pasted walls.js):\n\n- Along X: \n  - left end at `x=origin.x + 0`\n  - right end at `x=origin.x + (length - studW)`\n  - z always `origin.z`\n- Along Z: \n  - start at `z=origin.z + 0`\n  - end at `z=origin.z + (length - studW)`\n  - x always `origin.x`\n\nStud box sizing:\n\n- Along X wall: \n  - `(Lx=studW, Ly=studHeight, Lz=wallThk)`\n- Along Z wall: \n  - `(Lx=wallThk, Ly=studHeight, Lz=studW)`\\\n    Stud vertical origin:\n- studs start at `y=plateY`\n\n### 4.4 BASIC variant panelization\n\nRule:\n\n- If basic wall length `> 2400`: \n  - Split into two panels: \n    - `p1 = floor(length/2)`\n    - `p2 = length - p1`\n  - Panel 1 origin offset 0\n  - Panel 2 origin offset `p1` along the wall axis\n  - Each panel gets: \n    - bottom plate + top plate for the panel length\n    - 3 studs: 2 ends + 1 midpoint (per panel)\n\nIf basic wall length `<= 2400`:\n\n- One wall, no panels\n- Studs: 2 ends + 1 midpoint\n\n(Basic door-specific rules are NOT present in pasted walls.js; only insulated/front door logic exists there.)\n\n### 4.5 INSULATED variant stud spacing\n\n- Studs at 400mm increments starting at 400mm from wall origin\n- Stop when exceeding `length - studW`\n- Corner studs are already placed separately\n- For non-front walls: studs placed normally\n- For front wall with door enabled (pasted walls.js behavior): \n  - stud at position `x` is skipped if its center lies inside the door interval `(doorX .. doorX+doorW)`\n\n### 4.6 Door framing (pasted walls.js behavior)\n\nDoor is taken as:\n\n- the FIRST opening in `state.walls.openings` (`openings[0]`)\n- Only active if: \n  - `variant === \"insulated\"`\n  - `door.enabled === true`\n  - and only applied to wallId `\"front\"`\n\nDoor dimensions:\n\n- `doorW = door.width_mm` (gap width)\n- `doorX = clamp(door.x_mm, 0, dims.w - doorW)`\n- `doorH = door.height_mm`\n\nFraming components added on front wall when enabled:\n\n- King studs: \n  - left king at `x = doorX0 - studW`, height = `height - 2*plateY`\n  - right king at `x = doorX1`, height = `height - 2*plateY`\n- Trimmer studs: \n  - left trimmer at `x = doorX0`, height = `doorH`\n  - right trimmer at `x = doorX1 - studW`, height = `doorH`\n- Header: \n  - length = `doorW + 2*studW`\n  - height = `studH`\n  - placed at `y = plateY + doorH`, x origin `doorX0 - studW`\n\n---\n\n## 5) Opening placement validity rules (UI/state orchestration)\n\nThese rules currently exist in `docs/src/index.js` (validation + snap helper). They affect:\n\n- What is considered valid/invalid\n- Whether “Snap to nearest viable position” appears\n- Whether invalid IDs are written to state (`state.walls.invalidDoorIds`, `state.walls.invalidWindowIds`)\n\nCommon constants:\n\n- `minGap = 50` mm\n\nWall usable lengths for openings:\n\n- First compute `wall outer dims` based on resolved base + overhang: \n  - `wallW = baseW + 2*25`\n  - `wallD = baseD + 2*25`\n- `wallThk = currentWallThicknessFromState()` which uses `state.walls[variant].section.h` (75/100)\n- Opening wall lengths: \n  - `front/back length = wallW`\n  - `left/right length = wallD - 2*wallThk`\n\nDoor validity (per door on its wall):\n\n- X must satisfy: \n  - `x >= 50`\n  - `x <= wallLen - doorW - 50`\n- Pairwise per wall: \n  - Door intervals must not overlap or be within 50mm of each other\n  - Interval is `[x, x+doorW]`\n  - Considered invalid if intervals overlap or distance &lt; 50mm\n\nWindow validity:\n\n- Same X/corner rule as doors\n- Same pairwise non-overlap/≥50 rule per wall\n- Additional height constraint: \n  - `y >= 0`\n  - `y + height + wallThickness <= studLen`\n    - where `studLen = wallHeight - 2*plateY`\n    - `plateY = studW`\n\nSnap computation (X-only) for a specific opening:\n\n- Allowed X range is `[50, wallLen - openingW - 50]`\n- Forbidden X ranges are constructed from every other opening on same wall: \n  - forbidden interval = `[otherX - 50 - openingW, otherX + otherW + 50]`\n- Allowed = baseAllowed minus forbidden intervals\n- Snap chooses the point within any allowed segment closest to desired X\n- If none allowed, clamps to the allowed range endpoints.\n\nCom",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n20",
+      "label": "Structural feasibility",
+      "nested": null
+    },
+    {
+      "id": "n21",
+      "label": "Cost feedback",
+      "nested": null
+    },
+    {
+      "id": "n22",
+      "label": "Commitment & Ordering",
+      "nested": null
+    },
+    {
+      "id": "n23",
+      "label": "Pricing lock",
+      "nested": null
+    },
+    {
+      "id": "n24",
+      "label": "Versioned design snapshot",
+      "nested": null
+    },
+    {
+      "id": "n25",
+      "label": "Manufacturing Translation",
+      "nested": null
+    },
+    {
+      "id": "n26",
+      "label": "Bills of materials",
+      "nested": null
+    },
+    {
+      "id": "n27",
+      "label": "Cutting lists",
+      "nested": null
+    },
+    {
+      "id": "n28",
+      "label": "CNC-ready outputs",
+      "nested": null
+    },
+    {
+      "id": "n29",
+      "label": "Future Automation",
+      "nested": null,
+      "resources": [
+        {
+          "id": "img-1",
+          "title": "1767098608812_t4hIVwDiOqI0BdZZZYLBVSIsH3zRxm.png",
+          "url": "https://gitmindgw.aoscdn.com/app%2Fgitmind-com%2Fresources%2Fdocs%2Fjnc6pxxy9kop%2F1767098608812_t4hIVwDiOqI0BdZZZYLBVSIsH3zRxm.png?auth_key=1776981059-814479-760478-0e006786aa13398aa812902fd5b912e5&Expires=1776981059&x-oss-process=image%2Fresize%2Cw_640",
+          "note": "GitMind embedded image",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        },
+        {
+          "id": "img-2",
+          "title": "Image (original)",
+          "url": "https://gitmindgw.aoscdn.com/app/gitmind-com/resources/docs/jnc6pxxy9kop/1767098608812_t4hIVwDiOqI0BdZZZYLBVSIsH3zRxm.png?auth_key=1767185017-807940-281322-4764a7227fc9a5d07133fe31aa609091",
+          "note": "GitMind original image URL",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n30",
+      "label": "CNC optimisation",
+      "nested": null
+    },
+    {
+      "id": "n31",
+      "label": "Robotics",
+      "nested": null
+    },
+    {
+      "id": "n32",
+      "label": "Modular systems",
+      "nested": null
+    },
+    {
+      "id": "n33",
+      "label": "Delivery & Installation",
+      "nested": null
+    },
+    {
+      "id": "n34",
+      "label": "Logistics planning",
+      "nested": null
+    },
+    {
+      "id": "n35",
+      "label": "Assembly sequencing",
+      "nested": null
+    },
+    {
+      "id": "n36",
+      "label": "Technical Foundation (Current State)",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "Tech stack flow chart",
+          "url": "https://gitmind.com/app/docs/flyrpk2x",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n37",
+      "label": "Working parametric 3D engine",
+      "nested": null
+    },
+    {
+      "id": "n38",
+      "label": "inputs",
+      "nested": null
+    },
+    {
+      "id": "n39",
+      "label": "analysis of input parameters and visual output required for the client",
+      "nested": null
+    },
+    {
+      "id": "n40",
+      "label": "Input Parameters first draft",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "# Project Inputs — Current Options (from pasted files)\n\n## 1) View / Navigation\n\n- `#viewSelect` (top-right dropdown)\n  - `3d` = “3D Scene View” (default)\n  - `walls` = “Walls Cutting List”\n  - `base` = “Base Cutting List”\n- URL hash support:\n  - `#view=3d|walls|base`\n- Keyboard shortcuts (when NOT typing in an input/select/textarea):\n  - `1` → 3D\n  - `2` → Walls\n  - `3` → Base\n\n---\n\n## 2) Visibility (3D only)\n\n- `#vWalls` (checkbox) — master walls visibility\n- `#vBase` (checkbox) — base grid visibility\n- `#vFrame` (checkbox) — timber frame visibility\n- `#vIns` (checkbox) — insulation visibility\n- `#vDeck` (checkbox) — decking visibility\n\nPer-wall toggles (only affect which wall(s) build/render & BOM):\n\n- `#vWallFront`\n- `#vWallBack`\n- `#vWallLeft`\n- `#vWallRight`\n\n---\n\n## 3) Walls\n\n- `#wallSection` (select: stud/plate size)\n\n  - `50x75` → section `{ w: 50, h: 75 }`\n  - `50x100` → section `{ w: 50, h: 100 }` (default)\n  - Applies to BOTH `state.walls.insulated.section` and `state.walls.basic.section`.\n\n- `#wallsVariant` (select)\n\n  - `insulated` (default)\n  - `basic`\n\n- `#wallHeight` (number, mm)\n\n  - min `100`, step `10`, default `2400`\n\nWall geometry notes (current behavior):\n\n- Plates are rotated: plate “vertical height” = `studW` (typically 50), wall thickness = `studH` (75/100).\n- Corner join is “non-overlapping”: left/right walls are shortened to fit between front/back by `2 * wallThickness`.\n- BASIC variant panelization:\n  - if a wall length &gt; 2400mm → split into 2 panels (equal-ish)\n  - each basic panel has: 2 end studs + 1 mid stud\n- INSULATED studs:\n  - studs at 400mm spacing, door area can remove studs (BUT see “Openings” note below)\n\n---\n\n## 4) Doors (UI + state)\n\nToolbar:\n\n- `#addDoorBtn` → adds a new door opening\n- `#removeAllDoorsBtn` → removes all door openings\n\nPer-door controls (repeated per item in `#doorsList`):\n\n- Wall (select): `front | back | left | right`\n- `Door X (mm)` (number; commit on blur or Enter)\n- `Door W (mm)` (number; commit on blur or Enter)\n  - Interpreted as the _gap width_ between uprights (does NOT include studs)\n- `Door H (mm)` (number; commit on blur or Enter)\n- `Snap to nearest viable position` (button)\n  - Only appears if door is invalid.\n- `Remove` (button)\n  - Removes that specific door.\n\nDoor validation rules (current UX logic):\n\n- Evaluated on commit (blur or Enter), and continuously thereafter via state change:\n  - Must be ≥ 50mm from wall ends/corners\n  - Must not overlap another door on the same wall\n  - Must be ≥ 50mm apart from other doors on the same wall\n- If invalid:\n  - Door is marked invalid (state tracks invalid IDs)\n  - A persistent message appears explaining the reason\n  - The snap button appears\n  - (Red highlight in 3D depends on wall builder; see note below)\n- If user clicks “Snap…”:\n  - Door X is moved to nearest valid position respecting the same constraints\n  - A short “Snapped to …mm.” notice appears\n\nIMPORTANT current implementation note:\n\n- `docs/src/index.js` supports MULTIPLE doors on ANY wall in state and UI.\n- `docs/src/elements/walls.js` (as pasted) currently only uses the _first opening_ as a door,\\\n  and only applies door stud-removal + framing on the FRONT wall and only when variant is `insulated`.\\\n  (So multi-door / non-front / basic door framing is not yet reflected by that walls builder.)\n\n---\n\n## 5) Windows (UI + state)\n\nToolbar:\n\n- `#addWindowBtn` → adds a new window opening\n- `#removeAllWindowsBtn` → removes all window openings\n\nPer-window controls (repeated per item in `#windowsList`):\n\n- Wall (select): `front | back | left | right`\n- `Win X (mm)` (number; commit on blur or Enter)\n- `Win Y (mm)` (number; commit on blur or Enter)\n  - Measured from “bottom plate top” per UI hint; enforced by validation below.\n- `Win W (mm)` (number; commit on blur or Enter)\n- `Win H (mm)` (number; commit on blur or Enter)\n- `Snap to nearest viable position` (button; X-only)\n  - Only appears if window is invalid.\n- `Remove` (button)\n\nWindow validation rules (current UX logic):\n\n- Must be ≥ 50mm from wall ends/corners\n- Must not overlap another window on same wall\n- Must be ≥ 50mm apart from other windows on same wall\n- Height constraint:\n  - `y_mm` must be ≥ 0\n  - `y_mm + height_mm + wallThickness` must be ≤ `studLen`\n    - `studLen = wallHeight - 2*plateY`\n    - `plateY = studW` (typically 50)\n    - `wallThickness = studH` (75/100)\n\nNOTE:\n\n- There is currently no window cutout/framing in `docs/src/elements/walls.js` as pasted.\n\n---\n\n## 6) Dimensions (base/frame/roof mode)\n\n- `#dimMode` (select)\n\n  - `base` (default)\n  - `frame`\n  - `roof`\n\n- `#wInput` (number, mm) — “Width (mm) — X direction”\n\n- `#dInput` (number, mm) — “Depth (mm) — Z direction”\n\n  - min `1`, step `10`, defaults `3000` and `4000`\n  - These write into `state.dimInputs.<mode>W_mm / <mode>D_mm` based on current `dimMode`.\n\nResolver behavior (`resolveDims`):\n\n- base ↔ frame uses `dimGap_mm` (default 40mm)\n- roof differs by overhang sums (left+right, front+back)\n\n---\n\n## 7) Roof\n\n- `#roofStyle` (select)\n  - `apex` (default) — “Apex (gabled)”\n  - `pent` — “Pent (single pitch)”\n  - `hipped` — “Hipped”\n- Overhang inputs (mm):\n  - `#roofOverUniform` (number; default 0)\n  - `#roofOverFront` (number; blank = uniform)\n  - `#roofOverBack` (number; blank = uniform)\n  - `#roofOverLeft` (number; blank = uniform)\n  - `#roofOverRight` (number; blank = uniform)\n\nNOTE:\n\n- As of pasted files, roof style is stored in state (`state.roof.style`) but does not alter 3D geometry yet.\n\n---\n\n## 8) BOM / Cutting List page controls\n\n- Units:\n  - `#unitsSelect`: `mm` | `both` (mm + inches fractional)\n- `#exportCsvBtn` → downloads `cutting_list.csv`\n- `#printBtn` → triggers print\n\n---\n\n## 9) Debug / status (optional)\n\n- `#statusOverlay` exists and is updated every 1s (currently `display:none` by CSS)\n- Tracks BABYLON load, canvas size, engine/scene/camera presence, frames, build calls, meshes, last error.",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n41",
+      "label": "Latest input parameters",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "# **BUILD OPTIONS — v1.7**\n\nDesign your shed\n\n---\n\n## ▸ Size & Shape\n\n┌──────────────────────────────────────────────────────────────┐\\\n│ Unit Mode (Metric / Imperial) │\\\n│ │\\\n│ Dimension Mode (Base / Frame / Roof) │\\\n│ │\\\n│ Width (mm) \\[ 3000 \\] │\\\n│ Depth (mm) \\[ 4000 \\] │\\\n│ │\\\n│ Roof Type ▾ │\\\n│ • Apex (gabled) │\\\n│ • Pent (single pitch) │\\\n│ • Hipped │\\\n│ │\\\n│ Variant \\[ Insulated ▾ \\] │\\\n└──────────────────────────────────────────────────────────────┘\n\n---\n\n## ▸ Walls & Openings\n\n┌──────────────────────────────────────────────────────────────┐\\\n│ Wall Construction │\\\n│ Stud / Plate Size \\[ 50×100 ▾ \\] │\\\n│ │\\\n│ Doors │\\\n│ \\[+ Add Door\\] \\[ Remove All \\] │\\\n│ │\\\n│ Windows │\\\n│ \\[+ Add Window\\] \\[ Remove All \\] │\\\n└──────────────────────────────────────────────────────────────┘\n\n---\n\n## ▸ Roof\n\n┌──────────────────────────────────────────────────────────────┐\\\n│ Building Height Options │\\\n│ (Shown after roof type selection) │\\\n│ │\\\n│ ── Apex Roof ────────────────────────────────────────────── │\\\n│ Height to Eaves (mm) \\[ 1850 \\] │\\\n│ Height to Crest (mm) \\[ 2200 \\] │\\\n│ │\\\n│ Roof Pitch \\[ 30° \\] (calculated, read-only) │\\\n│ │\\\n│ ── Pent Roof ────────────────────────────────────────────── │\\\n│ Minimum Height (mm) \\[ 2100 \\] │\\\n│ Maximum Height (mm) \\[ 2300 \\] │\\\n│ │\\\n│ Roof Pitch \\[ 7° \\] (calculated, read-only) │\\\n│ │\\\n│ ── Hipped Roof ──────────────────────────────────────────── │\\\n│ Height to Eaves (mm) \\[ 2000 \\] │\\\n│ Height to Crest (mm) \\[ 2400 \\] │\\\n│ │\\\n│ Roof Pitch \\[ 25° \\] (calculated, read-only) │\\\n│ │\\\n│ \\[ Hipped Roof Design Options \\] (disabled / coming soon) │\\\n│ │\\\n│ ─────────────────────────────────────────────────────────── │\\\n│ Overhangs │\\\n│ Uniform \\[ 0 \\] │\\\n│ Front \\[ \\] Back \\[ \\] │\\\n│ Left \\[ \\] Right \\[ \\] │\\\n└──────────────────────────────────────────────────────────────┘\n\n---\n\n## ▸ Appearance\n\n┌──────────────────────────────────────────────────────────────┐\\\n│ (Cladding, finishes, colours — future) │\\\n└──────────────────────────────────────────────────────────────┘\n\n---\n\n## ▸ Visibility (Advanced)\n\n┌──────────────────────────────────────────────────────────────┐\\\n│ Whole Assemblies │\\\n│ ☐ Base │\\\n│ ☐ Walls │\\\n│ ☐ Roof │\\\n│ ☐ Cladding │\\\n│ │\\\n│ Base Components │\\\n│ ☐ Base Grid │\\\n│ ☐ Timber Frame │\\\n│ ☐ Insulation │\\\n│ ☐ Decking │\\\n│ │\\\n│ Wall Components │\\\n│ ☐ Front │\\\n│ ☐ Back │\\\n│ ☐ Left │\\\n│ ☐ Right │\\\n│ │\\\n│ Roof Components │\\\n│ ☐ Structure (future-safe) │\\\n│ ☐ OSB / Sheathing (future-safe) │\\\n│ ☐ Roof Covering │\\\n└──────────────────────────────────────────────────────────────┘\n\n---\n\n## ▸ Save / Load Design\n\n┌──────────────────────────────────────────────────────────────┐\\\n│ Saved Designs │\\\n│ \\[ Select design ▾ \\] │\\\n│ │\\\n│ \\[ Save \\] \\[ Save As \\] \\[ Load \\] \\[ Delete \\] │\\\n└──────────────────────────────────────────────────────────────┘",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n42",
+      "label": "Wall, roof, base, insulation logic",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "FirtsDraftLogic",
+          "url": "https://1drv.ms/f/c/4a72439b55333838/IgACMn_5dKp-RaLdW-0VlRzCAa3kTXU0n_yIumPIJV8S8ok?e=UIbbwf",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n43",
+      "label": "Manufacturing-aware BOM generation",
+      "nested": null
+    },
+    {
+      "id": "n44",
+      "label": "Accurate cutting lists with real constraints",
+      "nested": null
+    },
+    {
+      "id": "n45",
+      "label": "Stable, inspectable codebase",
+      "nested": null
+    },
+    {
+      "id": "n46",
+      "label": "coding with chat GPT copilot",
+      "nested": null
+    },
+    {
+      "id": "n47",
+      "label": "Babylon",
+      "nested": null
+    },
+    {
+      "id": "n48",
+      "label": "Migrate to Python idea",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "would it be possible to completely recode this whole application in Python as opposed to JS\n\nYes — but not as a 1-for-1 replacement that still runs in the browser the same way.\n\nYour current app is doing three things that are _natively_ browser/JS jobs:\n\n1. **Realtime 3D rendering (Babylon.js/WebGL)**\n\n2. **Interactive UI + DOM wiring**\n\n3. **Live BOM generation tied to the same state/geometry**\n\nPython can absolutely own the **core parametric/geometry/BOM engine**, but you’d still need _something_ on the client to render and provide UI.\n\nPractical options:\n\n### Option A — Keep the browser UI/3D, move “engine” to Python (best balance)\n\n- Python becomes the **single source of truth** for:\n\n  - state validation\n\n  - geometry generation (studs/plates/openings, etc.)\n\n  - BOM/cutting lists\n\n- Browser becomes:\n\n  - a thin UI + Babylon renderer fed by Python outputs (meshes as JSON, glTF, or simple box primitives)\n\n- Transport:\n\n  - HTTP (FastAPI) or WebSocket for realtime updates\n\n**Pros:** you still get Babylon-level interactivity, Python owns the math, easy to test.\\\n**Cons:** latency unless you’re careful; you still have JS in the browser.\n\n### Option B — Rebuild everything in Python with a desktop UI\n\n- Python + a 3D engine (e.g., Panda3D, PyOpenGL, Ursina) + GUI (Qt)\\\n  **Pros:** “all Python” is real.\\\n  **Cons:** you lose “open in browser”, deployment becomes heavier, mobile becomes hard.\n\n### Option C — Python generates outputs only (no interactive 3D)\n\n- Python takes parameters → outputs:\n\n  - BOM / CSV\n\n  - drawings / cut sheets (PDF/SVG)\n\n  - 3D model export (glTF)\\\n    **Pros:** clean and robust for manufacturing pipeline.\\\n    **Cons:** not an interactive configurator unless you add a viewer.\n\n### Option D — Python in the browser (Pyodide)\n\n- Run Python in-browser via WebAssembly, keep Babylon in JS.\\\n  **Pros:** “Python logic” without a server.\\\n  **Cons:** heavier load, more complexity, still JS for rendering/UI.\n\n---\n\n## If your goal is “Python as the source of truth”\n\nThe most realistic path is **Option A**:\n\n- Extract your current deterministic geometry + BOM logic into a Python library\n\n- Expose a single endpoint: `POST /solve` with the state → returns:\n\n  - normalized state\n\n  - a list of primitives to render (boxes with dims/positions/material tags)\n\n  - BOM sections\n\n- JS becomes a renderer/view-controller only\n\nThis also sets you up for the longer-term “automate manufacturing” roadmap, because Python is often friendlier for CAD/CAM integrations, scheduling, optimization, and production systems.\n\n---\n\n## What you _cannot_ avoid\n\nIf you want a **browser-based 3D configurator**, you will still need:\n\n- JS (or at least WebGL bindings) for rendering and UI events\\\n  Even if Python computes everything, the browser doesn’t render Babylon scenes from Python alone.\n\n---\n\nIf you tell me which of these outcomes you actually want:\n\n- **(1) still runs in browser with realtime 3D**, or\n\n- **(2) desktop app**, or\n\n- **(3) generator for manufacturing outputs only**,\n\nI’ll map out a concrete migration plan that preserves determinism and avoids “drift” in geometry/BOM logic.\n\n1\n\nCool — then the clean approach is: **Python becomes the deterministic “solver”** (state → geometry + BOM), while **the browser stays Babylon.js + UI**, but much thinner.\n\n### Target architecture (browser realtime 3D stays)\n\n**Client (JS, unchanged UX goals)**\n\n- Keeps: Babylon scene, camera/controls, render loop, view switching, DOM.\n\n- Sends: current `state` JSON to Python.\n\n- Receives:\n\n  1. `primitives[]` (boxes/cylinders/etc. with mm dims + positions + material tags)\n\n  2. `bom` (already grouped rows/sections)\n\n  3. `validation` (invalid openings, warnings)\n\n**Server (Python)**\n\n- Owns: all parametric logic + BOM math in one place.\n\n- Exposes:\n\n  - `POST /solve` → returns geometry + BOM\n\n  - optional: `GET /health`\n\n### Data contract (the key to “no drift”)\n\nDefine one canonical output format the renderer consumes, e.g.:\n\n```\n{\n  \"primitives\": [\n    {\n      \"id\": \"wall-front-stud-12\",\n      \"type\": \"box\",\n      \"dims_mm\": { \"x\": 50, \"y\": 2200, \"z\": 100 },\n      \"pos_mm\":  { \"x\": 1200, \"y\": 50, \"z\": 0 },\n      \"mat\": \"timber\",\n      \"meta\": { \"dynamic\": true }\n    }\n  ],\n  \"bom\": {\n    \"walls\": [[\"Studs (front)\", 8, 2200, 50, \"@400\"]],\n    \"base\":  { \"...\": \"...\" },\n    \"roof\":  { \"...\": \"...\" }\n  },\n  \"state_normalized\": { \"...\": \"...\" }\n}\n```\n\nYour JS renderer simply loops `primitives` and calls Babylon `CreateBox` with `dims_mm/1000` and `pos_mm/1000`.\n\n### Why this works well\n\n- You keep the **browser experience** (fast, interactive, Babylon camera).\n\n- Python becomes the **single source of truth** for geometry/BOM.\n\n- Determinism improves because Python can be unit-tested aggressively.\n\n- Later manufacturing automation slots naturally into Python.\n\n### Reality check\n\nYou won’t “completely remove JS” because:\n\n- Browser rendering + DOM UI is still JS territory.\\\n  But you _can_ remove almost all _logic_ from JS.\n\n### Minimal migration plan (no big-bang rewrite)\n\n1. **Freeze a state schema** (your current one).\n\n2. Add a **Python** `/solve` that initially returns **just one subsystem** (e.g., roof or walls) as primitives + BOM.\n\n3. JS renders that subsystem from primitives while the rest remains local.\n\n4. Gradually migrate base, then walls, then openings validation, etc.\n\n5. Finally: JS becomes orchestration + rendering only.\n\nIf you want, I can write you a “Copilot prompt” that creates the initial skeleton:\n\n- `server/` FastAPI app with `/solve`\n\n- a tiny client fetch wrapper in `docs/src/index.js` that can be toggled on/off\n\n- renderer that consumes `primitives`\n\n…but I’ll only do that once you paste the current repo files involved (because of your no-drift constraint around IDs/view switching).",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n49",
+      "label": "Roadmap (Living & Capability-Based)",
+      "nested": null
+    },
+    {
+      "id": "n50",
+      "label": "Foundations (largely complete)",
+      "nested": null
+    },
+    {
+      "id": "n51",
+      "label": "Intent → Design simplification",
+      "nested": null
+    },
+    {
+      "id": "n52",
+      "label": "Design → Commitment (commercial viability)",
+      "nested": null
+    },
+    {
+      "id": "n53",
+      "label": "Production optimisation",
+      "nested": null
+    },
+    {
+      "id": "n54",
+      "label": "Physical automation (long horizon)",
+      "nested": null
+    },
+    {
+      "id": "n55",
+      "label": "Archive",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "Parametric shed",
+          "url": "https://1drv.ms/f/c/4a72439b55333838/IgBT8RagKkxDQLk_b5nijx41ATmwR0O7gsSSNV80wDWWf6A?e=Ahqd1X",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n56",
+      "label": "\"C:\\\\Users\\\\User\\\\parametric-shed\"",
+      "nested": null
+    },
+    {
+      "id": "n57",
+      "label": "Vertical Use-Cases",
+      "nested": null
+    },
+    {
+      "id": "n58",
+      "label": "Workshop",
+      "nested": null
+    },
+    {
+      "id": "n59",
+      "label": "Wellness spaces",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "Hyperlink",
+          "url": "https://grok.com/share/bGVnYWN5_f9784efa-c4fd-410c-af58-eca682f44c0e",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n60",
+      "label": "sauna",
+      "nested": null
+    },
+    {
+      "id": "n61",
+      "label": "steam room",
+      "nested": null
+    },
+    {
+      "id": "n62",
+      "label": "Jacuzzi and hot tub",
+      "nested": null
+    },
+    {
+      "id": "n63",
+      "label": "yoga studio",
+      "nested": null
+    },
+    {
+      "id": "n64",
+      "label": "Production sheds",
+      "nested": null
+    },
+    {
+      "id": "n65",
+      "label": "Food",
+      "nested": null
+    },
+    {
+      "id": "n66",
+      "label": "Drink",
+      "nested": null
+    },
+    {
+      "id": "n67",
+      "label": "Microbrewery",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "conversation with 30th of December 2025",
+          "url": "https://grok.com/share/bGVnYWN5_b05a5c3a-a08b-4246-b263-d6cd9ef95e05",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n68",
+      "label": "Wine cellar",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "### Overview of Small-Scale Automated Wine Cellars\n\nSmall-scale wine cellars at a \"garden shed\" level refer to compact storage solutions that can fit in a limited space like a 10x10 shed (e.g., units under 3-4 feet in height/width), holding 12-300 bottles, and designed for hobbyists or small collectors storing 50-500 bottles total. These setups emphasize automation for environmental controls—primarily temperature (ideal 55-57°F or 12-14°C to slow aging without fluctuations), humidity (50-70% to prevent cork drying or mold), vibration reduction, and sometimes UV protection or lighting—while allowing remote management via smartphone apps for monitoring, alerts, and adjustments. Garden sheds work well if insulated (to combat outdoor temperature swings), with access to power (110-240V), ventilation (for heat exhaust), and possibly a dehumidifier/humidifier add-on. Prices range from $300 for basic monitors to $2,000-$5,000 for full automated cabinets or cooling systems. Current trends (as of 2025) include WiFi/IoT integration with apps like Wine Enthusiast or Vinotag, enabling real-time data, automated tweaks, and inventory tracking from your phone, even integrating with smart home systems like Alexa or Google Home. Pros: Consistent wine preservation (e.g., reds/whites age properly without oxidation), convenience (no frequent shed visits), and energy efficiency (many use low-power sensors). Cons: Initial setup cost, need for stable WiFi in the shed (use extenders if needed), and potential for app glitches; sheds in extreme climates may require additional insulation.\n\n### Key Components and Features for Garden Shed Setups\n\nA basic automated wine cellar includes a storage unit (cabinet or racking), cooling/humidification system, sensors, and a controller/app. For max automation:\n\n- **Environmental Controls**: Automated systems maintain 55°F and 60% humidity via compressors, heaters, humidifiers, and dehumidifiers. Sensors detect deviations and auto-adjust or alert you.\n- **Phone Control**: Apps provide dashboards for temp/humidity graphs, setpoints, notifications (e.g., \"temp too high\"), remote on/off, and sometimes inventory scanning (e.g., via RFID or camera).\n- **Size and Fit**: Compact units (e.g., 24-36\" wide) fit sheds easily; freestanding or wall-mounted to save space. Vibration-dampening racks prevent sediment disturbance.\n- **Capacity**: 12-300 bottles suits small-scale (e.g., personal collections, not commercial).\n- **Power and Setup Needs**: Low-voltage options; ensure shed has GFCI outlets and ventilation. UV-protected glass doors and LED lighting (app-controllable) add features.\n- **Additional Gear**: Racking systems, backup batteries for outages, or integration with home automation for voice control.\n\nIdeal for sheds: Through-the-wall or plug-in units that exhaust heat outside. Use wireless sensors for easy install without wiring. For DIY: Start with a insulated shed, add racking, and retrofit with smart controllers.\n\n### Recommended Systems with Phone Control\n\nHere are top options based on current availability, all compact for sheds with app-based automation. Prioritized for ease of install, phone integration, and wine-specific controls.\n\n#### 1. Wine Enthusiast VinoView 24” Smart Wi-Fi Undercounter Wine Cellar\n\n- **Features**: Dual-zone cooling (upper 41-54°F for whites, lower 54-66°F for reds); built-in humidifier; vibration-free compressor; UV-tinted glass; LED lighting; holds up to 46 bottles.\n- **Size**: 23.5\"W x 22.5\"D x 34\"H; compact for shed shelving.\n- **Capacity**: 46 bottles.\n- **Automation**: High—auto-maintains humidity 55-75%; sensors for alerts.\n- **Phone Control**: Wine Enthusiast Smart Cellar App for remote monitoring, temp adjustments, inventory, and notifications via WiFi.\n- **Price**: Around $1,200.\n- **Suitability for Garden Shed**: Excellent—undercounter design fits tight spaces; quiet operation; plug-in install with exhaust options for sheds.\n- **Pros/Cons**: Pros: Sleek, energy-efficient, easy app integration for beginners. Cons: Limited to standard bottles; may need extension for shed WiFi.\n\n#### 2. Wine Guardian Through-the-Wall (TTW) Cooling System\n\n- **Features**: Commercial-grade cooling with integrated humidifier/heater; 24V thermostat; options for remote sensors; maintains 55°F and 50-70% humidity; low-vibration fans.\n- **Size**: Compact (e.g., 25\"W x 14\"H x 14\"D for TTW012 model); mounts through shed wall.\n- **Capacity**: Cools up to 650 cu ft (fits small shed cellars holding 200-300 bottles).\n- **Automation**: Semi to high—PID controls for precision; optional humidistat.\n- **Phone Control**: Remote Interface Controller app (or integrate with smart home) for monitoring temp/humidity, alerts, and adjustments via WiFi.\n- **Price**: $2,500-$4,000 depending on capacity.\n- **Suitability for Garden Shed**: Ideal—through-wall exhausts heat outside; durable for varying shed temps; pair with racking for full cellar.\n- **Pros/Cons**: Pros: Reliable for long-term storage, versatile mounting, excellent humidity control. Cons: Professional install recommended; higher cost.\n\n#### 3. Climadiff Connected Wine Cabinets (e.g., ACI-CLI351 Model)\n\n- **Features**: Single/dual-zone; anti-vibration system; charcoal filter; UV-protected door; auto-humidity via hygrometer; LED display.\n- **Size**: Around 23.6\"W x 27.6\"D x 70.9\"H; freestanding for shed floor.\n- **Capacity**: 152 bottles.\n- **Automation**: High—auto-regulates temp (41-68°F) and humidity (50-80%); alarm for deviations.\n- **Phone Control**: WiFi app for remote lighting, temp/humidity control, alarms, and bottle tracking.\n- **Price**: $1,500-$2,000.\n- **Suitability for Garden Shed**: Great—self-contained cabinet; stable in insulated sheds; minimal setup.\n- **Pros/Cons**: Pros: Versatile for mixed collections, quiet, app includes showcase modes. Cons: Taller unit may limit shed headroom; app requires strong signal.\n\n#### 4. Vinotemp Wine Cellar Temperature and Humidity Controller with Wi-Fi\n\n- **Features**: 24V touchscreen; integrates with existing coolers/racks; controls temp (50-65°F) and humidity (50-70%); compatible with heaters/humidifiers.\n- **Size**: Small panel (5\" screen); wall-mount in shed.\n- **Capacity**: Retrofits for 100-500 bottle setups.\n- **Automation**: High—auto-cycles based on sensors; low-voltage for safety.\n- **Phone Control**: Vinotemp app for remote setpoint changes, monitoring, and alerts.\n- **Price**: $300-$500 (controller only; add to existing unit).\n- **Suitability for Garden Shed**: Perfect for DIY—upgrade a basic fridge or racking; compact and affordable for small scales.\n- **Pros/Cons**: Pros: Cost-effective retrofit, precise control, easy phone access. Cons: Requires separate cooling unit; not a full system.\n\n### Other Considerations\n\n- **Monitoring-Only Options**: For budget setups, La Crosse or E-Control wireless sensors ($100-$300) provide app alerts without full automation—pair with a basic wine fridge.\n- **Apps and Integration**: Many (e.g., OENO by Vintec) add sommelier features like pairing suggestions or virtual inventory. For sheds, ensure UV/vibration protection; trends include AI for predictive alerts (e.g., \"upcoming heat wave—adjust now\"). Start with insulation and a hygrometer app test before investing.",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n69",
+      "label": "Controlled environments",
+      "nested": null
+    },
+    {
+      "id": "n70",
+      "label": "Future micro-infrastructure modules",
+      "nested": null
+    },
+    {
+      "id": "n71",
+      "label": "Farm Shop",
+      "nested": null
+    },
+    {
+      "id": "n72",
+      "label": "Human out the loop",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "chat GPT 19th December 2025",
+          "url": "https://chatgpt.com/share/6953c369-e1a4-8008-82ff-c82e107ec0ff",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n73",
+      "label": "Garden Office",
+      "nested": null
+    },
+    {
+      "id": "n74",
+      "label": "Storage",
+      "nested": null
+    },
+    {
+      "id": "n75",
+      "label": "Automated home cheese aging",
+      "nested": null
+    },
+    {
+      "id": "n76",
+      "label": "Automated Meat Dry-Aging",
+      "nested": null
+    },
+    {
+      "id": "n77",
+      "label": "Mushroom Growing/Fruiting",
+      "nested": null
+    },
+    {
+      "id": "n78",
+      "label": "Reptile or Exotic Pet Vivarium/Enclosure",
+      "nested": null
+    },
+    {
+      "id": "n79",
+      "label": "Small-Scale Aquaponics",
+      "nested": null
+    },
+    {
+      "id": "n80",
+      "label": "Fermentation (Kimchi, Sauerkraut, Hot Sauce, Kombucha, Kefir, etc.",
+      "nested": null
+    },
+    {
+      "id": "n81",
+      "label": "Tropical Plant / Orchid / Carnivorous Plant Room",
+      "nested": null
+    },
+    {
+      "id": "n82",
+      "label": "Microgreens & Hydroponic Salad Production",
+      "nested": null
+    },
+    {
+      "id": "n83",
+      "label": "Insect Farming (Crickets, Mealworms, Black Soldier Fly Larvae)\nRaise edible insects for pet food, chicken feed, or human consumption.",
+      "nested": null
+    },
+    {
+      "id": "n84",
+      "label": "Home Distillery or Essential Oil Extraction",
+      "nested": null
+    },
+    {
+      "id": "n85",
+      "label": "Small-Scale Beekeeping Support (Honey Processing & Wintering)",
+      "nested": null
+    },
+    {
+      "id": "n86",
+      "label": "arts and crafts",
+      "nested": null
+    },
+    {
+      "id": "n87",
+      "label": "painting",
+      "nested": null
+    },
+    {
+      "id": "n88",
+      "label": "pottery",
+      "nested": null
+    },
+    {
+      "id": "n89",
+      "label": "Narrative & Communication",
+      "nested": null
+    },
+    {
+      "id": "n90",
+      "label": "Customer messaging: explain use, not specs",
+      "nested": null
+    },
+    {
+      "id": "n91",
+      "label": "Partner messaging: efficiency and automation",
+      "nested": null
+    },
+    {
+      "id": "n92",
+      "label": "Investor messaging: scalable system architecture",
+      "nested": null
+    },
+    {
+      "id": "n93",
+      "label": "Public language rules",
+      "nested": null
+    },
+    {
+      "id": "n94",
+      "label": "Avoid jargon",
+      "nested": null
+    },
+    {
+      "id": "n95",
+      "label": "Avoid AI hype",
+      "nested": null
+    },
+    {
+      "id": "n96",
+      "label": "Anchor explanations in real-world use",
+      "nested": null
+    },
+    {
+      "id": "n97",
+      "label": "2026 action plan",
+      "nested": null
+    },
+    {
+      "id": "n98",
+      "label": "Central Node (Level 0)  \n2026 Breakthrough Year 🛖🚀",
+      "nested": null
+    },
+    {
+      "id": "n99",
+      "label": "Large, bold font with a shed icon and rocket emoji",
+      "nested": null
+    },
+    {
+      "id": "n100",
+      "label": "Vibrant green-blue gradient theme",
+      "nested": null
+    },
+    {
+      "id": "n101",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n102",
+      "label": "Main Branches (Level 1, arranged clockwise)",
+      "nested": null
+    },
+    {
+      "id": "n103",
+      "label": "Priority 1: Website + Parametric Tool Launch (Weeks 1-4) 🧰  \nColor: Blue/Green (growth)",
+      "nested": null
+    },
+    {
+      "id": "n104",
+      "label": "Choose UK Hosting: Evaluation and selection between Krystal and SiteGround for reliability and performance in UK region.",
+      "nested": null
+    },
+    {
+      "id": "n105",
+      "label": "Core Pages Development:",
+      "nested": null
+    },
+    {
+      "id": "n106",
+      "label": "Homepage Hero* with engaging animations demonstrating the bespoke shed concept and interactive visuals.",
+      "nested": null
+    },
+    {
+      "id": "n107",
+      "label": "Spectrum Explainer* page highlighting design features and customization options with clear, concise infographics.",
+      "nested": null
+    },
+    {
+      "id": "n108",
+      "label": "Lifestyle Gallery* showcasing diverse shed uses in real environments with high-quality imagery and user stories.",
+      "nested": null
+    },
+    {
+      "id": "n109",
+      "label": "Portfolio* featuring completed projects with specifications and outcomes to inspire confidence.",
+      "nested": null
+    },
+    {
+      "id": "n110",
+      "label": "FAQs* addressing common inquiries regarding the platform, design, build process, and timelines.",
+      "nested": null
+    },
+    {
+      "id": "n111",
+      "label": "Calls-To-Action (CTAs)* strategically placed for lead capture and guiding users towards tool usage or contact.",
+      "nested": null
+    },
+    {
+      "id": "n112",
+      "label": "Integrate Parametric Tool & Lead Capture: Embed the interactive design configurator allowing users to specify intents and see custom shed designs, alongside lead form integration f",
+      "nested": null
+    },
+    {
+      "id": "n113",
+      "label": "Quick SEO Optimization: Focus on real user queries with an emphasis on E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) principles for organic visibility and ear",
+      "nested": null
+    },
+    {
+      "id": "n114",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n115",
+      "label": "Priority 2: Marketing Content Creation (Weeks 3-6) 💡  \nColor: Orange (urgency)",
+      "nested": null
+    },
+    {
+      "id": "n116",
+      "label": "Babylon.js Animations: Produce short 15-30 second clips illustrating the transformation process of a garden shed from concept to finished shed, including interior and exterior visu",
+      "nested": null
+    },
+    {
+      "id": "n117",
+      "label": "Promotional Video Storyboard: Develop a narrative flow: beginning with *transformation* (showing customization), moving to *involvement* (customer engagement), followed by *lifesty",
+      "nested": null
+    },
+    {
+      "id": "n118",
+      "label": "Content Distribution: Publish these video clips as YouTube Shorts, Instagram Reels, and embed within the site’s media section for maximum exposure and engagement.",
+      "nested": null
+    },
+    {
+      "id": "n119",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n120",
+      "label": "Priority 3: First Sales & Proof (From Week 4) 🎯  \nColor: Blue/Green (growth)",
+      "nested": null
+    },
+    {
+      "id": "n121",
+      "label": "Pilot Offers: Launch incentivized offers such as discounted design plans or assisted builds to early adopters to stimulate initial revenue and feedback.",
+      "nested": null
+    },
+    {
+      "id": "n122",
+      "label": "Target Local Channels: Promote through hyper-local community channels including Facebook groups focused on garden rooms, Nextdoor neighborhoods, and specialized forums to reach the",
+      "nested": null
+    },
+    {
+      "id": "n123",
+      "label": "Portfolio Documentation: Transparently document pilot projects, including design iterations and customer testimonials, to build social proof and demonstrate quality.",
+      "nested": null
+    },
+    {
+      "id": "n124",
+      "label": "Milestone: Achieve the first paid project by the end of the first quarter (Q1 2026), serving as a critical credibility milestone.",
+      "nested": null
+    },
+    {
+      "id": "n125",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n126",
+      "label": "Priority 4: Early Visibility 📅  \nColor: Orange (urgency)",
+      "nested": null
+    },
+    {
+      "id": "n127",
+      "label": "Share Tool Progress: Regularly update communities on Reddit (r/GardenRooms), X (formerly Twitter), and other relevant platforms showcasing behind-the-scenes development progress, u",
+      "nested": null
+    },
+    {
+      "id": "n128",
+      "label": "Hashtag Strategy & Positioning: Use hashtags like #BespokeGardenRoom and #ParticipatoryDesign to anchor messaging in participatory, user-driven design, promoting the platform as an",
+      "nested": null
+    },
+    {
+      "id": "n129",
+      "label": "Brand Messaging: Emphasize the “Open, Transparent Alternative” value proposition in communications to differentiate from competitors.",
+      "nested": null
+    },
+    {
+      "id": "n130",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n131",
+      "label": "Final Branch: Next Layers After Momentum 🏆  \nColor: Blue/Green (growth)",
+      "nested": null
+    },
+    {
+      "id": "n132",
+      "label": "Partner Briefs: Develop strategic briefs and collaborative materials to engage manufacturing, fabrication, and distribution partners, setting the stage for scaling.",
+      "nested": null
+    },
+    {
+      "id": "n133",
+      "label": "Full Community Build: Plan and initiate a community-based build program leveraging crowd-sourced designs and user feedback to expand product range authentically.",
+      "nested": null
+    },
+    {
+      "id": "n134",
+      "label": "Advanced Features: Roadmap integration of complex parametric features, enhanced configurator capabilities, and eventual physical automation modules post-launch momentum.",
+      "nested": null
+    },
+    {
+      "id": "n135",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n136",
+      "label": "Style Tips for GitMind Setup",
+      "nested": null
+    },
+    {
+      "id": "n137",
+      "label": "Use a radial or right-map layout for a modern, clean appearance that facilitates intuitive navigation.",
+      "nested": null
+    },
+    {
+      "id": "n138",
+      "label": "Color-code branches:",
+      "nested": null
+    },
+    {
+      "id": "n139",
+      "label": "Green/Blue for growth and development priorities (Website Launch, Sales, Next Layers).",
+      "nested": null
+    },
+    {
+      "id": "n140",
+      "label": "Orange for urgent marketing and visibility tasks.",
+      "nested": null
+    },
+    {
+      "id": "n141",
+      "label": "Add expressive icons next to branch titles for quick visual identification:",
+      "nested": null
+    },
+    {
+      "id": "n142",
+      "label": "🚀 for central “Launch” theme",
+      "nested": null
+    },
+    {
+      "id": "n143",
+      "label": "🧰 for building and tool-related tasks",
+      "nested": null
+    },
+    {
+      "id": "n144",
+      "label": "💡 for creative marketing ideas",
+      "nested": null
+    },
+    {
+      "id": "n145",
+      "label": "🎯 for sales and progress targets",
+      "nested": null
+    },
+    {
+      "id": "n146",
+      "label": "📅 for timeline-focused actions",
+      "nested": null
+    },
+    {
+      "id": "n147",
+      "label": "🏆 for achievements and future plans",
+      "nested": null
+    },
+    {
+      "id": "n148",
+      "label": "Connect branches sequentially with arrows to showcase process flow from Priority 1 through Next Layers.",
+      "nested": null
+    },
+    {
+      "id": "n149",
+      "label": "Keep text concise and punchy for clarity and motivational impact.",
+      "nested": null
+    },
+    {
+      "id": "n150",
+      "label": "Use subtle shading or borders to visually separate branches and improve readability.",
+      "nested": null
+    },
+    {
+      "id": "n151",
+      "label": "Untitled",
+      "nested": null
+    },
+    {
+      "id": "n152",
+      "label": "If you want, I can also generate a JSON import file for GitMind or produce a visual draft in a mind map tool format — just let me know!",
+      "nested": null
+    },
+    {
+      "id": "n153",
+      "label": "DIY to Turnkey Spectrum",
+      "nested": null,
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Notes",
+          "url": "",
+          "note": "strategic considerations: positioning the product against existing shed companies, identifying early revenue-generating verticals, planning for software-first launch before physical automation, and crafting visual explanations (diagrams, animations) that convey the magic of intent-to-reality transformation.",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n154",
+      "label": "Funding & Partnerships",
+      "nested": null
+    },
+    {
+      "id": "n155",
+      "label": "Materials and tooling sponsorship",
+      "nested": null
+    },
+    {
+      "id": "n156",
+      "label": "Manufacturing and fabrication partners",
+      "nested": null
+    },
+    {
+      "id": "n157",
+      "label": "Strategic angel investors",
+      "nested": null
+    },
+    {
+      "id": "n158",
+      "label": "Grants and innovation funding",
+      "nested": null
+    },
+    {
+      "id": "n159",
+      "label": "Content-led sponsorship opportunities",
+      "nested": null
+    },
+    {
+      "id": "n160",
+      "label": "Milestones for Partnership Trigger",
+      "nested": null
+    },
+    {
+      "id": "n161",
+      "label": "Revenue Targets",
+      "nested": null
+    },
+    {
+      "id": "n162",
+      "label": "Customer Feedback",
+      "nested": null
+    },
+    {
+      "id": "n163",
+      "label": "Lifestyle Upgrades",
+      "nested": null
+    },
+    {
+      "id": "n164",
+      "label": "Garden Landscapes",
+      "nested": null
+    },
+    {
+      "id": "n165",
+      "label": "Animated Shed Previews (Marketing Content)",
+      "nested": null
+    },
+    {
+      "id": "n166",
+      "label": "SEO Strategy",
+      "nested": null
+    },
+    {
+      "id": "n167",
+      "label": "Keyword Research",
+      "nested": null
+    },
+    {
+      "id": "n168",
+      "label": "Mobile-Friendly Design",
+      "nested": null
+    },
+    {
+      "id": "n169",
+      "label": "Content Updates",
+      "nested": null
+    },
+    {
+      "id": "n170",
+      "label": "Open-Source & Community Building",
+      "nested": null
+    },
+    {
+      "id": "n171",
+      "label": "Transparent Food Production",
+      "nested": null
+    },
+    {
+      "id": "n172",
+      "label": "Blockchain Trust",
+      "nested": null
+    },
+    {
+      "id": "n173",
+      "label": "Operating Model",
+      "nested": null
+    },
+    {
+      "id": "n174",
+      "label": "Project Memory Schema for continuity",
+      "nested": null
+    },
+    {
+      "id": "n175",
+      "label": "Conversations with AI",
+      "nested": null
+    },
+    {
+      "id": "n176",
+      "label": "Chat GPT",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "Summary Chat with GPT 30th December 2025",
+          "url": "https://chatgpt.com/share/6953c172-940c-8008-8bf9-2e08cab380cc",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n177",
+      "label": "Gemini",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "summary of progress from Gemini 30th December 2025",
+          "url": "https://gemini.google.com/share/17638fd5fddf",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n178",
+      "label": "Grok",
+      "nested": null,
+      "resources": [
+        {
+          "id": "link-1",
+          "title": "Grok30december2025",
+          "url": "https://grok.com/share/bGVnYWN5_431ad09d-ef19-4841-934c-9d1e98e316c0",
+          "note": "",
+          "addedAt": "2026-04-22T22:53:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n179",
+      "label": "Layer-based system thinking",
+      "nested": null
+    },
+    {
+      "id": "n180",
+      "label": "Visual-first planning and explanation",
+      "nested": null
+    },
+    {
+      "id": "n181",
+      "label": "Strict scope and change discipline",
+      "nested": null
+    },
+    {
+      "id": "n182",
+      "label": "Long-term system execution mindset",
+      "nested": null
+    },
+    {
+      "id": "n183",
+      "label": "Parametric Shed Configurator",
+      "nested": null
+    },
+    {
+      "id": "n184",
+      "label": "Monetisation (Investor Perspective)",
+      "nested": null
+    },
+    {
+      "id": "n185",
+      "label": "Lead generation (CPL/CPA model)",
+      "nested": null
+    },
+    {
+      "id": "n186",
+      "label": "Manufacturing brokerage (margins and marketplace)",
+      "nested": null
+    },
+    {
+      "id": "n187",
+      "label": "Kits and flat-pack panels (unit margins)",
+      "nested": null
+    },
+    {
+      "id": "n188",
+      "label": "DIY premium products (drawings, cut lists, tooling)",
+      "nested": null
+    },
+    {
+      "id": "n189",
+      "label": "Preset SKUs (optimized inventory)",
+      "nested": null
+    },
+    {
+      "id": "n190",
+      "label": "Installer network (booking and franchising)",
+      "nested": null
+    },
+    {
+      "id": "n191",
+      "label": "Finance and warranty (referrals and premium services)",
+      "nested": null
+    },
+    {
+      "id": "n192",
+      "label": "Supplier integrations (affiliate programs, rebates)",
+      "nested": null
+    },
+    {
+      "id": "n193",
+      "label": "Compliance tools (planning and calculations)",
+      "nested": null
+    },
+    {
+      "id": "n194",
+      "label": "White-label SaaS (licensing and support)",
+      "nested": null
+    },
+    {
+      "id": "n195",
+      "label": "Fast Path to Monetisation",
+      "nested": null
+    },
+    {
+      "id": "n196",
+      "label": "DIY digital drawings as SKUs",
+      "nested": null
+    },
+    {
+      "id": "n197",
+      "label": "Lead generation partnerships with fabricators and installers",
+      "nested": null
+    },
+    {
+      "id": "n198",
+      "label": "Supplier bundles including materials, fixings, roofing",
+      "nested": null
+    },
+    {
+      "id": "n199",
+      "label": "Spin-offs & Satellites",
+      "nested": null
+    },
+    {
+      "id": "n200",
+      "label": "Garages and carports",
+      "nested": null
+    },
+    {
+      "id": "n201",
+      "label": "Garden rooms and studios",
+      "nested": null
+    },
+    {
+      "id": "n202",
+      "label": "Pergolas and verandas",
+      "nested": null
+    },
+    {
+      "id": "n203",
+      "label": "Lean-to structures",
+      "nested": null
+    },
+    {
+      "id": "n204",
+      "label": "Greenhouses and polytunnels",
+      "nested": null
+    },
+    {
+      "id": "n205",
+      "label": "Animal housing (stables, kennels, aviaries)",
+      "nested": null
+    },
+    {
+      "id": "n206",
+      "label": "Micro ADUs and cabins",
+      "nested": null
+    },
+    {
+      "id": "n207",
+      "label": "Modular interiors (storage, benches, fitted units)",
+      "nested": null
+    },
+    {
+      "id": "n208",
+      "label": "Solar-ready canopies",
+      "nested": null
+    },
+    {
+      "id": "n209",
+      "label": "Temporary structures for events, retail, welfare",
+      "nested": null
+    },
+    {
+      "id": "n210",
+      "label": "Software Satellites",
+      "nested": null
+    },
+    {
+      "id": "n211",
+      "label": "BOM optimiser (timber, sheet materials)",
+      "nested": null
+    },
+    {
+      "id": "n212",
+      "label": "CNC routing optimiser",
+      "nested": null
+    },
+    {
+      "id": "n213",
+      "label": "Logistics optimiser (flat-pack, pallet, van logistics)",
+      "nested": null
+    },
+    {
+      "id": "n214",
+      "label": "Planning checker (UK permitted development rules)",
+      "nested": null
+    },
+    {
+      "id": "n215",
+      "label": "Installation scheduler",
+      "nested": null
+    },
+    {
+      "id": "n216",
+      "label": "Augmented reality preview and measuring tools",
+      "nested": null
+    },
+    {
+      "id": "n217",
+      "label": "Reverse CAD to parametric model conversion",
+      "nested": null
+    },
+    {
+      "id": "n218",
+      "label": "Builder toolkit for prefab panels",
+      "nested": null
+    },
+    {
+      "id": "n219",
+      "label": "Homeowner asset manager (maintenance tracking)",
+      "nested": null
+    },
+    {
+      "id": "n220",
+      "label": "Makerverse (jigs and templates)",
+      "nested": null
+    },
+    {
+      "id": "n221",
+      "label": "Parametrisable Categories (Bespoke and Regularised)",
+      "nested": null
+    },
+    {
+      "id": "n222",
+      "label": "Outbuildings (sheds, garages, offices)",
+      "nested": null
+    },
+    {
+      "id": "n223",
+      "label": "Modular construction components (panels, windows, doors)",
+      "nested": null
+    },
+    {
+      "id": "n224",
+      "label": "Hard landscaping (decking, fences)",
+      "nested": null
+    },
+    {
+      "id": "n225",
+      "label": "Furniture-level structures (storage, kitchens, workbenches)",
+      "nested": null
+    },
+    {
+      "id": "n226",
+      "label": "Vehicle and utility covers (bikes, motorcycles, kayaks)",
+      "nested": null
+    },
+    {
+      "id": "n227",
+      "label": "Agriculture and animal-related structures (coops, stables, polytunnels)",
+      "nested": null
+    },
+    {
+      "id": "n228",
+      "label": "Retail and commercial kiosks, stands, pop-ups",
+      "nested": null
+    },
+    {
+      "id": "n229",
+      "label": "Maker and workshop fixtures (cabinets, fixtures)",
+      "nested": null
+    },
+    {
+      "id": "n230",
+      "label": "Compliance-sensitive designs (insulation, fire, permitted development envelope)",
+      "nested": null
+    },
+    {
+      "id": "n231",
+      "label": "Logistics-optimized structures (flat-pack, pallet, van transport)",
+      "nested": null
+    },
+    {
+      "id": "n232",
+      "label": "Software-only parametric assets (cost, BOM, supply chain management)",
+      "nested": null
+    },
+    {
+      "id": "n233",
+      "label": "Core Thesis",
+      "nested": null
+    },
+    {
+      "id": "n234",
+      "label": "Small buildings are mostly bespoke but with structural regularity",
+      "nested": null
+    },
+    {
+      "id": "n235",
+      "label": "Main friction points include quoting, BOM, compliance, logistics, installation",
+      "nested": null
+    },
+    {
+      "id": "n236",
+      "label": "Parametric design reduces friction and scales supply chains",
+      "nested": null
+    },
+    {
+      "id": "n237",
+      "label": "Strategic Positioning",
+      "nested": null
+    },
+    {
+      "id": "n238",
+      "label": "Enter mass customization for built environment",
+      "nested": null
+    },
+    {
+      "id": "n239",
+      "label": "Expand horizontally into adjacent product categories",
+      "nested": null
+    },
+    {
+      "id": "n240",
+      "label": "Optionality in SaaS, marketplace, manufacturing, fintech models",
+      "nested": null
+    }
+  ],
+  "links": [
+    {
+      "from": "n2",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n7",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n7",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n7",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n7",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n15",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n16",
+      "type": "child"
+    },
+    {
+      "from": "n13",
+      "to": "n14",
+      "type": "child"
+    },
+    {
+      "from": "n13",
+      "to": "n17",
+      "type": "child"
+    },
+    {
+      "from": "n12",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n18",
+      "to": "n19",
+      "type": "child"
+    },
+    {
+      "from": "n18",
+      "to": "n20",
+      "type": "child"
+    },
+    {
+      "from": "n18",
+      "to": "n21",
+      "type": "child"
+    },
+    {
+      "from": "n12",
+      "to": "n18",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n23",
+      "type": "child"
+    },
+    {
+      "from": "n22",
+      "to": "n24",
+      "type": "child"
+    },
+    {
+      "from": "n12",
+      "to": "n22",
+      "type": "child"
+    },
+    {
+      "from": "n25",
+      "to": "n26",
+      "type": "child"
+    },
+    {
+      "from": "n25",
+      "to": "n27",
+      "type": "child"
+    },
+    {
+      "from": "n25",
+      "to": "n28",
+      "type": "child"
+    },
+    {
+      "from": "n12",
+      "to": "n25",
+      "type": "child"
+    },
+    {
+      "from": "n29",
+      "to": "n30",
+      "type": "child"
+    },
+    {
+      "from": "n29",
+      "to": "n31",
+      "type": "child"
+    },
+    {
+      "from": "n29",
+      "to": "n32",
+      "type": "child"
+    },
+    {
+      "from": "n12",
+      "to": "n29",
+      "type": "child"
+    },
+    {
+      "from": "n33",
+      "to": "n34",
+      "type": "child"
+    },
+    {
+      "from": "n33",
+      "to": "n35",
+      "type": "child"
+    },
+    {
+      "from": "n12",
+      "to": "n33",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n39",
+      "type": "child"
+    },
+    {
+      "from": "n40",
+      "to": "n41",
+      "type": "child"
+    },
+    {
+      "from": "n38",
+      "to": "n40",
+      "type": "child"
+    },
+    {
+      "from": "n37",
+      "to": "n38",
+      "type": "child"
+    },
+    {
+      "from": "n36",
+      "to": "n37",
+      "type": "child"
+    },
+    {
+      "from": "n36",
+      "to": "n42",
+      "type": "child"
+    },
+    {
+      "from": "n36",
+      "to": "n43",
+      "type": "child"
+    },
+    {
+      "from": "n36",
+      "to": "n44",
+      "type": "child"
+    },
+    {
+      "from": "n45",
+      "to": "n46",
+      "type": "child"
+    },
+    {
+      "from": "n45",
+      "to": "n47",
+      "type": "child"
+    },
+    {
+      "from": "n45",
+      "to": "n48",
+      "type": "child"
+    },
+    {
+      "from": "n36",
+      "to": "n45",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n36",
+      "type": "child"
+    },
+    {
+      "from": "n49",
+      "to": "n50",
+      "type": "child"
+    },
+    {
+      "from": "n49",
+      "to": "n51",
+      "type": "child"
+    },
+    {
+      "from": "n49",
+      "to": "n52",
+      "type": "child"
+    },
+    {
+      "from": "n49",
+      "to": "n53",
+      "type": "child"
+    },
+    {
+      "from": "n49",
+      "to": "n54",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n49",
+      "type": "child"
+    },
+    {
+      "from": "n55",
+      "to": "n56",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n55",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n58",
+      "type": "child"
+    },
+    {
+      "from": "n59",
+      "to": "n60",
+      "type": "child"
+    },
+    {
+      "from": "n59",
+      "to": "n61",
+      "type": "child"
+    },
+    {
+      "from": "n59",
+      "to": "n62",
+      "type": "child"
+    },
+    {
+      "from": "n59",
+      "to": "n63",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n59",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n64",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n65",
+      "type": "child"
+    },
+    {
+      "from": "n66",
+      "to": "n67",
+      "type": "child"
+    },
+    {
+      "from": "n66",
+      "to": "n68",
+      "type": "child"
+    },
+    {
+      "from": "n66",
+      "to": "n69",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n66",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n70",
+      "type": "child"
+    },
+    {
+      "from": "n71",
+      "to": "n72",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n71",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n73",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n74",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n75",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n76",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n77",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n78",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n79",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n80",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n81",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n82",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n83",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n84",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n85",
+      "type": "child"
+    },
+    {
+      "from": "n86",
+      "to": "n87",
+      "type": "child"
+    },
+    {
+      "from": "n86",
+      "to": "n88",
+      "type": "child"
+    },
+    {
+      "from": "n57",
+      "to": "n86",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n57",
+      "type": "child"
+    },
+    {
+      "from": "n89",
+      "to": "n90",
+      "type": "child"
+    },
+    {
+      "from": "n89",
+      "to": "n91",
+      "type": "child"
+    },
+    {
+      "from": "n89",
+      "to": "n92",
+      "type": "child"
+    },
+    {
+      "from": "n93",
+      "to": "n94",
+      "type": "child"
+    },
+    {
+      "from": "n93",
+      "to": "n95",
+      "type": "child"
+    },
+    {
+      "from": "n93",
+      "to": "n96",
+      "type": "child"
+    },
+    {
+      "from": "n89",
+      "to": "n93",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n89",
+      "type": "child"
+    },
+    {
+      "from": "n98",
+      "to": "n99",
+      "type": "child"
+    },
+    {
+      "from": "n98",
+      "to": "n100",
+      "type": "child"
+    },
+    {
+      "from": "n98",
+      "to": "n101",
+      "type": "child"
+    },
+    {
+      "from": "n97",
+      "to": "n98",
+      "type": "child"
+    },
+    {
+      "from": "n103",
+      "to": "n104",
+      "type": "child"
+    },
+    {
+      "from": "n105",
+      "to": "n106",
+      "type": "child"
+    },
+    {
+      "from": "n105",
+      "to": "n107",
+      "type": "child"
+    },
+    {
+      "from": "n105",
+      "to": "n108",
+      "type": "child"
+    },
+    {
+      "from": "n105",
+      "to": "n109",
+      "type": "child"
+    },
+    {
+      "from": "n105",
+      "to": "n110",
+      "type": "child"
+    },
+    {
+      "from": "n105",
+      "to": "n111",
+      "type": "child"
+    },
+    {
+      "from": "n103",
+      "to": "n105",
+      "type": "child"
+    },
+    {
+      "from": "n103",
+      "to": "n112",
+      "type": "child"
+    },
+    {
+      "from": "n103",
+      "to": "n113",
+      "type": "child"
+    },
+    {
+      "from": "n103",
+      "to": "n114",
+      "type": "child"
+    },
+    {
+      "from": "n102",
+      "to": "n103",
+      "type": "child"
+    },
+    {
+      "from": "n115",
+      "to": "n116",
+      "type": "child"
+    },
+    {
+      "from": "n115",
+      "to": "n117",
+      "type": "child"
+    },
+    {
+      "from": "n115",
+      "to": "n118",
+      "type": "child"
+    },
+    {
+      "from": "n115",
+      "to": "n119",
+      "type": "child"
+    },
+    {
+      "from": "n102",
+      "to": "n115",
+      "type": "child"
+    },
+    {
+      "from": "n120",
+      "to": "n121",
+      "type": "child"
+    },
+    {
+      "from": "n120",
+      "to": "n122",
+      "type": "child"
+    },
+    {
+      "from": "n120",
+      "to": "n123",
+      "type": "child"
+    },
+    {
+      "from": "n120",
+      "to": "n124",
+      "type": "child"
+    },
+    {
+      "from": "n120",
+      "to": "n125",
+      "type": "child"
+    },
+    {
+      "from": "n102",
+      "to": "n120",
+      "type": "child"
+    },
+    {
+      "from": "n126",
+      "to": "n127",
+      "type": "child"
+    },
+    {
+      "from": "n126",
+      "to": "n128",
+      "type": "child"
+    },
+    {
+      "from": "n126",
+      "to": "n129",
+      "type": "child"
+    },
+    {
+      "from": "n126",
+      "to": "n130",
+      "type": "child"
+    },
+    {
+      "from": "n102",
+      "to": "n126",
+      "type": "child"
+    },
+    {
+      "from": "n131",
+      "to": "n132",
+      "type": "child"
+    },
+    {
+      "from": "n131",
+      "to": "n133",
+      "type": "child"
+    },
+    {
+      "from": "n131",
+      "to": "n134",
+      "type": "child"
+    },
+    {
+      "from": "n131",
+      "to": "n135",
+      "type": "child"
+    },
+    {
+      "from": "n102",
+      "to": "n131",
+      "type": "child"
+    },
+    {
+      "from": "n97",
+      "to": "n102",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n137",
+      "type": "child"
+    },
+    {
+      "from": "n138",
+      "to": "n139",
+      "type": "child"
+    },
+    {
+      "from": "n138",
+      "to": "n140",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n138",
+      "type": "child"
+    },
+    {
+      "from": "n141",
+      "to": "n142",
+      "type": "child"
+    },
+    {
+      "from": "n141",
+      "to": "n143",
+      "type": "child"
+    },
+    {
+      "from": "n141",
+      "to": "n144",
+      "type": "child"
+    },
+    {
+      "from": "n141",
+      "to": "n145",
+      "type": "child"
+    },
+    {
+      "from": "n141",
+      "to": "n146",
+      "type": "child"
+    },
+    {
+      "from": "n141",
+      "to": "n147",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n141",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n148",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n149",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n150",
+      "type": "child"
+    },
+    {
+      "from": "n151",
+      "to": "n152",
+      "type": "child"
+    },
+    {
+      "from": "n136",
+      "to": "n151",
+      "type": "child"
+    },
+    {
+      "from": "n97",
+      "to": "n136",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n97",
+      "type": "child"
+    },
+    {
+      "from": "n154",
+      "to": "n155",
+      "type": "child"
+    },
+    {
+      "from": "n154",
+      "to": "n156",
+      "type": "child"
+    },
+    {
+      "from": "n154",
+      "to": "n157",
+      "type": "child"
+    },
+    {
+      "from": "n154",
+      "to": "n158",
+      "type": "child"
+    },
+    {
+      "from": "n154",
+      "to": "n159",
+      "type": "child"
+    },
+    {
+      "from": "n153",
+      "to": "n154",
+      "type": "child"
+    },
+    {
+      "from": "n160",
+      "to": "n161",
+      "type": "child"
+    },
+    {
+      "from": "n160",
+      "to": "n162",
+      "type": "child"
+    },
+    {
+      "from": "n153",
+      "to": "n160",
+      "type": "child"
+    },
+    {
+      "from": "n163",
+      "to": "n164",
+      "type": "child"
+    },
+    {
+      "from": "n163",
+      "to": "n165",
+      "type": "child"
+    },
+    {
+      "from": "n153",
+      "to": "n163",
+      "type": "child"
+    },
+    {
+      "from": "n166",
+      "to": "n167",
+      "type": "child"
+    },
+    {
+      "from": "n166",
+      "to": "n168",
+      "type": "child"
+    },
+    {
+      "from": "n166",
+      "to": "n169",
+      "type": "child"
+    },
+    {
+      "from": "n153",
+      "to": "n166",
+      "type": "child"
+    },
+    {
+      "from": "n170",
+      "to": "n171",
+      "type": "child"
+    },
+    {
+      "from": "n170",
+      "to": "n172",
+      "type": "child"
+    },
+    {
+      "from": "n153",
+      "to": "n170",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n153",
+      "type": "child"
+    },
+    {
+      "from": "n175",
+      "to": "n176",
+      "type": "child"
+    },
+    {
+      "from": "n175",
+      "to": "n177",
+      "type": "child"
+    },
+    {
+      "from": "n175",
+      "to": "n178",
+      "type": "child"
+    },
+    {
+      "from": "n174",
+      "to": "n175",
+      "type": "child"
+    },
+    {
+      "from": "n173",
+      "to": "n174",
+      "type": "child"
+    },
+    {
+      "from": "n173",
+      "to": "n179",
+      "type": "child"
+    },
+    {
+      "from": "n173",
+      "to": "n180",
+      "type": "child"
+    },
+    {
+      "from": "n173",
+      "to": "n181",
+      "type": "child"
+    },
+    {
+      "from": "n173",
+      "to": "n182",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n173",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n185",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n186",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n187",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n188",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n189",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n190",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n191",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n192",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n193",
+      "type": "child"
+    },
+    {
+      "from": "n184",
+      "to": "n194",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n184",
+      "type": "child"
+    },
+    {
+      "from": "n195",
+      "to": "n196",
+      "type": "child"
+    },
+    {
+      "from": "n195",
+      "to": "n197",
+      "type": "child"
+    },
+    {
+      "from": "n195",
+      "to": "n198",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n195",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n200",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n201",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n202",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n203",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n204",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n205",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n206",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n207",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n208",
+      "type": "child"
+    },
+    {
+      "from": "n199",
+      "to": "n209",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n199",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n211",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n212",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n213",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n214",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n215",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n216",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n217",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n218",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n219",
+      "type": "child"
+    },
+    {
+      "from": "n210",
+      "to": "n220",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n210",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n222",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n223",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n224",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n225",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n226",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n227",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n228",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n229",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n230",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n231",
+      "type": "child"
+    },
+    {
+      "from": "n221",
+      "to": "n232",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n221",
+      "type": "child"
+    },
+    {
+      "from": "n233",
+      "to": "n234",
+      "type": "child"
+    },
+    {
+      "from": "n233",
+      "to": "n235",
+      "type": "child"
+    },
+    {
+      "from": "n233",
+      "to": "n236",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n233",
+      "type": "child"
+    },
+    {
+      "from": "n237",
+      "to": "n238",
+      "type": "child"
+    },
+    {
+      "from": "n237",
+      "to": "n239",
+      "type": "child"
+    },
+    {
+      "from": "n237",
+      "to": "n240",
+      "type": "child"
+    },
+    {
+      "from": "n183",
+      "to": "n237",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n183",
+      "type": "child"
+    },
+    {
+      "from": "n5",
+      "to": "n57",
+      "type": "jump"
+    },
+    {
+      "from": "n69",
+      "to": "n68",
+      "type": "jump"
+    },
+    {
+      "from": "n69",
+      "to": "n67",
+      "type": "jump"
+    },
+    {
+      "from": "n69",
+      "to": "n72",
+      "type": "jump"
+    },
+    {
+      "from": "n10",
+      "to": "n19",
+      "type": "jump"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 240
+}
