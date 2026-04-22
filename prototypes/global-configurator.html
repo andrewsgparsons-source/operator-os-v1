@@ -588,6 +588,7 @@
     const W = 1200, H = 760;
     const center = { x: W / 2, y: H / 2 };
     let scale = 1;
+    let enterArmed = true; // Prevent repeated multi-level auto-enter during one continuous zoom gesture
 
     // Transition thresholds
     // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
@@ -649,6 +650,7 @@
       currentMindmap = node.nested;
       currentDepth = navStack.length;
       scale = 1;
+      enterArmed = false; // Require a fresh zoom cycle before next auto-enter
 
       render();
       updateBreadcrumb();
@@ -994,10 +996,12 @@
       }
 
       // Determine what to render based on scale
-      if (scale >= TRANSITION_END) {
-        // Fully zoomed in - check if we should switch to nested level
+      if (scale >= TRANSITION_END && enterArmed) {
+        // Fully zoomed in: create/enter nested map only once per zoom cycle
         const focusedNode = getFocusedNode();
-        if (focusedNode && hasNestedContent(focusedNode.id)) {
+        if (focusedNode) {
+          if (!focusedNode.nested) ensureNestedMindmap(focusedNode);
+          enterArmed = false;
           enterNode(focusedNode.id);
           return;
         }
@@ -1024,10 +1028,11 @@
         const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
         svg.appendChild(parentLayer);
 
-        // Render nested (child) level if it exists - fading in
+        // Render nested (child) level preview only if it already exists.
+        // Do not auto-create during preview; creation happens only at click-in threshold.
         const focusedNode = getFocusedNode();
-        if (focusedNode) {
-          const nested = ensureNestedMindmap(focusedNode);
+        if (focusedNode && focusedNode.nested) {
+          const nested = focusedNode.nested;
           // Child layer starts tiny and grows during transition.
           const childScale = 0.08 + (progress * 0.42); // ~0.08 -> ~0.50
           const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
@@ -1044,12 +1049,13 @@
     function setScale(next) {
       const MAX_SCALE = Math.max(8.0, TRANSITION_END + 1.0);
       scale = Math.max(0.3, Math.min(MAX_SCALE, next));
+      if (scale <= 1.2) enterArmed = true; // Rearm only after zoom returns near base level
       render();
     }
 
     document.getElementById('zoomIn').onclick = () => setScale(scale + 0.15);
     document.getElementById('zoomOut').onclick = () => setScale(scale - 0.15);
-    document.getElementById('zoomReset').onclick = () => { scale = 1; render(); };
+    document.getElementById('zoomReset').onclick = () => { scale = 1; enterArmed = true; render(); };
     document.getElementById('enterNode').onclick = () => {
       const focused = getFocusedNode();
       if (focused) enterNode(focused.id);
