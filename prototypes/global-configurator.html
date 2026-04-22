@@ -496,6 +496,11 @@
             <option value="3">3 levels</option>
             <option value="4">4 levels</option>
           </select>
+          <label for="cameraMode" class="subtitle" style="display:block;margin-bottom:6px;">Navigation mode</label>
+          <select id="cameraMode" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="focus">Focus lock (center selected node)</option>
+            <option value="free">Free pan canvas</option>
+          </select>
           <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
           <button id="addChild">+ Add Child to Focus</button>
           <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
@@ -594,6 +599,9 @@
     let scale = 1;
     let layoutMode = 'topdown';
     let hierarchyLevelsVisible = 1;
+    let cameraMode = 'focus'; // focus|free
+    let panX = 0;
+    let panY = 0;
     let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
 
     // Motion system (TheBrain-like focus transitions)
@@ -622,6 +630,7 @@
     const quickNodes = document.getElementById('quickNodes');
     const layoutModeSelect = document.getElementById('layoutMode');
     const levelsVisibleSelect = document.getElementById('levelsVisible');
+    const cameraModeSelect = document.getElementById('cameraMode');
     const statDepth = document.getElementById('statDepth');
     const statNodes = document.getElementById('statNodes');
     const statLinks = document.getElementById('statLinks');
@@ -1065,12 +1074,17 @@
       const colors = getColorScheme(depth);
       const pos = positionsOverride || place(mindmap.focusId, mindmap);
       
-      // Calculate transform to keep focused node centered
+      // Camera transform: either focus-lock centering or free-pan canvas
       const focusPos = focusPosOverride || pos[mindmap.focusId];
       let tx = 0, ty = 0;
-      if (focusPos) {
-        tx = center.x - (focusPos.x * layerScale);
-        ty = center.y - (focusPos.y * layerScale);
+      if (cameraMode === 'focus') {
+        if (focusPos) {
+          tx = center.x - (focusPos.x * layerScale);
+          ty = center.y - (focusPos.y * layerScale);
+        }
+      } else {
+        tx = panX;
+        ty = panY;
       }
 
       const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -1307,9 +1321,38 @@
       }, 180);
     }, { passive: false });
 
-    // ===== PINCH-TO-ZOOM =====
+    // Free-pan drag (desktop)
+    let panDragging = false;
+    let panStartX = 0;
+    let panStartY = 0;
+
+    svg.addEventListener('mousedown', (e) => {
+      if (cameraMode !== 'free') return;
+      panDragging = true;
+      panStartX = e.clientX - panX;
+      panStartY = e.clientY - panY;
+      svg.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!panDragging || cameraMode !== 'free') return;
+      panX = e.clientX - panStartX;
+      panY = e.clientY - panStartY;
+      render();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!panDragging) return;
+      panDragging = false;
+      svg.style.cursor = 'default';
+    });
+
+    // ===== TOUCH NAVIGATION (PINCH + FREE-PAN) =====
     let pinchLastDistance = null;
     let pinchGestureActive = false;
+    let touchPanActive = false;
+    let touchPanStartX = 0;
+    let touchPanStartY = 0;
 
     function getTouchDistance(touch1, touch2) {
       const dx = touch2.clientX - touch1.clientX;
@@ -1320,11 +1363,19 @@
     svg.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
+        touchPanActive = false;
         if (!pinchGestureActive) {
           pinchGestureActive = true;
           entryUsedThisGesture = false;
         }
         pinchLastDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        return;
+      }
+
+      if (e.touches.length === 1 && cameraMode === 'free') {
+        touchPanActive = true;
+        touchPanStartX = e.touches[0].clientX - panX;
+        touchPanStartY = e.touches[0].clientY - panY;
       }
     }, { passive: false });
 
@@ -1337,6 +1388,14 @@
           setScale(scale * ratio);
         }
         pinchLastDistance = currentDistance;
+        return;
+      }
+
+      if (e.touches.length === 1 && cameraMode === 'free' && touchPanActive) {
+        e.preventDefault();
+        panX = e.touches[0].clientX - touchPanStartX;
+        panY = e.touches[0].clientY - touchPanStartY;
+        render();
       }
     }, { passive: false });
 
@@ -1345,6 +1404,9 @@
         pinchLastDistance = null;
         pinchGestureActive = false;
         entryUsedThisGesture = false;
+      }
+      if (e.touches.length === 0) {
+        touchPanActive = false;
       }
     }, { passive: false });
 
@@ -1368,6 +1430,15 @@
 
     levelsVisibleSelect.addEventListener('change', (e) => {
       hierarchyLevelsVisible = Math.max(1, Math.min(4, Number(e.target.value) || 1));
+      render();
+    });
+
+    cameraModeSelect.addEventListener('change', (e) => {
+      cameraMode = e.target.value === 'free' ? 'free' : 'focus';
+      if (cameraMode === 'focus') {
+        panX = 0;
+        panY = 0;
+      }
       render();
     });
 
