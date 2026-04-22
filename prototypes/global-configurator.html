@@ -589,7 +589,7 @@
     const center = { x: W / 2, y: H / 2 };
     let scale = 1;
     let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
-    let autoEnterLocked = false; // Hard lock: at most one level entry per continuous zoom gesture
+    let aboveEnterThreshold = false; // Hysteresis guard: trigger once per threshold crossing
 
     // Transition thresholds
     // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
@@ -653,8 +653,8 @@
       currentMindmap = node.nested;
       currentDepth = navStack.length;
       scale = 1;
-      enterArmed = false;
-      autoEnterLocked = true; // One-level-per-gesture lock
+      enterArmed = true;
+      aboveEnterThreshold = false;
 
       render();
       updateBreadcrumb();
@@ -674,7 +674,7 @@
       // Clean settle on previous level root-view scale to avoid re-showing same nested preview.
       scale = 1;
       enterArmed = true;
-      autoEnterLocked = false;
+      aboveEnterThreshold = false;
 
       render();
       updateBreadcrumb();
@@ -1003,16 +1003,18 @@
       }
 
       // Determine what to render based on scale
-      if (scale >= TRANSITION_END && enterArmed && !autoEnterLocked) {
-        // Fully zoomed in: create/enter nested map only once per zoom gesture
+      if (scale >= TRANSITION_END && enterArmed && !aboveEnterThreshold) {
+        // Fully zoomed in: trigger once per threshold crossing
         const focusedNode = getFocusedNode();
         if (focusedNode) {
           if (!focusedNode.nested) ensureNestedMindmap(focusedNode);
-          enterArmed = false;
-          autoEnterLocked = true;
+          aboveEnterThreshold = true;
           enterNode(focusedNode.id);
           return;
         }
+      }
+      if (scale < (TRANSITION_END - 0.35)) {
+        aboveEnterThreshold = false;
       }
 
       if (scale <= EXIT_THRESHOLD) {
@@ -1089,26 +1091,15 @@
     };
     document.getElementById('exitNode').onclick = () => exitNode();
 
-    let wheelUnlockTimer = null;
     svg.addEventListener('wheel', (e) => {
       e.preventDefault();
       const delta = e.deltaY < 0 ? 0.1 : -0.1;
       setScale(scale + delta);
-
-      // Unlock one-level-enter after wheel gesture settles and we're back near base scale
-      if (wheelUnlockTimer) clearTimeout(wheelUnlockTimer);
-      wheelUnlockTimer = setTimeout(() => {
-        if (scale <= 1.2) {
-          enterArmed = true;
-          autoEnterLocked = false;
-        }
-      }, 180);
     }, { passive: false });
 
     // ===== PINCH-TO-ZOOM =====
     let pinchStartDistance = null;
     let pinchStartScale = null;
-    let pinchActive = false;
 
     function getTouchDistance(touch1, touch2) {
       const dx = touch2.clientX - touch1.clientX;
@@ -1119,7 +1110,6 @@
     svg.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         e.preventDefault();
-        pinchActive = true;
         pinchStartDistance = getTouchDistance(e.touches[0], e.touches[1]);
         pinchStartScale = scale;
       }
@@ -1139,12 +1129,6 @@
       if (e.touches.length < 2) {
         pinchStartDistance = null;
         pinchStartScale = null;
-        pinchActive = false;
-        // Unlock one-level-enter after pinch gesture ends and we're near base scale
-        if (scale <= 1.2) {
-          enterArmed = true;
-          autoEnterLocked = false;
-        }
       }
     }, { passive: false });
 
