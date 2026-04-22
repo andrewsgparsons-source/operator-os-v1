@@ -471,7 +471,7 @@
         </div>
         <div class="control-box">
           <h2>Current Scope</h2>
-          <div class="info-line"><span class="info-label">Focused Node</span><span class="info-value" id="focusName">Andrew</span></div>
+          <div class="info-line"><span class="info-label">Focused Node</span><span class="info-value" id="focusName">Focus Node</span></div>
           <div class="info-line"><span class="info-label">Current Level</span><span class="info-value" id="statDepth">0</span></div>
           <div class="info-line"><span class="info-label">Nodes Here</span><span class="info-value" id="statNodes">1</span></div>
           <div class="info-line"><span class="info-label">Links Here</span><span class="info-value" id="statLinks">0</span></div>
@@ -532,20 +532,11 @@
     const MAP_DATA_URL = './data/global-configurator.base.json';
     const fallbackMindmap = {
       nodes: [
-        { id: 'n1', label: 'Andrew', nested: null },
-        { id: 'n2', label: 'work', nested: null },
-        { id: 'n3', label: 'personal', nested: null },
-        { id: 'n4', label: 'agents', nested: null },
-        { id: 'n5', label: 'Andy', nested: null }
+        { id: 'n1', label: 'Focus Node', nested: null }
       ],
-      links: [
-        { from: 'n1', to: 'n2', type: 'child' },
-        { from: 'n1', to: 'n3', type: 'child' },
-        { from: 'n2', to: 'n4', type: 'child' },
-        { from: 'n4', to: 'n5', type: 'child' }
-      ],
+      links: [],
       focusId: 'n1',
-      seq: 5
+      seq: 1
     };
 
     function cloneMindmap(data) {
