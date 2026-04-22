@@ -1,0 +1,583 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Video Insights Library",
+      "nested": null
+    },
+    {
+      "id": "n2",
+      "label": "Agent-Readable Skills",
+      "nested": null,
+      "resources": [
+        {
+          "id": "src",
+          "title": "Source video",
+          "url": "https://youtu.be/0cVuMHaYEHE",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n3",
+      "label": "Agent-Readable Skills \u00b7 Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Standardized skill-file formats improve cross-model and cross-tool portability.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Agent-Readable Skills \u00b7 Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Explicit instructions + constraints reduce agent drift and improve repeatability.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n5",
+      "label": "Agent-Readable Skills \u00b7 Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Skill granularity matters: small composable skills outperform monolithic prompts.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Agent-Readable Skills \u00b7 Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Versioning skills enables safer iteration and rollback.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "Agent-Readable Skills \u00b7 Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Operational docs should be machine-readable first, human-readable second.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "Claude Dispatch & Computer Use",
+      "nested": null,
+      "resources": [
+        {
+          "id": "src",
+          "title": "Source video",
+          "url": "https://youtu.be/3e7gmNPr5Vo",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "Claude Dispatch & Computer Use \u00b7 Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Asynchronous dispatch allows work to continue without constant supervision.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Claude Dispatch & Computer Use \u00b7 Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Computer-use tools extend agents from chat to real UI execution.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "Claude Dispatch & Computer Use \u00b7 Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Task decomposition and checkpoints are essential for long-running jobs.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Claude Dispatch & Computer Use \u00b7 Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Guardrails and approval gates reduce high-impact automation risk.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "Claude Dispatch & Computer Use \u00b7 Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Clear success criteria improve autonomous completion quality.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "AI Job Skills Breakdown",
+      "nested": null,
+      "resources": [
+        {
+          "id": "src",
+          "title": "Source video",
+          "url": "https://youtu.be/4cuT-LKcmWs",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n15",
+      "label": "AI Job Skills Breakdown \u00b7 Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "AI labor market is bifurcating into operators and orchestrators.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n16",
+      "label": "AI Job Skills Breakdown \u00b7 Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "High-value roles combine domain judgment with automation design.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n17",
+      "label": "AI Job Skills Breakdown \u00b7 Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Prompting alone is commoditizing; systems thinking is compounding.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n18",
+      "label": "AI Job Skills Breakdown \u00b7 Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Workflow ownership and delivery speed are key differentiators.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n19",
+      "label": "AI Job Skills Breakdown \u00b7 Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Portfolio of shipped automations signals capability better than theory.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n20",
+      "label": "AI Agent Frameworks",
+      "nested": null,
+      "resources": [
+        {
+          "id": "src",
+          "title": "Source video",
+          "url": "https://youtu.be/R8S7O2Fvdt4",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n21",
+      "label": "AI Agent Frameworks \u00b7 Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Framework choice should follow problem constraints, not hype cycles.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n22",
+      "label": "AI Agent Frameworks \u00b7 Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "State management, memory strategy, and tool reliability matter most.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n23",
+      "label": "AI Agent Frameworks \u00b7 Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Lightweight orchestration often beats heavy framework lock-in early.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n24",
+      "label": "AI Agent Frameworks \u00b7 Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Observability is mandatory for debugging multi-step agent flows.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n25",
+      "label": "AI Agent Frameworks \u00b7 Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Evaluation loops are needed to prevent silent quality drift.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n26",
+      "label": "Coding Agents Deep Dive",
+      "nested": null,
+      "resources": [
+        {
+          "id": "src",
+          "title": "Source video",
+          "url": "https://youtu.be/Gl3oQPBhO14",
+          "note": "",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n27",
+      "label": "Coding Agents Deep Dive \u00b7 Insight 1",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Coding agents are strongest with tight scopes and explicit acceptance tests.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n28",
+      "label": "Coding Agents Deep Dive \u00b7 Insight 2",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Short feedback loops (edit-run-verify) outperform long speculative runs.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n29",
+      "label": "Coding Agents Deep Dive \u00b7 Insight 3",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Repo hygiene and conventions directly affect agent quality.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n30",
+      "label": "Coding Agents Deep Dive \u00b7 Insight 4",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Parallel agents help exploration, but merge discipline is critical.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    },
+    {
+      "id": "n31",
+      "label": "Coding Agents Deep Dive \u00b7 Insight 5",
+      "nested": null,
+      "resources": [
+        {
+          "id": "detail",
+          "title": "Insight detail",
+          "url": "",
+          "note": "Human review remains essential at architecture and safety boundaries.",
+          "addedAt": "2026-04-22T23:35:00+01:00"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n6",
+      "type": "child"
+    },
+    {
+      "from": "n2",
+      "to": "n7",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n8",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n9",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n10",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n11",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n12",
+      "type": "child"
+    },
+    {
+      "from": "n8",
+      "to": "n13",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n14",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n15",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n16",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n17",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n18",
+      "type": "child"
+    },
+    {
+      "from": "n14",
+      "to": "n19",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n20",
+      "type": "child"
+    },
+    {
+      "from": "n20",
+      "to": "n21",
+      "type": "child"
+    },
+    {
+      "from": "n20",
+      "to": "n22",
+      "type": "child"
+    },
+    {
+      "from": "n20",
+      "to": "n23",
+      "type": "child"
+    },
+    {
+      "from": "n20",
+      "to": "n24",
+      "type": "child"
+    },
+    {
+      "from": "n20",
+      "to": "n25",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n26",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n27",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n28",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n29",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n30",
+      "type": "child"
+    },
+    {
+      "from": "n26",
+      "to": "n31",
+      "type": "child"
+    }
+  ],
+  "focusId": "n1",
+  "seq": 31
+}
