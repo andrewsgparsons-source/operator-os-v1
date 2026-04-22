@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Global Configurator</title>
+  <style>
+    /* ============================================================
+       NESTED MINDMAP — Infinite Zoom, Fractal Structure
+       ============================================================ */
+    :root {
+      --primary: #1E5BA8;
+      --primary-light: #E3EEF9;
+      --primary-hover: #143D6F;
+      --accent: #5B9FD8;
+      --accent-light: #D1E7F8;
+      --bg: #F5F9FC;
+      --bg-panel: #FFFFFF;
+      --text: #1A1A1A;
+      --text-secondary: #5C5C5C;
+      --text-muted: #8A8A8A;
+      --border: #D1E0ED;
+      --shadow: 0 2px 12px rgba(30, 91, 168, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      color: var(--text);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    #mindmapContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ===== BREADCRUMB TRAIL ===== */
+    #breadcrumb {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .breadcrumb-item {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .breadcrumb-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .breadcrumb-sep {
+      color: var(--text-muted);
+    }
+
+    /* ===== GRAPH PREVIEW (TOP) ===== */
+    #graphPane {
+      position: relative;
+      flex: 0 0 auto;
+      height: 55vh;
+      height: 55dvh;
+      min-height: 15vh;
+      max-height: 80vh;
+      background: #ffffff;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #ffffff;
+      touch-action: none;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .overlay-row {
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+      box-shadow: var(--shadow);
+    }
+
+    .overlay button {
+      width: auto;
+      padding: 6px 12px;
+      margin: 0;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .overlay button:hover {
+      background: var(--primary-light);
+    }
+
+    .overlay button:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 3;
+    }
+
+    .zoom-hint.show {
+      opacity: 1;
+    }
+
+    /* ===== DRAG HANDLE (DIVIDER) ===== */
+    #dragHandle {
+      flex: 0 0 auto;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: row-resize;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #dragHandle .handle-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    #dragHandle .handle-arrow:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    #dragHandle .handle-bar {
+      width: 48px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background var(--transition);
+    }
+
+    #dragHandle:active .handle-bar {
+      background: var(--primary);
+    }
+
+    /* ===== TAB NAVIGATION ===== */
+    #tabNav {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 6px;
+      padding: 12px 12px 0 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      background: var(--bg);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    #tabNav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-pill {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .tab-pill:not(.active):hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--accent-light);
+    }
+
+    /* ===== CONTROLS AREA (BOTTOM) ===== */
+    #controlsPane {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+      padding: 0;
+      min-height: 0;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 16px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .control-box {
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-box h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .control-box .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-panel);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-top: 10px;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.secondary {
+      background: var(--bg-panel);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+
+    button.secondary:hover {
+      background: var(--primary-light);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg-panel);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .chip:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .chip:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .info-line:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Scroll fade indicator */
+    #controlsPane::after {
+      content: '';
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events: none;
+      display: block;
+      z-index: 1;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      #graphPane {
+        height: 50vh;
+        height: 50dvh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="mindmapContainer">
+    <!-- BREADCRUMB TRAIL -->
+    <div id="breadcrumb"></div>
+
+    <!-- GRAPH PANE -->
+    <section id="graphPane">
+      <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="overlay">
+        <div class="overlay-row">
+          <button id="zoomOut">−</button>
+          <button id="zoomReset">100%</button>
+          <button id="zoomIn">+</button>
+        </div>
+        <div class="overlay-row">
+          <button id="enterNode">↓ Enter</button>
+          <button id="exitNode">↑ Exit</button>
+        </div>
+      </div>
+      <div class="zoom-hint" id="zoomHint"></div>
+    </section>
+
+    <!-- DRAG HANDLE -->
+    <div id="dragHandle">
+      <span class="handle-arrow" id="collapseUp">▲</span>
+      <div class="handle-bar"></div>
+      <span class="handle-arrow" id="expandDown">▼</span>
+    </div>
+
+    <!-- TAB NAVIGATION -->
+    <nav id="tabNav">
+      <button class="tab-pill active" data-tab="save">Save</button>
+      <button class="tab-pill" data-tab="main">Main Control</button>
+    </nav>
+
+    <!-- CONTROLS PANE -->
+    <section id="controlsPane">
+      <!-- SAVE TAB -->
+      <div class="tab-content active" data-tab="save">
+        <div class="control-box">
+          <h2>Save / Load JSON</h2>
+          <div class="subtitle">Scope follows current map level. At root, export/import includes entire map. In nested levels, it applies to that level and its nested subtree.</div>
+          <button id="exportJson">⬇ Export Current Map JSON</button>
+          <button id="copyJson" class="secondary">⧉ Copy Current Map JSON</button>
+          <button id="importJsonBtn" class="secondary">⬆ Import Into Current Map</button>
+          <input type="file" id="importJsonFile" accept="application/json" style="display:none" />
+        </div>
+        <div class="control-box">
+          <h2>Current Scope</h2>
+          <div class="info-line"><span class="info-label">Focused Node</span><span class="info-value" id="focusName">Andrew</span></div>
+          <div class="info-line"><span class="info-label">Current Level</span><span class="info-value" id="statDepth">0</span></div>
+          <div class="info-line"><span class="info-label">Nodes Here</span><span class="info-value" id="statNodes">1</span></div>
+          <div class="info-line"><span class="info-label">Links Here</span><span class="info-value" id="statLinks">0</span></div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTROL TAB -->
+      <div class="tab-content" data-tab="main">
+        <div class="control-box">
+          <h2>Main Control</h2>
+          <div class="subtitle">Create and connect nodes for the current map level.</div>
+          <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
+          <button id="addChild">+ Add Child to Focus</button>
+          <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
+          <button id="addJump" class="secondary">+ Add Jump Link to Focus</button>
+          <button id="focusRoot" class="secondary">⌂ Focus Root Node</button>
+        </div>
+        <div class="control-box">
+          <h2>Quick Navigate</h2>
+          <div class="subtitle">Tap any node to focus</div>
+          <div id="quickNodes" class="chips"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ===== COLOR SCHEMES BY DEPTH =====
+    const colorSchemes = [
+      { primary: '#1E5BA8', light: '#D1E7F8', grad1: '#D1E7F8', grad2: '#7FB9E8', line: '#A8CCE8' }, // Blue
+      { primary: '#7B2D8E', light: '#E8D1F0', grad1: '#E8D1F0', grad2: '#B87FC8', line: '#C8A8E8' }, // Purple
+      { primary: '#2D8E7B', light: '#D1F0E8', grad1: '#D1F0E8', grad2: '#7FC8B8', line: '#A8E8C8' }, // Teal
+      { primary: '#8E5A2D', light: '#F0E2D1', grad1: '#F0E2D1', grad2: '#C8A87F', line: '#E8C8A8' }, // Brown
+      { primary: '#2D5A8E', light: '#D1E2F0', grad1: '#D1E2F0', grad2: '#7FA8C8', line: '#A8C8E8' }, // Steel
+    ];
+
+    function getColorScheme(depth) {
+      return colorSchemes[depth % colorSchemes.length];
+    }
+
+    // ===== NAVIGATION STATE =====
+    const MAP_DATA_URL = './data/global-configurator.base.json';
+    const fallbackMindmap = {
+      nodes: [
+        { id: 'n1', label: 'Andrew', nested: null },
+        { id: 'n2', label: 'work', nested: null },
+        { id: 'n3', label: 'personal', nested: null },
+        { id: 'n4', label: 'agents', nested: null },
+        { id: 'n5', label: 'Andy', nested: null }
+      ],
+      links: [
+        { from: 'n1', to: 'n2', type: 'child' },
+        { from: 'n1', to: 'n3', type: 'child' },
+        { from: 'n2', to: 'n4', type: 'child' },
+        { from: 'n4', to: 'n5', type: 'child' }
+      ],
+      focusId: 'n1',
+      seq: 5
+    };
+
+    function cloneMindmap(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function sanitizeMindmap(data) {
+      if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
+        return cloneMindmap(fallbackMindmap);
+      }
+      const safe = cloneMindmap(data);
+      if (!safe.focusId && safe.nodes[0]) safe.focusId = safe.nodes[0].id;
+      if (typeof safe.seq !== 'number') {
+        safe.seq = safe.nodes.reduce((max, n) => {
+          const m = /^n(\d+)$/.exec(n.id || '');
+          return Math.max(max, m ? Number(m[1]) : 0);
+        }, 1);
+      }
+      return safe;
+    }
+
+    async function loadRootMindmap() {
+      try {
+        const res = await fetch(MAP_DATA_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return sanitizeMindmap(data);
+      } catch (err) {
+        console.warn('Using fallback mindmap data:', err.message);
+        return cloneMindmap(fallbackMindmap);
+      }
+    }
+
+    let rootMindmap = cloneMindmap(fallbackMindmap);
+    let navStack = []; // Stack of { mindmap, nodeId } to track path
+    let currentMindmap = rootMindmap;
+    let currentDepth = 0;
+
+    // ===== VIEW STATE =====
+    const W = 1200, H = 760;
+    const center = { x: W / 2, y: H / 2 };
+    let scale = 1;
+
+    // Transition thresholds
+    const TRANSITION_START = 1.5;  // Start showing nested content
+    const TRANSITION_END = 3.5;    // Fully switched to nested level
+    const EXIT_THRESHOLD = 0.4;    // Exit to parent level
+
+    // ===== DOM ELEMENTS =====
+    const svg = document.getElementById('stage');
+    const input = document.getElementById('nodeLabel');
+    const focusName = document.getElementById('focusName');
+    const quickNodes = document.getElementById('quickNodes');
+    const statDepth = document.getElementById('statDepth');
+    const statNodes = document.getElementById('statNodes');
+    const statLinks = document.getElementById('statLinks');
+    const breadcrumb = document.getElementById('breadcrumb');
+    const zoomHint = document.getElementById('zoomHint');
+
+    // ===== HELPER FUNCTIONS =====
+    function nextId() {
+      currentMindmap.seq += 1;
+      return 'n' + currentMindmap.seq;
+    }
+
+    function getNode(id, mindmap = currentMindmap) {
+      return mindmap.nodes.find(n => n.id === id);
+    }
+
+    function getFocusedNode() {
+      return getNode(currentMindmap.focusId);
+    }
+
+    function hasNestedContent(nodeId) {
+      const node = getNode(nodeId);
+      return node && node.nested && (node.nested.nodes.length > 0 || node.nested.links.length > 0);
+    }
+
+    function ensureNestedMindmap(node) {
+      if (!node.nested) {
+        node.nested = {
+          nodes: [{ id: 'n1', label: node.label, nested: null }],
+          links: [],
+          focusId: 'n1',
+          seq: 1
+        };
+      }
+      return node.nested;
+    }
+
+    // ===== NESTED NAVIGATION =====
+    function enterNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      ensureNestedMindmap(node);
+
+      // Push current state to nav stack
+      navStack.push({ mindmap: currentMindmap, nodeId: nodeId });
+      currentMindmap = node.nested;
+      currentDepth = navStack.length;
+      scale = 1;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Entered nested mindmap ↓');
+    }
+
+    function exitNode() {
+      if (navStack.length === 0) {
+        showZoomHint('Already at root level');
+        return;
+      }
+
+      const prev = navStack.pop();
+      currentMindmap = prev.mindmap;
+      currentMindmap.focusId = prev.nodeId; // Focus the node we exited from
+      currentDepth = navStack.length;
+      scale = 1;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Exited to parent level ↑');
+    }
+
+    function jumpToLevel(levelIndex) {
+      if (levelIndex < 0 || levelIndex > navStack.length) return;
+
+      if (levelIndex === 0) {
+        navStack = [];
+        currentMindmap = rootMindmap;
+        currentDepth = 0;
+      } else {
+        const targetStack = navStack.slice(0, levelIndex);
+        const targetState = targetStack[targetStack.length - 1];
+        navStack = targetStack;
+        currentMindmap = targetState.mindmap;
+        currentDepth = navStack.length;
+      }
+
+      scale = 1;
+      render();
+      updateBreadcrumb();
+    }
+
+    function updateBreadcrumb() {
+      breadcrumb.innerHTML = '';
+
+      const rootItem = document.createElement('span');
+      rootItem.className = 'breadcrumb-item';
+      rootItem.textContent = '🏠 Root';
+      rootItem.onclick = () => jumpToLevel(0);
+      breadcrumb.appendChild(rootItem);
+
+      navStack.forEach((item, idx) => {
+        const sep = document.createElement('span');
+        sep.className = 'breadcrumb-sep';
+        sep.textContent = ' › ';
+        breadcrumb.appendChild(sep);
+
+        const node = item.mindmap.nodes.find(n => n.id === item.nodeId);
+        const crumb = document.createElement('span');
+        crumb.className = 'breadcrumb-item';
+        crumb.textContent = node ? node.label : item.nodeId;
+        crumb.onclick = () => jumpToLevel(idx + 1);
+        breadcrumb.appendChild(crumb);
+      });
+    }
+
+    function showZoomHint(text) {
+      zoomHint.textContent = text;
+      zoomHint.classList.add('show');
+      setTimeout(() => zoomHint.classList.remove('show'), 2000);
+    }
+
+    // ===== NODE OPERATIONS =====
+    function addNodeWith(type) {
+      const label = (input.value || '').trim() || defaultLabel(type);
+      const id = nextId();
+      currentMindmap.nodes.push({ id, label, nested: null });
+
+      if (type === 'child') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'child' });
+      }
+      if (type === 'parent') {
+        currentMindmap.links.push({ from: id, to: currentMindmap.focusId, type: 'parent' });
+      }
+      if (type === 'jump') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'jump' });
+      }
+
+      currentMindmap.focusId = id;
+      input.value = '';
+      render();
+      updateStats();
+    }
+
+    function defaultLabel(type) {
+      if (type === 'child') return 'Child idea';
+      if (type === 'parent') return 'Parent context';
+      return 'Jump idea';
+    }
+
+    function relationship(fid, mindmap) {
+      const parentLink = mindmap.links.find(l =>
+        l.to === fid && (l.type === 'parent' || l.type === 'child')
+      );
+      const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
+
+      const children = mindmap.links
+        .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.to)
+        .filter(id => id !== parent);
+
+      const jumps = mindmap.links
+        .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
+        .map(l => l.from === fid ? l.to : l.from);
+
+      return { parent, children, jumps };
+    }
+
+    function place(fid, mindmap) {
+      const rel = relationship(fid, mindmap);
+      const pos = {};
+      pos[fid] = { x: center.x, y: center.y };
+
+      if (rel.parent) pos[rel.parent] = { x: center.x, y: center.y - 180 };
+
+      rel.children.forEach((id, i) => {
+        const spread = (rel.children.length - 1) * 170;
+        const x = center.x - spread / 2 + i * 170;
+        pos[id] = { x, y: center.y + 180 };
+      });
+
+      rel.jumps.forEach((id, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const rank = Math.floor(i / 2);
+        const x = center.x + side * (240 + rank * 150);
+        const y = center.y + (side < 0 ? -80 : 80);
+        pos[id] = { x, y };
+      });
+
+      return pos;
+    }
+
+    // ===== RENDERING =====
+    function line(x1, y1, x2, y2, color, dash = false) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+      el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+      el.setAttribute('stroke', color);
+      el.setAttribute('stroke-width', '2');
+      if (dash) el.setAttribute('stroke-dasharray', '7 6');
+      return el;
+    }
+
+    function nodeShape(n, x, y, focused, colors, showNested) {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.style.cursor = 'pointer';
+      g.addEventListener('click', () => {
+        currentMindmap.focusId = n.id;
+        render();
+      });
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x);
+      text.setAttribute('y', y - 42);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size', focused ? '17' : '14');
+      text.setAttribute('font-weight', focused ? '700' : '500');
+      text.setAttribute('fill', colors.primary);
+      text.textContent = n.label;
+
+      const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      e.setAttribute('cx', x); e.setAttribute('cy', y);
+      e.setAttribute('rx', focused ? '92' : '82');
+      e.setAttribute('ry', focused ? '34' : '30');
+      e.setAttribute('fill', `url(#grad-${currentDepth})`);
+      e.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
+      e.setAttribute('stroke-width', focused ? '3' : '2');
+
+      g.appendChild(text);
+      g.appendChild(e);
+
+      // Nested indicator
+      if (showNested && hasNestedContent(n.id)) {
+        const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        indicator.setAttribute('cx', x + (focused ? 70 : 62));
+        indicator.setAttribute('cy', y - (focused ? 18 : 16));
+        indicator.setAttribute('r', '6');
+        indicator.setAttribute('fill', '#FFB800');
+        indicator.setAttribute('stroke', '#fff');
+        indicator.setAttribute('stroke-width', '1.5');
+        g.appendChild(indicator);
+      }
+
+      return g;
+    }
+
+    function defs(colors, depth) {
+      const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      grad.setAttribute('id', `grad-${depth}`);
+      grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
+      grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
+
+      const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', colors.grad1);
+      const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', colors.grad2);
+
+      grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
+      return d;
+    }
+
+    function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null) {
+      const colors = getColorScheme(depth);
+      const pos = place(mindmap.focusId, mindmap);
+      
+      // Calculate transform to keep focused node centered
+      const focusPos = focusPosOverride || pos[mindmap.focusId];
+      let tx = 0, ty = 0;
+      if (focusPos) {
+        tx = center.x - (focusPos.x * layerScale);
+        ty = center.y - (focusPos.y * layerScale);
+      }
+
+      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${layerScale})`);
+      layer.setAttribute('opacity', layerOpacity);
+
+      // Draw links
+      mindmap.links.forEach(l => {
+        const a = pos[l.from], b = pos[l.to];
+        if (!a || !b) return;
+        const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
+        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+      });
+
+      // Draw nodes
+      Object.entries(pos).forEach(([id, p]) => {
+        const n = getNode(id, mindmap);
+        if (!n) return;
+        const showNested = (layerOpacity > 0.5); // Only show nested indicators when layer is dominant
+        layer.appendChild(nodeShape(n, p.x, p.y, id === mindmap.focusId, colors, showNested));
+      });
+
+      return layer;
+    }
+
+    function renderQuick() {
+      quickNodes.innerHTML = '';
+      currentMindmap.nodes.slice(-24).forEach(n => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = n.label;
+        chip.onclick = () => {
+          currentMindmap.focusId = n.id;
+          render();
+        };
+        quickNodes.appendChild(chip);
+      });
+    }
+
+    function updateStats() {
+      statDepth.textContent = currentDepth;
+      statNodes.textContent = currentMindmap.nodes.length;
+      statLinks.textContent = currentMindmap.links.length;
+    }
+
+    function render() {
+      const focus = getFocusedNode();
+      focusName.textContent = focus?.label || currentMindmap.focusId;
+
+      svg.innerHTML = '';
+      
+      // Add all color scheme defs
+      for (let d = 0; d <= Math.min(currentDepth + 1, colorSchemes.length); d++) {
+        svg.appendChild(defs(getColorScheme(d), d));
+      }
+
+      // Determine what to render based on scale
+      if (scale >= TRANSITION_END) {
+        // Fully zoomed in - check if we should switch to nested level
+        const focusedNode = getFocusedNode();
+        if (focusedNode && hasNestedContent(focusedNode.id)) {
+          enterNode(focusedNode.id);
+          return;
+        }
+      }
+
+      if (scale <= EXIT_THRESHOLD) {
+        // Zoomed out - exit to parent level
+        exitNode();
+        return;
+      }
+
+      // Render current level
+      if (scale < TRANSITION_START) {
+        // Below transition - just show current level
+        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0);
+        svg.appendChild(layer);
+      } else {
+        // In transition zone - show both levels with crossfade
+        const progress = (scale - TRANSITION_START) / (TRANSITION_END - TRANSITION_START);
+        const parentOpacity = Math.max(0, 1 - progress);
+        const childOpacity = Math.min(1, progress);
+
+        // Render current (parent) level - fading out
+        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
+        svg.appendChild(parentLayer);
+
+        // Render nested (child) level if it exists - fading in
+        const focusedNode = getFocusedNode();
+        if (focusedNode) {
+          const nested = ensureNestedMindmap(focusedNode);
+          // Child layer should be scaled relative to parent zoom
+          // As parent zooms from 1.5→3.5x, child goes from 0→1x effectively
+          const childScale = scale * 0.4; // Adjust this multiplier for desired nested scale
+          const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
+          svg.appendChild(childLayer);
+        }
+      }
+
+      renderQuick();
+      updateStats();
+    }
+
+    // ===== ZOOM CONTROLS =====
+    function setScale(next) {
+      scale = Math.max(0.3, Math.min(5.0, next));
+      render();
+    }
+
+    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.15);
+    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.15);
+    document.getElementById('zoomReset').onclick = () => { scale = 1; render(); };
+    document.getElementById('enterNode').onclick = () => {
+      const focused = getFocusedNode();
+      if (focused) enterNode(focused.id);
+    };
+    document.getElementById('exitNode').onclick = () => exitNode();
+
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.1 : -0.1;
+      setScale(scale + delta);
+    }, { passive: false });
+
+    // ===== PINCH-TO-ZOOM =====
+    let pinchStartDistance = null;
+    let pinchStartScale = null;
+
+    function getTouchDistance(touch1, touch2) {
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    svg.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        pinchStartDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        pinchStartScale = scale;
+      }
+    }, { passive: false });
+
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && pinchStartDistance !== null) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        const ratio = currentDistance / pinchStartDistance;
+        const newScale = pinchStartScale * ratio;
+        setScale(newScale);
+      }
+    }, { passive: false });
+
+    svg.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        pinchStartDistance = null;
+        pinchStartScale = null;
+      }
+    }, { passive: false });
+
+    // ===== NODE ACTIONS =====
+    document.getElementById('addChild').onclick = () => addNodeWith('child');
+    document.getElementById('addParent').onclick = () => addNodeWith('parent');
+    document.getElementById('addJump').onclick = () => addNodeWith('jump');
+    document.getElementById('focusRoot').onclick = () => {
+      currentMindmap.focusId = currentMindmap.nodes[0].id;
+      render();
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addNodeWith('child');
+    });
+
+    // ===== SAVE / LOAD (CURRENT MAP SCOPE) =====
+    function exportCurrentMapJson() {
+      return JSON.stringify(currentMindmap, null, 2);
+    }
+
+    function replaceMindmapInPlace(target, incoming) {
+      target.nodes = Array.isArray(incoming.nodes) ? incoming.nodes : [];
+      target.links = Array.isArray(incoming.links) ? incoming.links : [];
+      target.focusId = incoming.focusId || (target.nodes[0] && target.nodes[0].id) || null;
+      target.seq = typeof incoming.seq === 'number' ? incoming.seq : target.nodes.reduce((max, n) => {
+        const m = /^n(\d+)$/.exec(n.id || '');
+        return Math.max(max, m ? Number(m[1]) : 0);
+      }, 1);
+    }
+
+    function downloadTextFile(filename, text) {
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('exportJson').onclick = () => {
+      const safeLabel = (getFocusedNode()?.label || 'map').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const level = `level-${currentDepth}`;
+      downloadTextFile(`global-configurator-${level}-${safeLabel || 'map'}.json`, exportCurrentMapJson());
+    };
+
+    document.getElementById('copyJson').onclick = async () => {
+      await navigator.clipboard.writeText(exportCurrentMapJson());
+      showZoomHint('Current map JSON copied');
+    };
+
+    document.getElementById('importJsonBtn').onclick = () => {
+      document.getElementById('importJsonFile').click();
+    };
+
+    document.getElementById('importJsonFile').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const incoming = sanitizeMindmap(JSON.parse(text));
+        replaceMindmapInPlace(currentMindmap, incoming);
+        render();
+        updateBreadcrumb();
+        showZoomHint('JSON imported into current map');
+      } catch (err) {
+        alert(`Import failed: ${err.message}`);
+      } finally {
+        e.target.value = '';
+      }
+    });
+
+    // ===== TAB NAVIGATION =====
+    document.querySelectorAll('.tab-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const targetTab = pill.getAttribute('data-tab');
+        document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+      });
+    });
+
+    // ===== DRAWER RESIZE =====
+    let dragging = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    const graphPane = document.getElementById('graphPane');
+    const dragHandle = document.getElementById('dragHandle');
+
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+      dragging = true;
+      startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      startHeight = graphPane.offsetHeight;
+      document.body.style.userSelect = 'none';
+    }
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+
+    function drag(e) {
+      if (!dragging) return;
+      const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const deltaY = currentY - startY;
+      const newHeight = startHeight + deltaY;
+      const minHeight = window.innerHeight * 0.15;
+      const maxHeight = window.innerHeight * 0.80;
+      
+      if (newHeight >= minHeight && newHeight <= maxHeight) {
+        graphPane.style.height = `${newHeight}px`;
+      }
+    }
+
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+
+    function stopDrag() {
+      dragging = false;
+      document.body.style.userSelect = '';
+    }
+
+    document.getElementById('collapseUp').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.25}px`;
+    });
+
+    document.getElementById('expandDown').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.70}px`;
+    });
+
+    // ===== INITIAL RENDER =====
+    async function init() {
+      rootMindmap = await loadRootMindmap();
+      navStack = [];
+      currentMindmap = rootMindmap;
+      currentDepth = 0;
+      render();
+      updateBreadcrumb();
+    }
+
+    init();
+  </script>
+</body>
+</html>
