@@ -1149,7 +1149,7 @@
         const containerOpacity = Math.min(1, reverse);
 
         // Current nested level fades out
-        const childLayer = renderMindmapLayer(currentMindmap, currentDepth, Math.max(0.55, scale), childOpacity, null, currentAnimatedPos);
+        const childLayer = renderMindmapLayer(currentMindmap, currentDepth, Math.max(0.55, scale), childOpacity, center, currentAnimatedPos);
         svg.appendChild(childLayer);
 
         // Container level fades in and scales toward its click-in zoom range
@@ -1162,7 +1162,7 @@
       // Render current level
       } else if (scale < TRANSITION_START) {
         // Below forward transition - show current level
-        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0, null, currentAnimatedPos);
+        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0, center, currentAnimatedPos);
         svg.appendChild(layer);
       } else {
         // Forward transition zone - show current + nested preview crossfade
@@ -1171,7 +1171,7 @@
         const childOpacity = Math.min(1, progress);
 
         // Render current level - fading out
-        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity, null, currentAnimatedPos);
+        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity, center, currentAnimatedPos);
         svg.appendChild(parentLayer);
 
         // Render nested preview; auto-create only near boundary threshold
