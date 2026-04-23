@@ -418,6 +418,27 @@
         height: 50vh;
         height: 50dvh;
       }
+
+      /* Mobile: keep only nested navigation controls */
+      .overlay {
+        top: 8px;
+        left: 10px;
+        right: auto;
+      }
+
+      .overlay-row:first-child {
+        display: none;
+      }
+
+      .overlay-row {
+        gap: 5px;
+        padding: 5px;
+      }
+
+      .overlay button {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
     }
   </style>
 </head>
@@ -436,8 +457,8 @@
           <button id="zoomIn">+</button>
         </div>
         <div class="overlay-row">
-          <button id="enterNode">↓ Enter</button>
-          <button id="exitNode">↑ Exit</button>
+          <button id="enterNode">Nest</button>
+          <button id="exitNode">Return Nest</button>
         </div>
       </div>
       <div class="zoom-hint" id="zoomHint"></div>
