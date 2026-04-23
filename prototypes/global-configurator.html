@@ -820,6 +820,15 @@
       return 'Jump idea';
     }
 
+    function renameNodeById(nodeId, nextLabel) {
+      const node = getNode(nodeId);
+      if (!node) return false;
+      const clean = (nextLabel || '').trim();
+      if (!clean) return false;
+      node.label = clean;
+      return true;
+    }
+
     function renameFocusedNode() {
       const focused = getFocusedNode();
       if (!focused) {
@@ -833,10 +842,27 @@
         return;
       }
 
-      focused.label = nextLabel;
-      if (renameInput) renameInput.value = '';
-      render();
-      showZoomHint('Focused node renamed');
+      if (renameNodeById(focused.id, nextLabel)) {
+        if (renameInput) renameInput.value = '';
+        render();
+        showZoomHint('Focused node renamed');
+      }
+    }
+
+    function promptRenameNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      const proposed = window.prompt('Rename node:', node.label || '');
+      if (proposed === null) return; // user cancelled
+
+      if (renameNodeById(nodeId, proposed)) {
+        if (renameInput) renameInput.value = '';
+        render();
+        showZoomHint('Node renamed');
+      } else {
+        showZoomHint('Rename cancelled (empty name)');
+      }
     }
 
     function relationship(fid, mindmap) {
@@ -1065,6 +1091,12 @@
       g.addEventListener('click', () => {
         currentMindmap.focusId = n.id;
         render();
+      });
+
+      g.addEventListener('contextmenu', (evt) => {
+        evt.preventDefault();
+        currentMindmap.focusId = n.id;
+        promptRenameNode(n.id);
       });
 
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
