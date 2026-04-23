@@ -1467,6 +1467,37 @@
       return p;
     }
 
+    function nodeVisualMetrics(n, focused) {
+      const organicMode = layoutMode === 'organic';
+      const isAgentic = n?.type === 'agentic';
+      const organicLabelWidth = Math.max(82, Math.min(190, (((n?.label || '').length) * 4.8) + (focused ? 42 : 32)));
+
+      if (isAgentic) {
+        const w = organicMode ? organicLabelWidth * 2 : (focused ? 184 : 164);
+        const h = organicMode ? (focused ? 54 : 48) : (focused ? 68 : 60);
+        return { shape: 'rect', hw: w / 2, hh: h / 2 };
+      }
+
+      const rx = organicMode ? organicLabelWidth : (focused ? 92 : 82);
+      const ry = organicMode ? (focused ? 28 : 24) : (focused ? 34 : 30);
+      return { shape: 'ellipse', rx, ry };
+    }
+
+    function edgeAnchor(from, to, metrics) {
+      const dx = (to.x - from.x) || 0.0001;
+      const dy = (to.y - from.y) || 0.0001;
+
+      if (metrics.shape === 'rect') {
+        const t = 1 / Math.max(Math.abs(dx) / metrics.hw, Math.abs(dy) / metrics.hh);
+        return { x: from.x + dx * t, y: from.y + dy * t };
+      }
+
+      // ellipse
+      const denom = Math.sqrt((dx * dx) / (metrics.rx * metrics.rx) + (dy * dy) / (metrics.ry * metrics.ry));
+      const t = denom > 0 ? 1 / denom : 1;
+      return { x: from.x + dx * t, y: from.y + dy * t };
+    }
+
     function nodeShape(n, x, y, focused, colors, showNested) {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.style.cursor = 'pointer';
@@ -1584,17 +1615,28 @@
       layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${layerScale})`);
       layer.setAttribute('opacity', layerOpacity);
 
-      // Draw links
+      // Draw links (attach at node boundaries for clarity)
       mindmap.links.forEach(l => {
         const a = pos[l.from], b = pos[l.to];
         if (!a || !b) return;
+
+        const na = getNode(l.from, mindmap);
+        const nb = getNode(l.to, mindmap);
+        if (!na || !nb) return;
+
+        const ma = nodeVisualMetrics(na, l.from === mindmap.focusId);
+        const mb = nodeVisualMetrics(nb, l.to === mindmap.focusId);
+        const aEdge = edgeAnchor(a, b, ma);
+        const bEdge = edgeAnchor(b, a, mb);
+
         const color = layoutMode === 'organic'
           ? (l.type === 'jump' ? '#4bb4ce' : '#8fd3e4')
           : (l.type === 'jump' ? colors.primary + '88' : colors.line);
+
         if (layoutMode === 'organic') {
-          layer.appendChild(curvedLink(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+          layer.appendChild(curvedLink(aEdge.x, aEdge.y, bEdge.x, bEdge.y, color, l.type === 'jump'));
         } else {
-          layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+          layer.appendChild(line(aEdge.x, aEdge.y, bEdge.x, bEdge.y, color, l.type === 'jump'));
         }
       });
 
