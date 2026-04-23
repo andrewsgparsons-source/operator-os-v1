@@ -264,6 +264,18 @@
       outline: none;
       -webkit-tap-highlight-color: transparent;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tab-pill::after {
+      content: '›';
+      font-size: 14px;
+      font-weight: 800;
+      opacity: 0.8;
+      transition: transform var(--transition), opacity var(--transition);
     }
 
     .tab-pill.active {
@@ -272,10 +284,16 @@
       color: #fff;
     }
 
+    .tab-pill.active::after {
+      transform: translateX(2px);
+      opacity: 1;
+    }
+
     .tab-pill:not(.active):hover {
       border-color: var(--accent);
       color: var(--text);
       background: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(125, 180, 232, 0.28);
     }
 
     /* ===== CONTROLS AREA (BOTTOM) ===== */
@@ -444,9 +462,16 @@
     /* ===== RESPONSIVE ===== */
     @media (min-width: 1024px) {
       #mindmapContainer {
+        --tab-w: 160px;
+        --panel-w: 0px;
         display: grid;
-        grid-template-columns: 150px 340px 1fr;
+        grid-template-columns: var(--tab-w) var(--panel-w) 1fr;
         grid-template-rows: auto 1fr;
+        transition: grid-template-columns var(--transition);
+      }
+
+      #mindmapContainer.controls-open {
+        --panel-w: 360px;
       }
 
       #breadcrumb {
@@ -473,6 +498,17 @@
         grid-row: 2;
         border-right: 1px solid var(--border);
         border-top: none;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: opacity var(--transition), transform var(--transition);
+        pointer-events: none;
+      }
+
+      #mindmapContainer.controls-open #controlsPane {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
       }
 
       #graphPane {
@@ -547,7 +583,7 @@
 
     <!-- TAB NAVIGATION -->
     <nav id="tabNav">
-      <button class="tab-pill active" data-tab="save">Save</button>
+      <button class="tab-pill" data-tab="save">Save</button>
       <button class="tab-pill" data-tab="main">Main Control</button>
       <button class="tab-pill" data-tab="navigate">Quick Navigate</button>
       <button class="tab-pill" data-tab="resources">Resources</button>
@@ -556,7 +592,7 @@
     <!-- CONTROLS PANE -->
     <section id="controlsPane">
       <!-- SAVE TAB -->
-      <div class="tab-content active" data-tab="save">
+      <div class="tab-content" data-tab="save">
         <div class="control-box">
           <h2>Save / Load JSON</h2>
           <div class="subtitle">Choose export scope before saving/copying JSON.</div>
@@ -762,6 +798,7 @@
     const EXIT_THRESHOLD = 0.35;     // Commit exit to parent level
 
     // ===== DOM ELEMENTS =====
+    const mindmapContainerEl = document.getElementById('mindmapContainer');
     const svg = document.getElementById('stage');
     const input = document.getElementById('nodeLabel');
     const renameInput = document.getElementById('renameNodeLabel');
@@ -2162,16 +2199,62 @@
     document.addEventListener('scroll', () => hideNodeContextMenu(), true);
 
     // ===== TAB NAVIGATION =====
+    function isDesktopLayout() {
+      return window.matchMedia('(min-width: 1024px)').matches;
+    }
+
+    function setActiveTab(tabName, { allowCloseDesktop = true } = {}) {
+      const pills = Array.from(document.querySelectorAll('.tab-pill'));
+      const contents = Array.from(document.querySelectorAll('.tab-content'));
+      const activePill = pills.find(p => p.classList.contains('active'));
+      const activeTab = activePill?.getAttribute('data-tab') || null;
+
+      let nextTab = tabName;
+      if (isDesktopLayout() && allowCloseDesktop && activeTab === tabName) {
+        nextTab = null; // Toggle closed on desktop when clicking active tab
+      }
+
+      pills.forEach(p => p.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+
+      if (nextTab) {
+        const pill = pills.find(p => p.getAttribute('data-tab') === nextTab);
+        const panel = contents.find(c => c.getAttribute('data-tab') === nextTab);
+        pill?.classList.add('active');
+        panel?.classList.add('active');
+      }
+
+      if (isDesktopLayout()) {
+        mindmapContainerEl?.classList.toggle('controls-open', !!nextTab);
+      } else {
+        mindmapContainerEl?.classList.add('controls-open');
+        if (!nextTab) {
+          // Mobile always keeps one visible tab
+          setActiveTab('save', { allowCloseDesktop: false });
+          return;
+        }
+      }
+    }
+
     document.querySelectorAll('.tab-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         const targetTab = pill.getAttribute('data-tab');
-        document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(content => {
-          content.classList.remove('active');
-        });
-        document.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+        setActiveTab(targetTab, { allowCloseDesktop: true });
       });
+    });
+
+    window.addEventListener('resize', () => {
+      const activePill = document.querySelector('.tab-pill.active');
+      const activeTab = activePill?.getAttribute('data-tab') || null;
+      if (isDesktopLayout()) {
+        if (activeTab) {
+          mindmapContainerEl?.classList.add('controls-open');
+        } else {
+          mindmapContainerEl?.classList.remove('controls-open');
+        }
+      } else {
+        if (!activeTab) setActiveTab('save', { allowCloseDesktop: false });
+      }
     });
 
     // ===== DRAWER RESIZE =====
@@ -2232,6 +2315,11 @@
       currentDepth = 0;
       render();
       updateBreadcrumb();
+      if (isDesktopLayout()) {
+        setActiveTab(null, { allowCloseDesktop: false });
+      } else {
+        setActiveTab('save', { allowCloseDesktop: false });
+      }
     }
 
     init();
