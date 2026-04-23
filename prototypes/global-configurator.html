@@ -602,6 +602,7 @@
     <button id="ctxRename">✎ Rename node</button>
     <button id="ctxTypeStandard" class="secondary">◯ Set type: Standard</button>
     <button id="ctxTypeAgentic" class="secondary">▭ Set type: Agentic</button>
+    <button id="ctxDeleteNode" class="secondary">🗑 Delete node (+ downstream)</button>
   </div>
 
   <script>
@@ -929,7 +930,7 @@
       contextNodeId = nodeId;
 
       const menuWidth = 210;
-      const menuHeight = 145;
+      const menuHeight = 190;
       const margin = 8;
       const left = Math.min(Math.max(margin, clientX), window.innerWidth - menuWidth - margin);
       const top = Math.min(Math.max(margin, clientY), window.innerHeight - menuHeight - margin);
@@ -962,6 +963,86 @@
       return mindmap.links
         .filter(l => l.from === nodeId && (l.type === 'child' || l.type === 'parent'))
         .map(l => l.to);
+    }
+
+    function collectStructuralDescendants(rootId, mindmap) {
+      const descendants = new Set();
+      const q = [rootId];
+      const visited = new Set();
+
+      while (q.length) {
+        const id = q.shift();
+        if (!id || visited.has(id)) continue;
+        visited.add(id);
+
+        const kids = childrenOf(id, mindmap);
+        for (const k of kids) {
+          if (!k || visited.has(k)) continue;
+          descendants.add(k);
+          q.push(k);
+        }
+      }
+
+      descendants.delete(rootId);
+      return descendants;
+    }
+
+    function hasExternalParentLink(nodeId, candidateSet, mindmap) {
+      return mindmap.links.some(l =>
+        (l.type === 'child' || l.type === 'parent') &&
+        l.to === nodeId &&
+        !candidateSet.has(l.from)
+      );
+    }
+
+    function deleteNodeWithDownstream(rootId) {
+      const rootNode = getNode(rootId);
+      if (!rootNode) {
+        showZoomHint('Node not found');
+        return;
+      }
+
+      const initialDesc = collectStructuralDescendants(rootId, currentMindmap);
+      const candidate = new Set([rootId, ...initialDesc]);
+
+      // Protect descendants that are also parent-targeted from outside candidate set.
+      const protectedNodes = new Set();
+      for (const id of initialDesc) {
+        if (hasExternalParentLink(id, candidate, currentMindmap)) {
+          protectedNodes.add(id);
+        }
+      }
+
+      // Also protect descendants of protected nodes (loop/cross-link safety).
+      const protectedClosure = new Set();
+      for (const pid of protectedNodes) {
+        protectedClosure.add(pid);
+        const d = collectStructuralDescendants(pid, currentMindmap);
+        d.forEach(x => protectedClosure.add(x));
+      }
+
+      const deleteSet = new Set([rootId]);
+      for (const id of initialDesc) {
+        if (!protectedClosure.has(id)) deleteSet.add(id);
+      }
+
+      const deletedCount = deleteSet.size;
+      currentMindmap.nodes = currentMindmap.nodes.filter(n => !deleteSet.has(n.id));
+      currentMindmap.links = currentMindmap.links.filter(l => !deleteSet.has(l.from) && !deleteSet.has(l.to));
+
+      if (!currentMindmap.nodes.length) {
+        currentMindmap.nodes.push({ id: 'n1', label: 'Focus Node', type: 'standard', nested: null });
+        currentMindmap.links = [];
+        currentMindmap.focusId = 'n1';
+        currentMindmap.seq = Math.max(1, currentMindmap.seq || 1);
+      } else if (!currentMindmap.nodes.some(n => n.id === currentMindmap.focusId)) {
+        currentMindmap.focusId = currentMindmap.nodes[0].id;
+      }
+
+      render();
+      updateBreadcrumb();
+      const kept = protectedClosure.size;
+      showZoomHint(`Deleted ${deletedCount} node(s)${kept ? `, kept ${kept} protected` : ''}`);
     }
 
     function parentsOf(nodeId, mindmap) {
@@ -1920,6 +2001,15 @@
     document.getElementById('ctxTypeAgentic')?.addEventListener('click', () => {
       if (!contextNodeId) return;
       setNodeType(contextNodeId, 'agentic');
+      hideNodeContextMenu();
+    });
+
+    document.getElementById('ctxDeleteNode')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      const node = getNode(contextNodeId);
+      const name = node?.label || contextNodeId;
+      const ok = window.confirm(`Delete "${name}" and downstream nodes?`);
+      if (ok) deleteNodeWithDownstream(contextNodeId);
       hideNodeContextMenu();
     });
 
