@@ -2,175 +2,781 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MindMap Scratchpad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Global Configurator</title>
   <style>
+    /* ============================================================
+       NESTED MINDMAP — Infinite Zoom, Fractal Structure
+       ============================================================ */
     :root {
-      --bg: #ffffff;
-      --ink: #15355f;
-      --muted: #5a7aa7;
-      --line: #9ebfe9;
-      --nodeBorder: #4d88d8;
-      --focus: #2f6fcb;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
-      height: 100vh;
-      display: grid;
-      grid-template-rows: 56vh 44vh;
+      --primary: #1E5BA8;
+      --primary-light: #E3EEF9;
+      --primary-hover: #143D6F;
+      --accent: #5B9FD8;
+      --accent-light: #D1E7F8;
+      --bg: #F5F9FC;
+      --bg-panel: #FFFFFF;
+      --text: #1A1A1A;
+      --text-secondary: #5C5C5C;
+      --text-muted: #8A8A8A;
+      --border: #D1E0ED;
+      --shadow: 0 2px 12px rgba(30, 91, 168, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* TOP HALF: nodes-only viewport */
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      color: var(--text);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    #mindmapContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ===== BREADCRUMB TRAIL ===== */
+    #breadcrumb {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .breadcrumb-item {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .breadcrumb-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .breadcrumb-sep {
+      color: var(--text-muted);
+    }
+
+    /* ===== GRAPH PREVIEW (TOP) ===== */
     #graphPane {
       position: relative;
-      border-bottom: 1px solid #d7e6fa;
+      flex: 0 0 auto;
+      height: 55vh;
+      height: 55dvh;
+      min-height: 15vh;
+      max-height: 80vh;
+      background: #ffffff;
       overflow: hidden;
-      background: #fff;
+      touch-action: none;
     }
-    svg { width: 100%; height: 100%; display: block; background: #fff; touch-action: none; }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #ffffff;
+      touch-action: none;
+    }
+
     .overlay {
       position: absolute;
       top: 10px;
       right: 10px;
       display: flex;
+      flex-direction: column;
       gap: 6px;
-      background: rgba(255,255,255,.94);
-      border: 1px solid #cfe2fb;
-      border-radius: 10px;
-      padding: 6px;
       z-index: 2;
     }
+
+    .overlay-row {
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+      box-shadow: var(--shadow);
+    }
+
     .overlay button {
       width: auto;
-      padding: 6px 10px;
+      padding: 6px 12px;
       margin: 0;
-      border-radius: 8px;
-      border: 1px solid #b8d3f6;
-      background: #f5faff;
-      color: var(--ink);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--primary);
       font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
-    /* BOTTOM HALF: controls only (no zoom/pan effect) */
-    #uiPane {
-      display: grid;
-      grid-template-columns: 320px 1fr;
+    .overlay button:hover {
+      background: var(--primary-light);
+    }
+
+    .overlay button:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 3;
+    }
+
+    .zoom-hint.show {
+      opacity: 1;
+    }
+
+    /* ===== DRAG HANDLE (DIVIDER) ===== */
+    #dragHandle {
+      flex: 0 0 auto;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: row-resize;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #dragHandle .handle-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    #dragHandle .handle-arrow:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    #dragHandle .handle-bar {
+      width: 48px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background var(--transition);
+    }
+
+    #dragHandle:active .handle-bar {
+      background: var(--primary);
+    }
+
+    /* ===== TAB NAVIGATION ===== */
+    #tabNav {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 6px;
+      padding: 12px 12px 0 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      background: var(--bg);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    #tabNav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-pill {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .tab-pill:not(.active):hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--accent-light);
+    }
+
+    /* ===== CONTROLS AREA (BOTTOM) ===== */
+    #controlsPane {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+      padding: 0;
       min-height: 0;
-    }
-    .left {
-      border-right: 1px solid #d7e6fa;
-      padding: 12px;
-      overflow: auto;
-    }
-    .right {
-      padding: 12px;
-      overflow: auto;
+      position: relative;
     }
 
-    h1 { font-size: 17px; margin: 0 0 10px; }
-    h2 { font-size: 13px; margin: 0 0 8px; }
-    .small { font-size: 12px; color: var(--muted); }
-    button, input {
-      width: 100%;
-      margin-top: 8px;
-      border: 1px solid #b8d3f6;
-      border-radius: 10px;
-      padding: 9px 10px;
-      background: #f5faff;
-      color: var(--ink);
-      font-size: 14px;
+    .tab-content {
+      display: none;
+      padding: 16px;
     }
-    .chips { margin-top: 10px; }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .control-box {
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-box h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .control-box .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-panel);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-top: 10px;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.secondary {
+      background: var(--bg-panel);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+
+    button.secondary:hover {
+      background: var(--primary-light);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
     .chip {
       display: inline-block;
-      margin: 4px 4px 0 0;
-      border: 1px solid #b8d3f6;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 4px 9px;
-      font-size: 11px;
-      color: #406da4;
+      background: var(--bg-panel);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      background: #f3f8ff;
+      transition: all var(--transition);
+      -webkit-tap-highlight-color: transparent;
     }
 
-    @media (max-width: 900px) {
-      body { grid-template-rows: 52vh 48vh; }
-      #uiPane { grid-template-columns: 1fr; }
-      .left { border-right: 0; border-bottom: 1px solid #d7e6fa; }
+    .chip:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .chip:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .info-line:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Scroll fade indicator */
+    #controlsPane::after {
+      content: '';
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events: none;
+      display: block;
+      z-index: 1;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      #graphPane {
+        height: 50vh;
+        height: 50dvh;
+      }
+
+      /* Mobile: keep only nested navigation controls */
+      .overlay {
+        top: 8px;
+        left: 10px;
+        right: auto;
+      }
+
+      .overlay-row:first-child {
+        display: none;
+      }
+
+      .overlay-row {
+        gap: 5px;
+        padding: 5px;
+      }
+
+      .overlay button {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <section id="graphPane">
-    <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="overlay">
-      <button id="zoomOut">−</button>
-      <button id="zoomReset">100%</button>
-      <button id="zoomIn">+</button>
+  <div id="mindmapContainer">
+    <!-- BREADCRUMB TRAIL -->
+    <div id="breadcrumb"></div>
+
+    <!-- GRAPH PANE -->
+    <section id="graphPane">
+      <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="overlay">
+        <div class="overlay-row">
+          <button id="zoomOut">−</button>
+          <button id="zoomReset">100%</button>
+          <button id="zoomIn">+</button>
+        </div>
+        <div class="overlay-row">
+          <button id="enterNode">Nest</button>
+          <button id="exitNode">Return Nest</button>
+        </div>
+      </div>
+      <div class="zoom-hint" id="zoomHint"></div>
+    </section>
+
+    <!-- DRAG HANDLE -->
+    <div id="dragHandle">
+      <span class="handle-arrow" id="collapseUp">▲</span>
+      <div class="handle-bar"></div>
+      <span class="handle-arrow" id="expandDown">▼</span>
     </div>
-  </section>
 
-  <section id="uiPane">
-    <aside class="left">
-      <h1>MindMap Scratchpad</h1>
-      <div class="small">Top half is nodes-only. Bottom controls stay fixed (never zoomed).</div>
+    <!-- TAB NAVIGATION -->
+    <nav id="tabNav">
+      <button class="tab-pill active" data-tab="add">Add Nodes</button>
+      <button class="tab-pill" data-tab="focus">Focus</button>
+      <button class="tab-pill" data-tab="navigate">Navigate</button>
+      <button class="tab-pill" data-tab="info">Info</button>
+    </nav>
 
-      <input id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
-      <button id="addChild">+ Add child to focus</button>
-      <button id="addParent">+ Add parent above focus</button>
-      <button id="addJump">+ Add jump link to focus</button>
-      <button id="focusRoot">Focus root</button>
+    <!-- CONTROLS PANE -->
+    <section id="controlsPane">
+      <!-- ADD NODES TAB -->
+      <div class="tab-content active" data-tab="add">
+        <div class="control-box">
+          <h2>Add Node</h2>
+          <div class="subtitle">Create new nodes and connections</div>
+          <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
+          <button id="addChild">+ Add Child to Focus</button>
+          <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
+          <button id="addJump" class="secondary">+ Add Jump Link to Focus</button>
+        </div>
+      </div>
 
-      <div style="margin-top:12px" class="small"><b>Focus node</b></div>
-      <div id="focusName" style="font-weight:600;margin-top:4px">Core Idea</div>
+      <!-- FOCUS TAB -->
+      <div class="tab-content" data-tab="focus">
+        <div class="control-box">
+          <h2>Current Focus</h2>
+          <div class="info-line">
+            <span class="info-label">Focused Node</span>
+            <span class="info-value" id="focusName">Andrew</span>
+          </div>
+          <button id="focusRoot" class="secondary">⌂ Focus Root Node</button>
+        </div>
+      </div>
 
-      <div style="margin-top:12px" class="small"><b>Quick focus</b></div>
-      <div id="quickNodes" class="chips"></div>
-    </aside>
+      <!-- NAVIGATE TAB -->
+      <div class="tab-content" data-tab="navigate">
+        <div class="control-box">
+          <h2>Quick Navigate</h2>
+          <div class="subtitle">Tap any node to focus</div>
+          <div id="quickNodes" class="chips"></div>
+        </div>
+      </div>
 
-    <aside class="right">
-      <h2>Layout</h2>
-      <div class="small">Parent above, children below, jumps to the sides. Tap node to re-focus.</div>
-      <div class="small" style="margin-top:8px">Zoom works only in node viewport (top half). Selectors here are fixed and never zoom.</div>
-    </aside>
-  </section>
+      <!-- INFO TAB -->
+      <div class="tab-content" data-tab="info">
+        <div class="control-box">
+          <h2>Nested Mindmaps</h2>
+          <div class="subtitle">
+            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom In:</strong> Zoom continuously into the focused node to see its nested mindmap</p>
+            <p style="margin: 0 0 8px 0;"><strong>🔍 Zoom Out:</strong> Zoom out to exit to parent level</p>
+            <p style="margin: 0 0 8px 0;"><strong>📍 Breadcrumbs:</strong> Click any level in the trail to jump there</p>
+            <p style="margin: 0;"><strong>🎨 Colors:</strong> Each nesting level has a unique color scheme</p>
+          </div>
+        </div>
+        <div class="control-box">
+          <h2>Graph Stats</h2>
+          <div class="info-line">
+            <span class="info-label">Current Level</span>
+            <span class="info-value" id="statDepth">0</span>
+          </div>
+          <div class="info-line">
+            <span class="info-label">Nodes Here</span>
+            <span class="info-value" id="statNodes">1</span>
+          </div>
+          <div class="info-line">
+            <span class="info-label">Links Here</span>
+            <span class="info-value" id="statLinks">0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <script>
+    // ===== COLOR SCHEMES BY DEPTH =====
+    const colorSchemes = [
+      { primary: '#1E5BA8', light: '#D1E7F8', grad1: '#D1E7F8', grad2: '#7FB9E8', line: '#A8CCE8' }, // Blue
+      { primary: '#7B2D8E', light: '#E8D1F0', grad1: '#E8D1F0', grad2: '#B87FC8', line: '#C8A8E8' }, // Purple
+      { primary: '#2D8E7B', light: '#D1F0E8', grad1: '#D1F0E8', grad2: '#7FC8B8', line: '#A8E8C8' }, // Teal
+      { primary: '#8E5A2D', light: '#F0E2D1', grad1: '#F0E2D1', grad2: '#C8A87F', line: '#E8C8A8' }, // Brown
+      { primary: '#2D5A8E', light: '#D1E2F0', grad1: '#D1E2F0', grad2: '#7FA8C8', line: '#A8C8E8' }, // Steel
+    ];
+
+    function getColorScheme(depth) {
+      return colorSchemes[depth % colorSchemes.length];
+    }
+
+    // ===== NAVIGATION STATE =====
+    const MAP_DATA_URL = './data/global-configurator.base.json';
+    const fallbackMindmap = {
+      nodes: [
+        { id: 'n1', label: 'Andrew', nested: null },
+        { id: 'n2', label: 'work', nested: null },
+        { id: 'n3', label: 'personal', nested: null },
+        { id: 'n4', label: 'agents', nested: null },
+        { id: 'n5', label: 'Andy', nested: null }
+      ],
+      links: [
+        { from: 'n1', to: 'n2', type: 'child' },
+        { from: 'n1', to: 'n3', type: 'child' },
+        { from: 'n2', to: 'n4', type: 'child' },
+        { from: 'n4', to: 'n5', type: 'child' }
+      ],
+      focusId: 'n1',
+      seq: 5
+    };
+
+    function cloneMindmap(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function sanitizeMindmap(data) {
+      if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
+        return cloneMindmap(fallbackMindmap);
+      }
+      const safe = cloneMindmap(data);
+      if (!safe.focusId && safe.nodes[0]) safe.focusId = safe.nodes[0].id;
+      if (typeof safe.seq !== 'number') {
+        safe.seq = safe.nodes.reduce((max, n) => {
+          const m = /^n(\d+)$/.exec(n.id || '');
+          return Math.max(max, m ? Number(m[1]) : 0);
+        }, 1);
+      }
+      return safe;
+    }
+
+    async function loadRootMindmap() {
+      try {
+        const res = await fetch(MAP_DATA_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return sanitizeMindmap(data);
+      } catch (err) {
+        console.warn('Using fallback mindmap data:', err.message);
+        return cloneMindmap(fallbackMindmap);
+      }
+    }
+
+    let rootMindmap = cloneMindmap(fallbackMindmap);
+    let navStack = []; // Stack of { mindmap, nodeId } to track path
+    let currentMindmap = rootMindmap;
+    let currentDepth = 0;
+
+    // ===== VIEW STATE =====
+    const W = 1200, H = 760;
+    const center = { x: W / 2, y: H / 2 };
+    let scale = 1;
+
+    // Transition thresholds
+    const TRANSITION_START = 1.5;  // Start showing nested content
+    const TRANSITION_END = 3.5;    // Fully switched to nested level
+    const EXIT_THRESHOLD = 0.4;    // Exit to parent level
+
+    // ===== DOM ELEMENTS =====
     const svg = document.getElementById('stage');
     const input = document.getElementById('nodeLabel');
     const focusName = document.getElementById('focusName');
     const quickNodes = document.getElementById('quickNodes');
+    const statDepth = document.getElementById('statDepth');
+    const statNodes = document.getElementById('statNodes');
+    const statLinks = document.getElementById('statLinks');
+    const breadcrumb = document.getElementById('breadcrumb');
+    const zoomHint = document.getElementById('zoomHint');
 
-    const nodes = [{ id: 'n1', label: 'Core Idea' }];
-    const links = [];
-    let focusId = 'n1';
-    let seq = 1;
+    // ===== HELPER FUNCTIONS =====
+    function nextId() {
+      currentMindmap.seq += 1;
+      return 'n' + currentMindmap.seq;
+    }
 
-    const W = 1200, H = 760;
-    const center = { x: W / 2, y: H / 2 };
+    function getNode(id, mindmap = currentMindmap) {
+      return mindmap.nodes.find(n => n.id === id);
+    }
 
-    // viewport transform (nodes only)
-    let scale = 1;
-    let tx = 0;
-    let ty = 0;
+    function getFocusedNode() {
+      return getNode(currentMindmap.focusId);
+    }
 
-    function nextId() { seq += 1; return 'n' + seq; }
-    function getNode(id) { return nodes.find(n => n.id === id); }
+    function hasNestedContent(nodeId) {
+      const node = getNode(nodeId);
+      return node && node.nested && (node.nested.nodes.length > 0 || node.nested.links.length > 0);
+    }
 
+    function ensureNestedMindmap(node) {
+      if (!node.nested) {
+        node.nested = {
+          nodes: [{ id: 'n1', label: node.label, nested: null }],
+          links: [],
+          focusId: 'n1',
+          seq: 1
+        };
+      }
+      return node.nested;
+    }
+
+    // ===== NESTED NAVIGATION =====
+    function enterNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      ensureNestedMindmap(node);
+
+      // Push current state to nav stack
+      navStack.push({ mindmap: currentMindmap, nodeId: nodeId });
+      currentMindmap = node.nested;
+      currentDepth = navStack.length;
+      scale = 1;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Entered nested mindmap ↓');
+    }
+
+    function exitNode() {
+      if (navStack.length === 0) {
+        showZoomHint('Already at root level');
+        return;
+      }
+
+      const prev = navStack.pop();
+      currentMindmap = prev.mindmap;
+      currentMindmap.focusId = prev.nodeId; // Focus the node we exited from
+      currentDepth = navStack.length;
+      scale = 1;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Exited to parent level ↑');
+    }
+
+    function jumpToLevel(levelIndex) {
+      if (levelIndex < 0 || levelIndex > navStack.length) return;
+
+      if (levelIndex === 0) {
+        navStack = [];
+        currentMindmap = rootMindmap;
+        currentDepth = 0;
+      } else {
+        const targetStack = navStack.slice(0, levelIndex);
+        const targetState = targetStack[targetStack.length - 1];
+        navStack = targetStack;
+        currentMindmap = targetState.mindmap;
+        currentDepth = navStack.length;
+      }
+
+      scale = 1;
+      render();
+      updateBreadcrumb();
+    }
+
+    function updateBreadcrumb() {
+      breadcrumb.innerHTML = '';
+
+      const rootItem = document.createElement('span');
+      rootItem.className = 'breadcrumb-item';
+      rootItem.textContent = '🏠 Root';
+      rootItem.onclick = () => jumpToLevel(0);
+      breadcrumb.appendChild(rootItem);
+
+      navStack.forEach((item, idx) => {
+        const sep = document.createElement('span');
+        sep.className = 'breadcrumb-sep';
+        sep.textContent = ' › ';
+        breadcrumb.appendChild(sep);
+
+        const node = item.mindmap.nodes.find(n => n.id === item.nodeId);
+        const crumb = document.createElement('span');
+        crumb.className = 'breadcrumb-item';
+        crumb.textContent = node ? node.label : item.nodeId;
+        crumb.onclick = () => jumpToLevel(idx + 1);
+        breadcrumb.appendChild(crumb);
+      });
+    }
+
+    function showZoomHint(text) {
+      zoomHint.textContent = text;
+      zoomHint.classList.add('show');
+      setTimeout(() => zoomHint.classList.remove('show'), 2000);
+    }
+
+    // ===== NODE OPERATIONS =====
     function addNodeWith(type) {
       const label = (input.value || '').trim() || defaultLabel(type);
       const id = nextId();
-      nodes.push({ id, label });
-      if (type === 'child') links.push({ from: focusId, to: id, type: 'child' });
-      if (type === 'parent') links.push({ from: id, to: focusId, type: 'parent' });
-      if (type === 'jump') links.push({ from: focusId, to: id, type: 'jump' });
-      focusId = id;
+      currentMindmap.nodes.push({ id, label, nested: null });
+
+      if (type === 'child') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'child' });
+      }
+      if (type === 'parent') {
+        currentMindmap.links.push({ from: id, to: currentMindmap.focusId, type: 'parent' });
+      }
+      if (type === 'jump') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'jump' });
+      }
+
+      currentMindmap.focusId = id;
       input.value = '';
       render();
+      updateStats();
     }
 
     function defaultLabel(type) {
@@ -179,24 +785,26 @@
       return 'Jump idea';
     }
 
-    function relationship(fid) {
-      const parentLink = links.find(l => l.to === fid && (l.type === 'parent' || l.type === 'child'));
+    function relationship(fid, mindmap) {
+      const parentLink = mindmap.links.find(l =>
+        l.to === fid && (l.type === 'parent' || l.type === 'child')
+      );
       const parent = parentLink ? (parentLink.from === fid ? parentLink.to : parentLink.from) : null;
 
-      const children = links
+      const children = mindmap.links
         .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
         .map(l => l.to)
         .filter(id => id !== parent);
 
-      const jumps = links
+      const jumps = mindmap.links
         .filter(l => l.type === 'jump' && (l.from === fid || l.to === fid))
         .map(l => l.from === fid ? l.to : l.from);
 
       return { parent, children, jumps };
     }
 
-    function place(fid) {
-      const rel = relationship(fid);
+    function place(fid, mindmap) {
+      const rel = relationship(fid, mindmap);
       const pos = {};
       pos[fid] = { x: center.x, y: center.y };
 
@@ -219,6 +827,7 @@
       return pos;
     }
 
+    // ===== RENDERING =====
     function line(x1, y1, x2, y2, color, dash = false) {
       const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       el.setAttribute('x1', x1); el.setAttribute('y1', y1);
@@ -229,10 +838,13 @@
       return el;
     }
 
-    function nodeShape(n, x, y, focused) {
+    function nodeShape(n, x, y, focused, colors, showNested) {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.style.cursor = 'pointer';
-      g.addEventListener('click', () => { focusId = n.id; render(); });
+      g.addEventListener('click', () => {
+        currentMindmap.focusId = n.id;
+        render();
+      });
 
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', x);
@@ -240,112 +852,307 @@
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('font-size', focused ? '17' : '14');
       text.setAttribute('font-weight', focused ? '700' : '500');
-      text.setAttribute('fill', '#204e86');
+      text.setAttribute('fill', colors.primary);
       text.textContent = n.label;
 
       const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
       e.setAttribute('cx', x); e.setAttribute('cy', y);
       e.setAttribute('rx', focused ? '92' : '82');
       e.setAttribute('ry', focused ? '34' : '30');
-      e.setAttribute('fill', 'url(#blueGrad)');
-      e.setAttribute('stroke', focused ? '#2f6fcb' : '#4d88d8');
+      e.setAttribute('fill', `url(#grad-${currentDepth})`);
+      e.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
       e.setAttribute('stroke-width', focused ? '3' : '2');
 
       g.appendChild(text);
       g.appendChild(e);
+
+      // Nested indicator
+      if (showNested && hasNestedContent(n.id)) {
+        const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        indicator.setAttribute('cx', x + (focused ? 70 : 62));
+        indicator.setAttribute('cy', y - (focused ? 18 : 16));
+        indicator.setAttribute('r', '6');
+        indicator.setAttribute('fill', '#FFB800');
+        indicator.setAttribute('stroke', '#fff');
+        indicator.setAttribute('stroke-width', '1.5');
+        g.appendChild(indicator);
+      }
+
       return g;
     }
 
-    function defs() {
+    function defs(colors, depth) {
       const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
       const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-      grad.setAttribute('id', 'blueGrad');
+      grad.setAttribute('id', `grad-${depth}`);
       grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
       grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
 
       const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#b7d7ff');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', colors.grad1);
       const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#7fb4ff');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', colors.grad2);
 
       grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
       return d;
     }
 
+    function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null) {
+      const colors = getColorScheme(depth);
+      const pos = place(mindmap.focusId, mindmap);
+      
+      // Calculate transform to keep focused node centered
+      const focusPos = focusPosOverride || pos[mindmap.focusId];
+      let tx = 0, ty = 0;
+      if (focusPos) {
+        tx = center.x - (focusPos.x * layerScale);
+        ty = center.y - (focusPos.y * layerScale);
+      }
+
+      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${layerScale})`);
+      layer.setAttribute('opacity', layerOpacity);
+
+      // Draw links
+      mindmap.links.forEach(l => {
+        const a = pos[l.from], b = pos[l.to];
+        if (!a || !b) return;
+        const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
+        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+      });
+
+      // Draw nodes
+      Object.entries(pos).forEach(([id, p]) => {
+        const n = getNode(id, mindmap);
+        if (!n) return;
+        const showNested = (layerOpacity > 0.5); // Only show nested indicators when layer is dominant
+        layer.appendChild(nodeShape(n, p.x, p.y, id === mindmap.focusId, colors, showNested));
+      });
+
+      return layer;
+    }
+
     function renderQuick() {
       quickNodes.innerHTML = '';
-      nodes.slice(-18).forEach(n => {
+      currentMindmap.nodes.slice(-24).forEach(n => {
         const chip = document.createElement('span');
         chip.className = 'chip';
         chip.textContent = n.label;
-        chip.onclick = () => { focusId = n.id; render(); };
+        chip.onclick = () => {
+          currentMindmap.focusId = n.id;
+          render();
+        };
         quickNodes.appendChild(chip);
       });
     }
 
-    function focusTransformOnNode(pos, fid) {
-      const p = pos[fid];
-      if (!p) return;
-      tx = center.x - p.x;
-      ty = center.y - p.y;
+    function updateStats() {
+      statDepth.textContent = currentDepth;
+      statNodes.textContent = currentMindmap.nodes.length;
+      statLinks.textContent = currentMindmap.links.length;
     }
 
     function render() {
-      const focus = getNode(focusId);
-      focusName.textContent = focus?.label || focusId;
-
-      const pos = place(focusId);
-      focusTransformOnNode(pos, focusId);
+      const focus = getFocusedNode();
+      focusName.textContent = focus?.label || currentMindmap.focusId;
 
       svg.innerHTML = '';
-      svg.appendChild(defs());
+      
+      // Add all color scheme defs
+      for (let d = 0; d <= Math.min(currentDepth + 1, colorSchemes.length); d++) {
+        svg.appendChild(defs(getColorScheme(d), d));
+      }
 
-      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      layer.setAttribute('id', 'nodeLayer');
-      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${scale})`);
+      // Determine what to render based on scale
+      if (scale >= TRANSITION_END) {
+        // Fully zoomed in - check if we should switch to nested level
+        const focusedNode = getFocusedNode();
+        if (focusedNode && hasNestedContent(focusedNode.id)) {
+          enterNode(focusedNode.id);
+          return;
+        }
+      }
 
-      links.forEach(l => {
-        const a = pos[l.from], b = pos[l.to];
-        if (!a || !b) return;
-        const color = l.type === 'jump' ? '#7fa8d9' : '#9ebfe9';
-        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
-      });
+      if (scale <= EXIT_THRESHOLD) {
+        // Zoomed out - exit to parent level
+        exitNode();
+        return;
+      }
 
-      Object.entries(pos).forEach(([id, p]) => {
-        const n = getNode(id);
-        if (!n) return;
-        layer.appendChild(nodeShape(n, p.x, p.y, id === focusId));
-      });
+      // Render current level
+      if (scale < TRANSITION_START) {
+        // Below transition - just show current level
+        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0);
+        svg.appendChild(layer);
+      } else {
+        // In transition zone - show both levels with crossfade
+        const progress = (scale - TRANSITION_START) / (TRANSITION_END - TRANSITION_START);
+        const parentOpacity = Math.max(0, 1 - progress);
+        const childOpacity = Math.min(1, progress);
 
-      svg.appendChild(layer);
+        // Render current (parent) level - fading out
+        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity);
+        svg.appendChild(parentLayer);
+
+        // Render nested (child) level if it exists - fading in
+        const focusedNode = getFocusedNode();
+        if (focusedNode) {
+          const nested = ensureNestedMindmap(focusedNode);
+          // Child layer should be scaled relative to parent zoom
+          // As parent zooms from 1.5→3.5x, child goes from 0→1x effectively
+          const childScale = scale * 0.4; // Adjust this multiplier for desired nested scale
+          const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
+          svg.appendChild(childLayer);
+        }
+      }
+
       renderQuick();
+      updateStats();
     }
 
-    // zoom controls only affect nodes layer
+    // ===== ZOOM CONTROLS =====
     function setScale(next) {
-      scale = Math.max(0.6, Math.min(2.2, next));
+      scale = Math.max(0.3, Math.min(5.0, next));
       render();
     }
-    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.12);
-    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.12);
+
+    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.15);
+    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.15);
     document.getElementById('zoomReset').onclick = () => { scale = 1; render(); };
+    document.getElementById('enterNode').onclick = () => {
+      const focused = getFocusedNode();
+      if (focused) enterNode(focused.id);
+    };
+    document.getElementById('exitNode').onclick = () => exitNode();
 
     svg.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const delta = e.deltaY < 0 ? 0.08 : -0.08;
+      const delta = e.deltaY < 0 ? 0.1 : -0.1;
       setScale(scale + delta);
     }, { passive: false });
 
+    // ===== PINCH-TO-ZOOM =====
+    let pinchStartDistance = null;
+    let pinchStartScale = null;
+
+    function getTouchDistance(touch1, touch2) {
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    svg.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        pinchStartDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        pinchStartScale = scale;
+      }
+    }, { passive: false });
+
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && pinchStartDistance !== null) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        const ratio = currentDistance / pinchStartDistance;
+        const newScale = pinchStartScale * ratio;
+        setScale(newScale);
+      }
+    }, { passive: false });
+
+    svg.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        pinchStartDistance = null;
+        pinchStartScale = null;
+      }
+    }, { passive: false });
+
+    // ===== NODE ACTIONS =====
     document.getElementById('addChild').onclick = () => addNodeWith('child');
     document.getElementById('addParent').onclick = () => addNodeWith('parent');
     document.getElementById('addJump').onclick = () => addNodeWith('jump');
-    document.getElementById('focusRoot').onclick = () => { focusId = 'n1'; render(); };
+    document.getElementById('focusRoot').onclick = () => {
+      currentMindmap.focusId = currentMindmap.nodes[0].id;
+      render();
+    };
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addNodeWith('child');
     });
 
-    render();
+    // ===== TAB NAVIGATION =====
+    document.querySelectorAll('.tab-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const targetTab = pill.getAttribute('data-tab');
+        document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+      });
+    });
+
+    // ===== DRAWER RESIZE =====
+    let dragging = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    const graphPane = document.getElementById('graphPane');
+    const dragHandle = document.getElementById('dragHandle');
+
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+      dragging = true;
+      startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      startHeight = graphPane.offsetHeight;
+      document.body.style.userSelect = 'none';
+    }
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+
+    function drag(e) {
+      if (!dragging) return;
+      const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const deltaY = currentY - startY;
+      const newHeight = startHeight + deltaY;
+      const minHeight = window.innerHeight * 0.15;
+      const maxHeight = window.innerHeight * 0.80;
+      
+      if (newHeight >= minHeight && newHeight <= maxHeight) {
+        graphPane.style.height = `${newHeight}px`;
+      }
+    }
+
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+
+    function stopDrag() {
+      dragging = false;
+      document.body.style.userSelect = '';
+    }
+
+    document.getElementById('collapseUp').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.25}px`;
+    });
+
+    document.getElementById('expandDown').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.70}px`;
+    });
+
+    // ===== INITIAL RENDER =====
+    async function init() {
+      rootMindmap = await loadRootMindmap();
+      navStack = [];
+      currentMindmap = rootMindmap;
+      currentDepth = 0;
+      render();
+      updateBreadcrumb();
+    }
+
+    init();
   </script>
 </body>
 </html>
