@@ -491,6 +491,7 @@
             <option value="all">Option 2 — Everything (full root map + all nested maps)</option>
             <option value="downstream">Option 3 — Subsequent nodes only (focused node + downstream children + nested maps)</option>
           </select>
+          <div id="exportScopeSummary" class="subtitle" style="margin:0 0 10px 0;">Will export: 0 nodes, 0 links, 0 nested maps</div>
           <button id="exportJson">⬇ Export JSON</button>
           <button id="copyJson" class="secondary">⧉ Copy JSON</button>
           <button id="importJsonBtn" class="secondary">⬆ Import Into Current Map</button>
@@ -1312,6 +1313,7 @@
       renderQuick();
       updateStats();
       renderResources();
+      updateExportScopeSummary();
     }
 
     // ===== ZOOM CONTROLS =====
@@ -1561,6 +1563,36 @@
       return cloneMindmap(currentMindmap);
     }
 
+    function countMindmapTree(mindmap) {
+      if (!mindmap || !Array.isArray(mindmap.nodes) || !Array.isArray(mindmap.links)) {
+        return { nodes: 0, links: 0, nestedMaps: 0 };
+      }
+
+      let nodes = mindmap.nodes.length;
+      let links = mindmap.links.length;
+      let nestedMaps = 0;
+
+      for (const n of mindmap.nodes) {
+        if (n && n.nested && Array.isArray(n.nested.nodes) && Array.isArray(n.nested.links)) {
+          nestedMaps += 1;
+          const childCounts = countMindmapTree(n.nested);
+          nodes += childCounts.nodes;
+          links += childCounts.links;
+          nestedMaps += childCounts.nestedMaps;
+        }
+      }
+
+      return { nodes, links, nestedMaps };
+    }
+
+    function updateExportScopeSummary() {
+      const summaryEl = document.getElementById('exportScopeSummary');
+      if (!summaryEl) return;
+      const payload = getExportPayload();
+      const c = countMindmapTree(payload);
+      summaryEl.textContent = `Will export: ${c.nodes} nodes, ${c.links} links, ${c.nestedMaps} nested maps`;
+    }
+
     function exportCurrentMapJson() {
       return JSON.stringify(getExportPayload(), null, 2);
     }
@@ -1600,6 +1632,10 @@
       await navigator.clipboard.writeText(exportCurrentMapJson());
       showZoomHint(`JSON copied (${scope})`);
     };
+
+    document.getElementById('exportScope')?.addEventListener('change', () => {
+      updateExportScopeSummary();
+    });
 
     document.getElementById('importJsonBtn').onclick = () => {
       document.getElementById('importJsonFile').click();
