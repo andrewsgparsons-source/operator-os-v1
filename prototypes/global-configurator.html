@@ -790,6 +790,10 @@
     let aboveEnterThreshold = false; // Hysteresis guard: trigger once per threshold crossing
     let entryUsedThisGesture = false; // Hard guard: one level entry per zoom gesture
 
+    // Manual node drag state
+    let dragState = null;
+    let suppressNodeClickUntil = 0;
+
     // Transition thresholds
     // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
     const TRANSITION_END = 7.2;      // Fully switch to nested level much later
@@ -943,6 +947,75 @@
       zoomHint.textContent = text;
       zoomHint.classList.add('show');
       setTimeout(() => zoomHint.classList.remove('show'), 2000);
+    }
+
+    function ensureManualPos(mindmap) {
+      if (!mindmap.manualPos || typeof mindmap.manualPos !== 'object') {
+        mindmap.manualPos = {};
+      }
+      return mindmap.manualPos;
+    }
+
+    function screenToMap(clientX, clientY, tx, ty, scaleVal) {
+      const pt = svg.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return null;
+      const svgPt = pt.matrixTransform(ctm.inverse());
+      return {
+        x: (svgPt.x - tx) / scaleVal,
+        y: (svgPt.y - ty) / scaleVal
+      };
+    }
+
+    function beginNodeDrag(evt, nodeId, mindmap, tx, ty, scaleVal) {
+      if (evt.button !== 0) return; // left mouse/touch pen only
+      if (!mindmap || mindmap !== currentMindmap) return;
+
+      const start = screenToMap(evt.clientX, evt.clientY, tx, ty, scaleVal);
+      if (!start) return;
+
+      const manual = ensureManualPos(mindmap);
+      const existing = manual[nodeId] || getNode(nodeId, mindmap) || { x: start.x, y: start.y };
+
+      dragState = {
+        nodeId,
+        mindmap,
+        tx,
+        ty,
+        scaleVal,
+        offsetX: existing.x - start.x,
+        offsetY: existing.y - start.y,
+        moved: false,
+        pointerId: evt.pointerId
+      };
+
+      try { evt.target.setPointerCapture?.(evt.pointerId); } catch (_) {}
+      evt.preventDefault();
+    }
+
+    function onNodeDragMove(evt) {
+      if (!dragState) return;
+      if (dragState.pointerId != null && evt.pointerId != null && evt.pointerId !== dragState.pointerId) return;
+
+      const p = screenToMap(evt.clientX, evt.clientY, dragState.tx, dragState.ty, dragState.scaleVal);
+      if (!p) return;
+
+      const manual = ensureManualPos(dragState.mindmap);
+      manual[dragState.nodeId] = {
+        x: p.x + dragState.offsetX,
+        y: p.y + dragState.offsetY
+      };
+
+      dragState.moved = true;
+      render();
+    }
+
+    function onNodeDragEnd() {
+      if (!dragState) return;
+      if (dragState.moved) suppressNodeClickUntil = Date.now() + 220;
+      dragState = null;
     }
 
     // ===== NODE OPERATIONS =====
@@ -1245,6 +1318,15 @@
       const { visible, descendants, ancestors } = collectHierarchy(fid, mindmap, hierarchyLevelsVisible);
       const pos = {};
 
+      const applyManualPositions = () => {
+        const manual = mindmap.manualPos || {};
+        Object.keys(pos).forEach(id => {
+          if (manual[id] && Number.isFinite(manual[id].x) && Number.isFinite(manual[id].y)) {
+            pos[id] = { x: manual[id].x, y: manual[id].y };
+          }
+        });
+      };
+
       if (layoutMode === 'list') {
         const fx = center.x - 260;
         const fy = center.y;
@@ -1269,6 +1351,7 @@
         rel.jumps.forEach((id, i) => {
           if (!pos[id]) pos[id] = { x: fx + 100, y: fy + 160 + i * 60 };
         });
+        applyManualPositions();
         return pos;
       }
 
@@ -1299,6 +1382,7 @@
           }
         });
 
+        applyManualPositions();
         return pos;
       }
 
@@ -1348,6 +1432,7 @@
           }
         });
 
+        applyManualPositions();
         return pos;
       }
 
@@ -1378,6 +1463,7 @@
         }
       });
 
+      applyManualPositions();
       return pos;
     }
 
@@ -1498,12 +1584,18 @@
       return { x: from.x + dx * t, y: from.y + dy * t };
     }
 
-    function nodeShape(n, x, y, focused, colors, showNested) {
+    function nodeShape(n, x, y, focused, colors, showNested, dragMeta = null) {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.style.cursor = 'pointer';
       g.addEventListener('click', () => {
+        if (Date.now() < suppressNodeClickUntil) return;
         currentMindmap.focusId = n.id;
         render();
+      });
+
+      g.addEventListener('pointerdown', (evt) => {
+        if (!dragMeta?.draggable) return;
+        beginNodeDrag(evt, n.id, dragMeta.mindmap, dragMeta.tx, dragMeta.ty, dragMeta.scale);
       });
 
       g.addEventListener('contextmenu', (evt) => {
@@ -1645,7 +1737,14 @@
         const n = getNode(id, mindmap);
         if (!n) return;
         const showNested = (layerOpacity > 0.5); // Only show nested indicators when layer is dominant
-        layer.appendChild(nodeShape(n, p.x, p.y, id === mindmap.focusId, colors, showNested));
+        const dragMeta = {
+          draggable: depth === currentDepth && layerOpacity > 0.9,
+          mindmap,
+          tx,
+          ty,
+          scale: layerScale
+        };
+        layer.appendChild(nodeShape(n, p.x, p.y, id === mindmap.focusId, colors, showNested, dragMeta));
       });
 
       return layer;
@@ -2388,6 +2487,11 @@
         if (!activeTab) setActiveTab('save', { allowCloseDesktop: false });
       }
     });
+
+    // ===== NODE DRAG EVENTS =====
+    window.addEventListener('pointermove', onNodeDragMove);
+    window.addEventListener('pointerup', onNodeDragEnd);
+    window.addEventListener('pointercancel', onNodeDragEnd);
 
     // ===== DRAWER RESIZE =====
     let dragging = false;
