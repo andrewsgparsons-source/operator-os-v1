@@ -1,0 +1,135 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Chronology & Ops Log",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "How to use this branch",
+          "url": "",
+          "note": "Append-only operating log for meaningful milestones/decisions/incidents. Create one child node per event with ISO timestamp prefix in label (YYYY-MM-DD HH:MM). Keep entries concise and factual: what happened, impact, next action. Do not rewrite old entries; append corrections as new nodes.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n2",
+      "label": "2026-04-23 19:50 — Locked release created",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Outcome",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/releases/global-configurator-live-2026-04-23-1950.html",
+          "note": "Created frozen release from uploaded full-state JSON and synced to main + gh-pages. Artifacts: releases/global-configurator-live-2026-04-23-1950.html, releases/global-configurator-state-2026-04-23-1950.json, releases/global-configurator-live.latest.json.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n3",
+      "label": "2026-04-23 20:26 — James migration safeguarded",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Backup",
+          "url": "",
+          "note": "Before migration, complete Clawdbot backup created at ~/migration-backups/2026-04-23-202634/.clawdbot (size ~1.5G). Rollback path preserved.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n4",
+      "label": "2026-04-23 20:39 — OpenAI Codex OAuth completed on James",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Auth status",
+          "url": "",
+          "note": "OpenClaw auth profile added: openai-codex:globalnativeorg@gmail.com (oauth). Default model switched to openai-codex/gpt-5.3-codex.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n5",
+      "label": "2026-04-23 20:51 — OpenClaw service stabilized",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Doctor + status",
+          "url": "",
+          "note": "Ran doctor-driven repair flow, installed openclaw-gateway systemd service, fixed credentials permissions (chmod 700), probe reachable, Telegram healthy.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n6",
+      "label": "2026-04-23 21:58 — Device scope pairing repaired",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Pairing",
+          "url": "",
+          "note": "Resolved repeated TUI pairing issue by approving pending scope-upgrade request ID from second terminal. Reconnect then succeeded.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n7",
+      "label": "2026-04-23 22:11 — James onboarding strategy agreed",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Approach",
+          "url": "",
+          "note": "Agreed two-stage James onboarding for Global Configurator: (1) read-only orientation + change summary, (2) one bounded first task. Avoid stale-context edits.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    },
+    {
+      "id": "n8",
+      "label": "Procedure — both Andy and James must append chronology",
+      "type": "standard",
+      "resources": [
+        {
+          "id": "note-1",
+          "title": "Operating rule",
+          "url": "",
+          "note": "For every meaningful chat/action: append one chronology node (timestamp + title + impact + next action). Minimum cadence: add before session close or lock release. If missed, add catch-up entry first at next opportunity.",
+          "addedAt": "2026-04-23T22:36:00+01:00"
+        }
+      ],
+      "nested": null
+    }
+  ],
+  "links": [
+    { "from": "n1", "to": "n2", "type": "child" },
+    { "from": "n1", "to": "n3", "type": "child" },
+    { "from": "n1", "to": "n4", "type": "child" },
+    { "from": "n1", "to": "n5", "type": "child" },
+    { "from": "n1", "to": "n6", "type": "child" },
+    { "from": "n1", "to": "n7", "type": "child" },
+    { "from": "n1", "to": "n8", "type": "child" }
+  ],
+  "focusId": "n1",
+  "seq": 8
+}
