@@ -1223,6 +1223,7 @@
       const focus = getFocusedNode();
       const scope = document.getElementById('resourcesScope');
       const list = document.getElementById('resourceList');
+      const titleInput = document.getElementById('resourceTitle');
       if (!focus) {
         scope.textContent = 'No focused node.';
         list.textContent = 'No resources yet for this node.';
@@ -1231,6 +1232,9 @@
 
       if (!Array.isArray(focus.resources)) focus.resources = [];
       scope.textContent = `Resources dedicated to focused node: ${focus.label}`;
+      if (titleInput && !titleInput.value.trim()) {
+        titleInput.value = focus.label || '';
+      }
 
       if (!focus.resources.length) {
         list.textContent = 'No resources yet for this node.';
@@ -1576,7 +1580,7 @@
       if (!Array.isArray(focus.resources)) focus.resources = [];
       focus.resources.push({ id: `r${Date.now()}`, title, url, note, addedAt: new Date().toISOString() });
 
-      titleEl.value = '';
+      titleEl.value = focus.label || '';
       urlEl.value = '';
       noteEl.value = '';
       renderResources();
