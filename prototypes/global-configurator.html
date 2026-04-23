@@ -969,15 +969,15 @@
       };
     }
 
-    function beginNodeDrag(evt, nodeId, mindmap, tx, ty, scaleVal) {
-      if (evt.button !== 0) return; // left mouse/touch pen only
+    function beginNodeDrag(evt, nodeId, mindmap, tx, ty, scaleVal, initialPos = null) {
+      if (!(evt.button === 0 || evt.pointerType === 'touch' || evt.pointerType === 'pen')) return;
       if (!mindmap || mindmap !== currentMindmap) return;
 
       const start = screenToMap(evt.clientX, evt.clientY, tx, ty, scaleVal);
       if (!start) return;
 
       const manual = ensureManualPos(mindmap);
-      const existing = manual[nodeId] || getNode(nodeId, mindmap) || { x: start.x, y: start.y };
+      const existing = manual[nodeId] || initialPos || { x: start.x, y: start.y };
 
       dragState = {
         nodeId,
@@ -1595,7 +1595,7 @@
 
       g.addEventListener('pointerdown', (evt) => {
         if (!dragMeta?.draggable) return;
-        beginNodeDrag(evt, n.id, dragMeta.mindmap, dragMeta.tx, dragMeta.ty, dragMeta.scale);
+        beginNodeDrag(evt, n.id, dragMeta.mindmap, dragMeta.tx, dragMeta.ty, dragMeta.scale, { x, y });
       });
 
       g.addEventListener('contextmenu', (evt) => {
