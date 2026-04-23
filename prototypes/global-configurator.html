@@ -1305,11 +1305,11 @@
       if (layoutMode === 'organic') {
         pos[fid] = { x: center.x, y: center.y };
 
-        // Parents arc above focus
+        // Parents arc above focus (tighter)
         ancestors.forEach((nodesAtLevel, lvlIdx) => {
-          const radius = 170 + (lvlIdx * 120);
-          const startA = -Math.PI * 0.92;
-          const endA = -Math.PI * 0.08;
+          const radius = 145 + (lvlIdx * 95);
+          const startA = -Math.PI * 0.90;
+          const endA = -Math.PI * 0.10;
           const span = endA - startA;
           nodesAtLevel.forEach((id, i) => {
             const t = nodesAtLevel.length === 1 ? 0.5 : (i / (nodesAtLevel.length - 1));
@@ -1318,11 +1318,11 @@
           });
         });
 
-        // Children arc below focus
+        // Children arc below focus (tighter)
         descendants.forEach((nodesAtLevel, lvlIdx) => {
-          const radius = 210 + (lvlIdx * 130);
-          const startA = Math.PI * 0.08;
-          const endA = Math.PI * 0.92;
+          const radius = 175 + (lvlIdx * 105);
+          const startA = Math.PI * 0.10;
+          const endA = Math.PI * 0.90;
           const span = endA - startA;
           nodesAtLevel.forEach((id, i) => {
             const t = nodesAtLevel.length === 1 ? 0.5 : (i / (nodesAtLevel.length - 1));
@@ -1337,8 +1337,8 @@
             const side = i % 2 === 0 ? -1 : 1;
             const rank = Math.floor(i / 2);
             pos[id] = {
-              x: center.x + side * (250 + (rank % 3) * 90),
-              y: center.y + (rank * 55) - 80
+              x: center.x + side * (220 + (rank % 3) * 75),
+              y: center.y + (rank * 48) - 70
             };
           }
         });
@@ -1444,17 +1444,17 @@
     function curvedLink(x1, y1, x2, y2, color, dash = false) {
       const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       const midX = (x1 + x2) / 2;
-      const bend = Math.max(40, Math.abs(x2 - x1) * 0.22);
+      const bend = Math.max(26, Math.abs(x2 - x1) * 0.18);
       const c1x = midX - bend;
       const c2x = midX + bend;
       const d = `M ${x1} ${y1} C ${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}`;
       p.setAttribute('d', d);
       p.setAttribute('fill', 'none');
       p.setAttribute('stroke', color);
-      p.setAttribute('stroke-width', '1.7');
+      p.setAttribute('stroke-width', '1.35');
       p.setAttribute('stroke-linecap', 'round');
-      p.setAttribute('opacity', '0.95');
-      if (dash) p.setAttribute('stroke-dasharray', '7 6');
+      p.setAttribute('opacity', '0.8');
+      if (dash) p.setAttribute('stroke-dasharray', '6 6');
       return p;
     }
 
@@ -1478,9 +1478,10 @@
       text.setAttribute('y', y + 5);
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('dominant-baseline', 'middle');
-      text.setAttribute('font-size', focused ? '15' : '13');
-      text.setAttribute('font-weight', focused ? '700' : '600');
-      text.setAttribute('fill', focused ? '#143D6F' : '#1E5BA8');
+      const organicMode = layoutMode === 'organic';
+      text.setAttribute('font-size', organicMode ? (focused ? '14' : '12') : (focused ? '15' : '13'));
+      text.setAttribute('font-weight', organicMode ? (focused ? '650' : '520') : (focused ? '700' : '600'));
+      text.setAttribute('fill', organicMode ? (focused ? '#154A6F' : '#286F92') : (focused ? '#143D6F' : '#1E5BA8'));
       text.textContent = n.label;
 
       const isAgentic = n.type === 'agentic';
@@ -1502,9 +1503,15 @@
         shape.setAttribute('ry', focused ? '34' : '30');
       }
 
-      shape.setAttribute('fill', `url(#grad-${currentDepth})`);
-      shape.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
-      shape.setAttribute('stroke-width', focused ? '3' : '2');
+      if (organicMode) {
+        shape.setAttribute('fill', focused ? colors.grad1 : '#eef9ff');
+        shape.setAttribute('stroke', focused ? '#2a8db8' : '#72bdd8');
+        shape.setAttribute('stroke-width', focused ? '2' : '1.4');
+      } else {
+        shape.setAttribute('fill', `url(#grad-${currentDepth})`);
+        shape.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
+        shape.setAttribute('stroke-width', focused ? '3' : '2');
+      }
 
       g.appendChild(shape);
       text.style.pointerEvents = 'none';
@@ -1566,7 +1573,9 @@
       mindmap.links.forEach(l => {
         const a = pos[l.from], b = pos[l.to];
         if (!a || !b) return;
-        const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
+        const color = layoutMode === 'organic'
+          ? (l.type === 'jump' ? '#4bb4ce' : '#8fd3e4')
+          : (l.type === 'jump' ? colors.primary + '88' : colors.line);
         if (layoutMode === 'organic') {
           layer.appendChild(curvedLink(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
         } else {
