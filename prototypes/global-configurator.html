@@ -1321,6 +1321,7 @@
       const applyManualPositions = () => {
         const manual = mindmap.manualPos || {};
         Object.keys(pos).forEach(id => {
+          if (cameraMode === 'focus' && id === fid) return; // keep selected focus node centered in focus-lock mode
           if (manual[id] && Number.isFinite(manual[id].x) && Number.isFinite(manual[id].y)) {
             pos[id] = { x: manual[id].x, y: manual[id].y };
           }
