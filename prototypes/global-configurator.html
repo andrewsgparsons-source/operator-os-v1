@@ -1584,6 +1584,79 @@
       return { x: from.x + dx * t, y: from.y + dy * t };
     }
 
+    function nodeCollisionRadius(node, focused) {
+      const m = nodeVisualMetrics(node, focused);
+      if (m.shape === 'rect') {
+        return Math.sqrt((m.hw * m.hw) + (m.hh * m.hh)) * 0.82;
+      }
+      return Math.max(m.rx, m.ry) * 0.92;
+    }
+
+    function resolveNodeOverlaps(pos, mindmap) {
+      const ids = Object.keys(pos || {});
+      if (ids.length < 2) return pos;
+
+      const focusId = mindmap.focusId;
+      const pad = 10;
+
+      for (let iter = 0; iter < 18; iter++) {
+        let moved = false;
+
+        for (let i = 0; i < ids.length; i++) {
+          const aId = ids[i];
+          const aPos = pos[aId];
+          const aNode = getNode(aId, mindmap);
+          if (!aPos || !aNode) continue;
+
+          for (let j = i + 1; j < ids.length; j++) {
+            const bId = ids[j];
+            const bPos = pos[bId];
+            const bNode = getNode(bId, mindmap);
+            if (!bPos || !bNode) continue;
+
+            let dx = bPos.x - aPos.x;
+            let dy = bPos.y - aPos.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < 0.001) {
+              dx = (Math.random() - 0.5) * 0.01;
+              dy = (Math.random() - 0.5) * 0.01;
+              dist = Math.hypot(dx, dy);
+            }
+
+            const ra = nodeCollisionRadius(aNode, aId === focusId);
+            const rb = nodeCollisionRadius(bNode, bId === focusId);
+            const minDist = ra + rb + pad;
+
+            if (dist < minDist) {
+              const overlap = (minDist - dist);
+              const ux = dx / dist;
+              const uy = dy / dist;
+
+              if (aId === focusId && bId !== focusId) {
+                bPos.x += ux * overlap;
+                bPos.y += uy * overlap;
+              } else if (bId === focusId && aId !== focusId) {
+                aPos.x -= ux * overlap;
+                aPos.y -= uy * overlap;
+              } else {
+                const push = overlap / 2;
+                aPos.x -= ux * push;
+                aPos.y -= uy * push;
+                bPos.x += ux * push;
+                bPos.y += uy * push;
+              }
+
+              moved = true;
+            }
+          }
+        }
+
+        if (!moved) break;
+      }
+
+      return pos;
+    }
+
     function nodeShape(n, x, y, focused, colors, showNested, dragMeta = null) {
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.style.cursor = 'pointer';
@@ -1688,7 +1761,9 @@
 
     function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null, positionsOverride = null) {
       const colors = getColorScheme(depth);
-      const pos = positionsOverride || place(mindmap.focusId, mindmap);
+      const basePos = positionsOverride || place(mindmap.focusId, mindmap);
+      const pos = Object.fromEntries(Object.entries(basePos).map(([k, v]) => [k, { x: v.x, y: v.y }]));
+      resolveNodeOverlaps(pos, mindmap);
       
       // Camera transform: either focus-lock centering or free-pan canvas
       const focusPos = focusPosOverride || pos[mindmap.focusId];
