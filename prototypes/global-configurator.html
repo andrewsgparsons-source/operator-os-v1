@@ -573,6 +573,19 @@
           <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
           <button id="addJump" class="secondary">+ Add Jump Link to Focus</button>
           <button id="focusRoot" class="secondary">⌂ Focus Root Node</button>
+
+          <div class="subtitle" style="margin-top:10px;">Create relationship between any existing nodes</div>
+          <label for="relFrom" class="subtitle" style="display:block;margin-bottom:6px;">From node</label>
+          <select id="relFrom" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;"></select>
+          <label for="relType" class="subtitle" style="display:block;margin-bottom:6px;">Relationship type</label>
+          <select id="relType" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="parent">Parent</option>
+            <option value="child">Child</option>
+            <option value="jump">Jump</option>
+          </select>
+          <label for="relTo" class="subtitle" style="display:block;margin-bottom:6px;">To node</label>
+          <select id="relTo" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;"></select>
+          <button id="createRelation" class="secondary">+ Create Relationship</button>
         </div>
       </div>
 
@@ -711,6 +724,9 @@
     const layoutModeSelect = document.getElementById('layoutMode');
     const levelsVisibleSelect = document.getElementById('levelsVisible');
     const cameraModeSelect = document.getElementById('cameraMode');
+    const relFromSelect = document.getElementById('relFrom');
+    const relToSelect = document.getElementById('relTo');
+    const relTypeSelect = document.getElementById('relType');
     const statDepth = document.getElementById('statDepth');
     const statNodes = document.getElementById('statNodes');
     const statLinks = document.getElementById('statLinks');
@@ -870,6 +886,49 @@
       if (type === 'child') return 'Child idea';
       if (type === 'parent') return 'Parent context';
       return 'Jump idea';
+    }
+
+    function refreshRelationshipBuilder() {
+      if (!relFromSelect || !relToSelect) return;
+      const nodes = currentMindmap.nodes || [];
+      const selectedFrom = relFromSelect.value || currentMindmap.focusId || '';
+      const selectedTo = relToSelect.value || currentMindmap.focusId || '';
+
+      const options = nodes.map(n => `<option value="${n.id}">${n.label || n.id}</option>`).join('');
+      relFromSelect.innerHTML = options;
+      relToSelect.innerHTML = options;
+
+      if (nodes.some(n => n.id === selectedFrom)) relFromSelect.value = selectedFrom;
+      if (nodes.some(n => n.id === selectedTo)) relToSelect.value = selectedTo;
+
+      if (!relFromSelect.value && nodes[0]) relFromSelect.value = nodes[0].id;
+      if (!relToSelect.value && nodes[0]) relToSelect.value = nodes[0].id;
+    }
+
+    function createRelationship() {
+      const from = relFromSelect?.value;
+      const to = relToSelect?.value;
+      const type = relTypeSelect?.value || 'child';
+
+      if (!from || !to) {
+        showZoomHint('Pick both nodes');
+        return;
+      }
+      if (from === to) {
+        showZoomHint('Pick two different nodes');
+        return;
+      }
+
+      const exists = currentMindmap.links.some(l => l.from === from && l.to === to && l.type === type);
+      if (exists) {
+        showZoomHint('Relationship already exists');
+        return;
+      }
+
+      currentMindmap.links.push({ from, to, type });
+      currentMindmap.focusId = to;
+      render();
+      showZoomHint(`Relationship added: ${type}`);
     }
 
     function renameNodeById(nodeId, nextLabel) {
@@ -1579,6 +1638,7 @@
       renderQuick();
       updateStats();
       renderResources();
+      refreshRelationshipBuilder();
       updateExportScopeSummary();
     }
 
@@ -1710,6 +1770,7 @@
     document.getElementById('addParent').onclick = () => addNodeWith('parent');
     document.getElementById('addJump').onclick = () => addNodeWith('jump');
     document.getElementById('renameNode').onclick = () => renameFocusedNode();
+    document.getElementById('createRelation').onclick = () => createRelationship();
     document.getElementById('focusRoot').onclick = () => {
       currentMindmap.focusId = currentMindmap.nodes[0].id;
       render();
