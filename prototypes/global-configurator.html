@@ -166,6 +166,35 @@
       opacity: 1;
     }
 
+    .node-context-menu {
+      position: fixed;
+      z-index: 9999;
+      min-width: 190px;
+      background: rgba(255,255,255,0.98);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 6px;
+      display: none;
+    }
+
+    .node-context-menu.show {
+      display: block;
+    }
+
+    .node-context-menu button {
+      width: 100%;
+      margin: 0 0 6px 0;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .node-context-menu button:last-child {
+      margin-bottom: 0;
+    }
+
     /* ===== DRAG HANDLE (DIVIDER) ===== */
     #dragHandle {
       flex: 0 0 auto;
@@ -569,6 +598,12 @@
     </section>
   </div>
 
+  <div id="nodeContextMenu" class="node-context-menu" role="menu" aria-label="Node actions">
+    <button id="ctxRename">✎ Rename node</button>
+    <button id="ctxTypeStandard" class="secondary">◯ Set type: Standard</button>
+    <button id="ctxTypeAgentic" class="secondary">▭ Set type: Agentic</button>
+  </div>
+
   <script>
     // ===== COLOR SCHEMES BY DEPTH =====
     const colorSchemes = [
@@ -675,6 +710,8 @@
     const statLinks = document.getElementById('statLinks');
     const breadcrumb = document.getElementById('breadcrumb');
     const zoomHint = document.getElementById('zoomHint');
+    const nodeContextMenu = document.getElementById('nodeContextMenu');
+    let contextNodeId = null;
     let lastAutoResourceTitle = '';
 
     // ===== HELPER FUNCTIONS =====
@@ -865,22 +902,41 @@
       const proposed = window.prompt('Rename node:', node.label || '');
       if (proposed === null) return; // user cancelled
 
-      const normalizedType = (node.type === 'agentic') ? 'agentic' : 'standard';
-      const typeInput = window.prompt('Node type (standard/agentic):', normalizedType);
-      if (typeInput !== null) {
-        const t = (typeInput || '').trim().toLowerCase().replace(/\s+node$/, '');
-        if (t === 'agentic' || t === 'standard') {
-          node.type = t;
-        }
-      }
-
       if (renameNodeById(nodeId, proposed)) {
         if (renameInput) renameInput.value = '';
         render();
-        showZoomHint('Node updated');
+        showZoomHint('Node renamed');
       } else {
         showZoomHint('Rename cancelled (empty name)');
       }
+    }
+
+    function setNodeType(nodeId, type) {
+      const node = getNode(nodeId);
+      if (!node) return;
+      node.type = (type === 'agentic') ? 'agentic' : 'standard';
+      render();
+      showZoomHint(`Node type set: ${node.type}`);
+    }
+
+    function hideNodeContextMenu() {
+      nodeContextMenu?.classList.remove('show');
+      contextNodeId = null;
+    }
+
+    function showNodeContextMenu(nodeId, clientX, clientY) {
+      if (!nodeContextMenu) return;
+      contextNodeId = nodeId;
+
+      const menuWidth = 210;
+      const menuHeight = 145;
+      const margin = 8;
+      const left = Math.min(Math.max(margin, clientX), window.innerWidth - menuWidth - margin);
+      const top = Math.min(Math.max(margin, clientY), window.innerHeight - menuHeight - margin);
+
+      nodeContextMenu.style.left = `${left}px`;
+      nodeContextMenu.style.top = `${top}px`;
+      nodeContextMenu.classList.add('show');
     }
 
     function relationship(fid, mindmap) {
@@ -1114,7 +1170,8 @@
       g.addEventListener('contextmenu', (evt) => {
         evt.preventDefault();
         currentMindmap.focusId = n.id;
-        promptRenameNode(n.id);
+        render();
+        showNodeContextMenu(n.id, evt.clientX, evt.clientY);
       });
 
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -1335,6 +1392,7 @@
     }
 
     function render() {
+      hideNodeContextMenu();
       const focus = getFocusedNode();
       focusName.textContent = focus?.label || currentMindmap.focusId;
       if (renameInput) {
@@ -1845,6 +1903,32 @@
         e.target.value = '';
       }
     });
+
+    // ===== NODE CONTEXT MENU =====
+    document.getElementById('ctxRename')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      promptRenameNode(contextNodeId);
+      hideNodeContextMenu();
+    });
+
+    document.getElementById('ctxTypeStandard')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      setNodeType(contextNodeId, 'standard');
+      hideNodeContextMenu();
+    });
+
+    document.getElementById('ctxTypeAgentic')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      setNodeType(contextNodeId, 'agentic');
+      hideNodeContextMenu();
+    });
+
+    document.addEventListener('click', (evt) => {
+      if (!nodeContextMenu) return;
+      if (!nodeContextMenu.contains(evt.target)) hideNodeContextMenu();
+    });
+
+    document.addEventListener('scroll', () => hideNodeContextMenu(), true);
 
     // ===== TAB NAVIGATION =====
     document.querySelectorAll('.tab-pill').forEach(pill => {
