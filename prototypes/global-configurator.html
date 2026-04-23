@@ -498,7 +498,8 @@
           <select id="importScope" style="margin-bottom:8px;">
             <option value="currentOnly">Option 1 — Import current level map ONLY</option>
             <option value="global">Option 2 — Import global map</option>
-            <option value="focusNode">Option 3 — Import map from focus node</option>
+            <option value="subsequent">Option 3 — Import subsequent to existing focused node</option>
+            <option value="focusNode">Option 4 — Import map from focus node</option>
           </select>
           <button id="importJsonBtn" class="secondary">⬆ Import JSON</button>
           <input type="file" id="importJsonFile" accept="application/json" style="display:none" />
@@ -1675,6 +1676,39 @@
       }, 1);
     }
 
+    function importSubsequentIntoFocused(targetMindmap, incomingMindmap) {
+      const focusedId = targetMindmap.focusId;
+      if (!focusedId) return { ok: false, reason: 'noFocus' };
+
+      const incomingNodes = Array.isArray(incomingMindmap?.nodes) ? incomingMindmap.nodes : [];
+      const incomingLinks = Array.isArray(incomingMindmap?.links) ? incomingMindmap.links : [];
+      if (incomingNodes.length === 0) return { ok: false, reason: 'empty' };
+
+      const idMap = new Map();
+      const remappedNodes = incomingNodes.map(n => {
+        const newId = nextId();
+        idMap.set(n.id, newId);
+        return { ...cloneMindmap(n), id: newId };
+      });
+
+      const remappedLinks = incomingLinks
+        .map(l => ({
+          ...cloneMindmap(l),
+          from: idMap.get(l.from),
+          to: idMap.get(l.to)
+        }))
+        .filter(l => l.from && l.to);
+
+      targetMindmap.nodes.push(...remappedNodes);
+      targetMindmap.links.push(...remappedLinks);
+
+      const incomingRootOldId = incomingMindmap.focusId || incomingNodes[0].id;
+      const importedRootId = idMap.get(incomingRootOldId) || remappedNodes[0].id;
+      targetMindmap.links.push({ from: focusedId, to: importedRootId, type: 'child' });
+
+      return { ok: true, importedRootId };
+    }
+
     function downloadTextFile(filename, text) {
       const blob = new Blob([text], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -1734,6 +1768,15 @@
             focused.nested = cloneMindmap(incoming);
             enterNode(focused.id);
             showZoomHint('Imported into focused node map');
+          }
+        } else if (importScope === 'subsequent') {
+          const result = importSubsequentIntoFocused(currentMindmap, incoming);
+          if (!result.ok) {
+            showZoomHint(result.reason === 'empty' ? 'Import skipped (empty map)' : 'No focused node to import into');
+          } else {
+            render();
+            updateBreadcrumb();
+            showZoomHint('Imported as subsequent to focused node');
           }
         } else {
           // Option 1: current level ONLY (ignore incoming nested maps)
