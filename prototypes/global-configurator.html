@@ -494,7 +494,13 @@
           <div id="exportScopeSummary" class="subtitle" style="margin:0 0 10px 0;">Will export: 0 nodes, 0 links, 0 nested maps</div>
           <button id="exportJson">⬇ Export JSON</button>
           <button id="copyJson" class="secondary">⧉ Copy JSON</button>
-          <button id="importJsonBtn" class="secondary">⬆ Import Into Current Map</button>
+          <label for="importScope" class="info-label" style="display:block;margin:6px 0 8px 0;">Import scope</label>
+          <select id="importScope" style="margin-bottom:8px;">
+            <option value="currentOnly">Option 1 — Import current level map ONLY</option>
+            <option value="global">Option 2 — Import global map</option>
+            <option value="focusNode">Option 3 — Import map from focus node</option>
+          </select>
+          <button id="importJsonBtn" class="secondary">⬆ Import JSON</button>
           <input type="file" id="importJsonFile" accept="application/json" style="display:none" />
         </div>
         <div class="control-box">
@@ -1709,10 +1715,35 @@
       try {
         const text = await file.text();
         const incoming = sanitizeMindmap(JSON.parse(text));
-        replaceMindmapInPlace(currentMindmap, incoming);
-        render();
-        updateBreadcrumb();
-        showZoomHint('JSON imported into current map');
+        const importScope = document.getElementById('importScope')?.value || 'currentOnly';
+
+        if (importScope === 'global') {
+          rootMindmap = cloneMindmap(incoming);
+          navStack = [];
+          currentMindmap = rootMindmap;
+          currentDepth = 0;
+          scale = 1;
+          render();
+          updateBreadcrumb();
+          showZoomHint('Global map imported');
+        } else if (importScope === 'focusNode') {
+          const focused = getFocusedNode();
+          if (!focused) {
+            showZoomHint('No focused node to import into');
+          } else {
+            focused.nested = cloneMindmap(incoming);
+            enterNode(focused.id);
+            showZoomHint('Imported into focused node map');
+          }
+        } else {
+          // Option 1: current level ONLY (ignore incoming nested maps)
+          const flatIncoming = cloneMindmap(incoming);
+          flatIncoming.nodes = (flatIncoming.nodes || []).map(n => ({ ...n, nested: null }));
+          replaceMindmapInPlace(currentMindmap, flatIncoming);
+          render();
+          updateBreadcrumb();
+          showZoomHint('Current level map imported (only)');
+        }
       } catch (err) {
         alert(`Import failed: ${err.message}`);
       } finally {
