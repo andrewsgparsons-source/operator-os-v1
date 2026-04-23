@@ -594,6 +594,7 @@
         <div class="control-box">
           <h2>Quick Navigate</h2>
           <div class="subtitle">Tap any node to focus</div>
+          <input type="text" id="quickSearch" placeholder="Search nodes..." style="margin-bottom:8px" />
           <div id="quickNodes" class="chips"></div>
         </div>
       </div>
@@ -728,6 +729,7 @@
     const relToSelect = document.getElementById('relTo');
     const relTypeSelect = document.getElementById('relType');
     const statDepth = document.getElementById('statDepth');
+    const quickSearchInput = document.getElementById('quickSearch');
     const statNodes = document.getElementById('statNodes');
     const statLinks = document.getElementById('statLinks');
     const breadcrumb = document.getElementById('breadcrumb');
@@ -1437,7 +1439,23 @@
 
     function renderQuick() {
       quickNodes.innerHTML = '';
-      currentMindmap.nodes.slice(-24).forEach(n => {
+      const q = (quickSearchInput?.value || '').trim().toLowerCase();
+      const pool = currentMindmap.nodes
+        .filter(n => {
+          if (!q) return true;
+          return `${n.label || ''} ${n.id || ''}`.toLowerCase().includes(q);
+        })
+        .slice(-80);
+
+      if (!pool.length) {
+        const empty = document.createElement('div');
+        empty.className = 'subtitle';
+        empty.textContent = q ? 'No matching nodes.' : 'No nodes.';
+        quickNodes.appendChild(empty);
+        return;
+      }
+
+      pool.forEach(n => {
         const chip = document.createElement('span');
         chip.className = 'chip';
         chip.textContent = n.label;
@@ -1782,6 +1800,10 @@
 
     renameInput?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') renameFocusedNode();
+    });
+
+    quickSearchInput?.addEventListener('input', () => {
+      renderQuick();
     });
 
     layoutModeSelect.addEventListener('change', (e) => {
