@@ -1270,6 +1270,21 @@
           row.appendChild(note);
         }
 
+        const editNote = document.createElement('button');
+        editNote.className = 'secondary';
+        editNote.style.marginTop = '8px';
+        editNote.style.marginRight = '6px';
+        editNote.textContent = 'Edit Note';
+        editNote.onclick = () => {
+          const currentNote = r.note || '';
+          const nextNote = window.prompt('Edit note:', currentNote);
+          if (nextNote === null) return;
+          r.note = nextNote.trim();
+          renderResources();
+          showZoomHint('Resource note updated');
+        };
+        row.appendChild(editNote);
+
         const del = document.createElement('button');
         del.className = 'secondary';
         del.style.marginTop = '8px';
