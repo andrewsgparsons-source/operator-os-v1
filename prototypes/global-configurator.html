@@ -484,9 +484,15 @@
       <div class="tab-content active" data-tab="save">
         <div class="control-box">
           <h2>Save / Load JSON</h2>
-          <div class="subtitle">Scope follows current map level. At root, export/import includes entire map. In nested levels, it applies to that level and its nested subtree.</div>
-          <button id="exportJson">⬇ Export Current Map JSON</button>
-          <button id="copyJson" class="secondary">⧉ Copy Current Map JSON</button>
+          <div class="subtitle">Choose export scope before saving/copying JSON.</div>
+          <label for="exportScope" class="info-label" style="display:block;margin:4px 0 8px 0;">Export scope</label>
+          <select id="exportScope" style="margin-bottom:8px;">
+            <option value="current">Option 1 — As is (current map level + its nested maps)</option>
+            <option value="all">Option 2 — Everything (full root map + all nested maps)</option>
+            <option value="downstream">Option 3 — Subsequent nodes only (focused node + downstream children + nested maps)</option>
+          </select>
+          <button id="exportJson">⬇ Export JSON</button>
+          <button id="copyJson" class="secondary">⧉ Copy JSON</button>
           <button id="importJsonBtn" class="secondary">⬆ Import Into Current Map</button>
           <input type="file" id="importJsonFile" accept="application/json" style="display:none" />
         </div>
@@ -1491,9 +1497,72 @@
       showZoomHint('Resource added to focused node');
     };
 
-    // ===== SAVE / LOAD (CURRENT MAP SCOPE) =====
+    // ===== SAVE / LOAD =====
+    function computeSeqFromNodes(nodes = []) {
+      return nodes.reduce((max, n) => {
+        const m = /^n(\d+)$/.exec(n.id || '');
+        return Math.max(max, m ? Number(m[1]) : 0);
+      }, 1);
+    }
+
+    function collectDownstreamNodeIds(mindmap, startId) {
+      const ids = new Set();
+      const queue = [startId];
+
+      while (queue.length) {
+        const id = queue.shift();
+        if (!id || ids.has(id)) continue;
+        ids.add(id);
+
+        const childIds = mindmap.links
+          .filter(l => (l.type === 'child' || l.type === 'parent') && l.from === id)
+          .map(l => l.to);
+
+        childIds.forEach(cid => {
+          if (!ids.has(cid)) queue.push(cid);
+        });
+      }
+
+      return ids;
+    }
+
+    function buildDownstreamMindmap(mindmap, startId) {
+      if (!startId) return cloneMindmap(mindmap);
+
+      const nodeIds = collectDownstreamNodeIds(mindmap, startId);
+      const nodes = mindmap.nodes
+        .filter(n => nodeIds.has(n.id))
+        .map(n => cloneMindmap(n));
+
+      const links = mindmap.links
+        .filter(l => (l.type === 'child' || l.type === 'parent') && nodeIds.has(l.from) && nodeIds.has(l.to))
+        .map(l => cloneMindmap(l));
+
+      return sanitizeMindmap({
+        nodes,
+        links,
+        focusId: startId,
+        seq: computeSeqFromNodes(nodes)
+      });
+    }
+
+    function getExportPayload() {
+      const scope = document.getElementById('exportScope')?.value || 'current';
+
+      if (scope === 'all') {
+        return cloneMindmap(rootMindmap);
+      }
+
+      if (scope === 'downstream') {
+        return buildDownstreamMindmap(currentMindmap, currentMindmap.focusId);
+      }
+
+      // Option 1: current map level as-is
+      return cloneMindmap(currentMindmap);
+    }
+
     function exportCurrentMapJson() {
-      return JSON.stringify(currentMindmap, null, 2);
+      return JSON.stringify(getExportPayload(), null, 2);
     }
 
     function replaceMindmapInPlace(target, incoming) {
@@ -1519,14 +1588,17 @@
     }
 
     document.getElementById('exportJson').onclick = () => {
+      const scope = document.getElementById('exportScope')?.value || 'current';
       const safeLabel = (getFocusedNode()?.label || 'map').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const level = `level-${currentDepth}`;
-      downloadTextFile(`global-configurator-${level}-${safeLabel || 'map'}.json`, exportCurrentMapJson());
+      downloadTextFile(`global-configurator-${scope}-${level}-${safeLabel || 'map'}.json`, exportCurrentMapJson());
+      showZoomHint(`JSON exported (${scope})`);
     };
 
     document.getElementById('copyJson').onclick = async () => {
+      const scope = document.getElementById('exportScope')?.value || 'current';
       await navigator.clipboard.writeText(exportCurrentMapJson());
-      showZoomHint('Current map JSON copied');
+      showZoomHint(`JSON copied (${scope})`);
     };
 
     document.getElementById('importJsonBtn').onclick = () => {
