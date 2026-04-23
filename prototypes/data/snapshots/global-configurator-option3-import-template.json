@@ -1,0 +1,36 @@
+{
+  "nodes": [
+    {
+      "id": "n1",
+      "label": "Imported Workstream Root",
+      "type": "standard",
+      "nested": {
+        "nodes": [
+          { "id": "n1", "label": "Nested Map Root", "type": "standard", "nested": null },
+          { "id": "n2", "label": "Nested Child A", "type": "standard", "nested": null },
+          { "id": "n3", "label": "Nested Agent", "type": "agentic", "nested": null, "agenticParams": { "role": "Specialist", "model": "openai-codex/gpt-5.3-codex", "temperature": "0.3" } }
+        ],
+        "links": [
+          { "from": "n1", "to": "n2", "type": "child" },
+          { "from": "n1", "to": "n3", "type": "child" }
+        ],
+        "focusId": "n1",
+        "seq": 3
+      }
+    },
+    { "id": "n2", "label": "Discovery", "type": "standard", "nested": null },
+    { "id": "n3", "label": "Build", "type": "standard", "nested": null },
+    { "id": "n4", "label": "Validate", "type": "standard", "nested": null },
+    { "id": "n5", "label": "Agentic QA", "type": "agentic", "nested": null, "agenticParams": { "role": "QA Agent", "model": "openai-codex/gpt-5.3-codex", "temperature": "0.3" } },
+    { "id": "n6", "label": "Reference Jump", "type": "standard", "nested": null }
+  ],
+  "links": [
+    { "from": "n1", "to": "n2", "type": "child" },
+    { "from": "n1", "to": "n3", "type": "child" },
+    { "from": "n1", "to": "n4", "type": "child" },
+    { "from": "n3", "to": "n5", "type": "child" },
+    { "from": "n1", "to": "n6", "type": "jump" }
+  ],
+  "focusId": "n1",
+  "seq": 6
+}
