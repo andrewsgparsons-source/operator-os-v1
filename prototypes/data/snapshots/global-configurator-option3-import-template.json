@@ -8,7 +8,7 @@
         {
           "id": "r-root-1",
           "title": "Node purpose and operating role",
-          "url": "",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/imported-workstream-root.mp3",
           "note": "This is the root node for an imported workstream. When used with Option 3 import, this node becomes the top of a new branch attached under the currently focused node in the Global Configurator. It is intended to represent a coherent package of work (discovery, build, validation, and supporting references) that can be moved as one unit. Human operators should treat this node as the branch entry point: focus it to inspect scope, then move through child nodes for execution detail.",
           "addedAt": "2026-04-23T19:25:00+01:00"
         }
@@ -23,7 +23,7 @@
               {
                 "id": "r-nested-root-1",
                 "title": "Nested map explanation",
-                "url": "",
+                "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/nested-map-root.mp3",
                 "note": "This node is the root of a nested map that sits inside the parent Imported Workstream Root node. Nested maps are used to hold second-order detail without cluttering the main level. Humans should use nested maps for decomposition: keep the top level legible, and push implementation specifics into nested layers. This pattern supports scale and reduces visual overload while preserving full traceability.",
                 "addedAt": "2026-04-23T19:25:00+01:00"
               }
@@ -38,7 +38,7 @@
               {
                 "id": "r-nested-child-a-1",
                 "title": "Nested child usage",
-                "url": "",
+                "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/nested-child-a.mp3",
                 "note": "This child node demonstrates how to represent a specific sub-task inside a nested map. It should describe a single unit of action or understanding that contributes to the nested root objective. Humans should avoid multi-topic notes here; keep it atomic so ownership, status, and progress are easy to reason about.",
                 "addedAt": "2026-04-23T19:25:00+01:00"
               }
@@ -58,7 +58,7 @@
               {
                 "id": "r-nested-agent-1",
                 "title": "Agentic node behavior",
-                "url": "",
+                "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/nested-agent.mp3",
                 "note": "This node is agentic, meaning it represents an executable AI role rather than passive information. Role defines the function, model defines compute profile, and temperature defines output determinism/creativity balance. For training: start low temperature for reliability, increase only when exploration is required. Humans should use agentic nodes where repeatable delegated behavior is needed.",
                 "addedAt": "2026-04-23T19:25:00+01:00"
               }
@@ -67,8 +67,16 @@
           }
         ],
         "links": [
-          { "from": "n1", "to": "n2", "type": "child" },
-          { "from": "n1", "to": "n3", "type": "child" }
+          {
+            "from": "n1",
+            "to": "n2",
+            "type": "child"
+          },
+          {
+            "from": "n1",
+            "to": "n3",
+            "type": "child"
+          }
         ],
         "focusId": "n1",
         "seq": 3
@@ -82,7 +90,7 @@
         {
           "id": "r-discovery-1",
           "title": "Discovery stage guide",
-          "url": "",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/discovery.mp3",
           "note": "Discovery captures problem framing, assumptions, constraints, and known unknowns. This node should answer: what are we solving, for whom, and what evidence do we already have? Humans should log findings, key references, and decision hypotheses here before moving to build. Strong discovery reduces rework and keeps downstream implementation aligned.",
           "addedAt": "2026-04-23T19:25:00+01:00"
         }
@@ -97,7 +105,7 @@
         {
           "id": "r-build-1",
           "title": "Build stage guide",
-          "url": "",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/build.mp3",
           "note": "Build is where approved discovery outputs become concrete implementation. This node should store build decisions, architecture choices, and execution checkpoints. Humans should track what was implemented, why trade-offs were made, and what remains outstanding. Keep links to validation criteria so build effort stays testable and objective.",
           "addedAt": "2026-04-23T19:25:00+01:00"
         }
@@ -112,7 +120,7 @@
         {
           "id": "r-validate-1",
           "title": "Validation stage guide",
-          "url": "",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/validate.mp3",
           "note": "Validate confirms whether the build meets functional, quality, and outcome expectations. Use this node for test plans, pass/fail evidence, defect notes, and sign-off decisions. Humans should record not only what failed but why and what corrective action was taken. Validation closes the loop between discovery assumptions and real results.",
           "addedAt": "2026-04-23T19:25:00+01:00"
         }
@@ -132,7 +140,7 @@
         {
           "id": "r-agentic-qa-1",
           "title": "Agentic QA operating notes",
-          "url": "",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/agentic-qa.mp3",
           "note": "This node represents an automated QA role. It should be used for repeatable test and review behavior where consistency matters. Recommended baseline is GPT model with low temperature to reduce variance and false positives. Humans should define explicit QA criteria in notes/resources so the agent has clear acceptance boundaries and does not drift into generic commentary.",
           "addedAt": "2026-04-23T19:25:00+01:00"
         }
@@ -147,7 +155,7 @@
         {
           "id": "r-reference-jump-1",
           "title": "Jump relationship explanation",
-          "url": "",
+          "url": "https://andrewsgparsons-source.github.io/operator-os-v1/prototypes/data/audio/training/reference-jump.mp3",
           "note": "This node exists to demonstrate non-hierarchical cross-linking via jump relationships. Jumps are used when two nodes are related conceptually or operationally but not parent-child in structure. Humans should use jump links to preserve hierarchy integrity while still exposing lateral dependencies, references, and supporting context.",
           "addedAt": "2026-04-23T19:25:00+01:00"
         }
@@ -156,11 +164,31 @@
     }
   ],
   "links": [
-    { "from": "n1", "to": "n2", "type": "child" },
-    { "from": "n1", "to": "n3", "type": "child" },
-    { "from": "n1", "to": "n4", "type": "child" },
-    { "from": "n3", "to": "n5", "type": "child" },
-    { "from": "n1", "to": "n6", "type": "jump" }
+    {
+      "from": "n1",
+      "to": "n2",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n3",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n4",
+      "type": "child"
+    },
+    {
+      "from": "n3",
+      "to": "n5",
+      "type": "child"
+    },
+    {
+      "from": "n1",
+      "to": "n6",
+      "type": "jump"
+    }
   ],
   "focusId": "n1",
   "seq": 6
