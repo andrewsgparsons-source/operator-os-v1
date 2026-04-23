@@ -531,6 +531,8 @@
           </select>
           <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
           <button id="addChild">+ Add Child to Focus</button>
+          <input type="text" id="renameNodeLabel" placeholder="Rename focused node" style="margin-top:8px" />
+          <button id="renameNode" class="secondary">✎ Rename Focused Node</button>
           <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
           <button id="addJump" class="secondary">+ Add Jump Link to Focus</button>
           <button id="focusRoot" class="secondary">⌂ Focus Root Node</button>
@@ -654,6 +656,7 @@
     // ===== DOM ELEMENTS =====
     const svg = document.getElementById('stage');
     const input = document.getElementById('nodeLabel');
+    const renameInput = document.getElementById('renameNodeLabel');
     const focusName = document.getElementById('focusName');
     const quickNodes = document.getElementById('quickNodes');
     const layoutModeSelect = document.getElementById('layoutMode');
@@ -815,6 +818,25 @@
       if (type === 'child') return 'Child idea';
       if (type === 'parent') return 'Parent context';
       return 'Jump idea';
+    }
+
+    function renameFocusedNode() {
+      const focused = getFocusedNode();
+      if (!focused) {
+        showZoomHint('No focused node to rename');
+        return;
+      }
+
+      const nextLabel = (renameInput?.value || '').trim();
+      if (!nextLabel) {
+        showZoomHint('Enter a new node name first');
+        return;
+      }
+
+      focused.label = nextLabel;
+      if (renameInput) renameInput.value = '';
+      render();
+      showZoomHint('Focused node renamed');
     }
 
     function relationship(fid, mindmap) {
@@ -1226,6 +1248,9 @@
     function render() {
       const focus = getFocusedNode();
       focusName.textContent = focus?.label || currentMindmap.focusId;
+      if (renameInput) {
+        renameInput.placeholder = focus?.label ? `Rename "${focus.label}"` : 'Rename focused node';
+      }
 
       svg.innerHTML = '';
       
@@ -1443,6 +1468,7 @@
     document.getElementById('addChild').onclick = () => addNodeWith('child');
     document.getElementById('addParent').onclick = () => addNodeWith('parent');
     document.getElementById('addJump').onclick = () => addNodeWith('jump');
+    document.getElementById('renameNode').onclick = () => renameFocusedNode();
     document.getElementById('focusRoot').onclick = () => {
       currentMindmap.focusId = currentMindmap.nodes[0].id;
       render();
@@ -1450,6 +1476,10 @@
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addNodeWith('child');
+    });
+
+    renameInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') renameFocusedNode();
     });
 
     layoutModeSelect.addEventListener('change', (e) => {
