@@ -587,7 +587,7 @@
     const MAP_DATA_URL = './data/global-configurator.base.json';
     const fallbackMindmap = {
       nodes: [
-        { id: 'n1', label: 'Focus Node', nested: null }
+        { id: 'n1', label: 'Focus Node', type: 'standard', nested: null }
       ],
       links: [],
       focusId: 'n1',
@@ -603,6 +603,7 @@
         return cloneMindmap(fallbackMindmap);
       }
       const safe = cloneMindmap(data);
+      safe.nodes = safe.nodes.map(n => ({ ...n, type: (n.type === 'agentic' ? 'agentic' : 'standard') }));
       if (!safe.focusId && safe.nodes[0]) safe.focusId = safe.nodes[0].id;
       if (typeof safe.seq !== 'number') {
         safe.seq = safe.nodes.reduce((max, n) => {
@@ -698,7 +699,7 @@
     function ensureNestedMindmap(node) {
       if (!node.nested) {
         node.nested = {
-          nodes: [{ id: 'n1', label: node.label, nested: null }],
+          nodes: [{ id: 'n1', label: node.label, type: 'standard', nested: null }],
           links: [],
           focusId: 'n1',
           seq: 1
@@ -804,7 +805,7 @@
     function addNodeWith(type) {
       const label = (input.value || '').trim() || defaultLabel(type);
       const id = nextId();
-      currentMindmap.nodes.push({ id, label, nested: null });
+      currentMindmap.nodes.push({ id, label, type: 'standard', nested: null });
 
       if (type === 'child') {
         currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'child' });
@@ -864,10 +865,19 @@
       const proposed = window.prompt('Rename node:', node.label || '');
       if (proposed === null) return; // user cancelled
 
+      const normalizedType = (node.type === 'agentic') ? 'agentic' : 'standard';
+      const typeInput = window.prompt('Node type (standard/agentic):', normalizedType);
+      if (typeInput !== null) {
+        const t = (typeInput || '').trim().toLowerCase().replace(/\s+node$/, '');
+        if (t === 'agentic' || t === 'standard') {
+          node.type = t;
+        }
+      }
+
       if (renameNodeById(nodeId, proposed)) {
         if (renameInput) renameInput.value = '';
         render();
-        showZoomHint('Node renamed');
+        showZoomHint('Node updated');
       } else {
         showZoomHint('Rename cancelled (empty name)');
       }
@@ -1117,15 +1127,30 @@
       text.setAttribute('fill', focused ? '#143D6F' : '#1E5BA8');
       text.textContent = n.label;
 
-      const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
-      e.setAttribute('cx', x); e.setAttribute('cy', y);
-      e.setAttribute('rx', focused ? '92' : '82');
-      e.setAttribute('ry', focused ? '34' : '30');
-      e.setAttribute('fill', `url(#grad-${currentDepth})`);
-      e.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
-      e.setAttribute('stroke-width', focused ? '3' : '2');
+      const isAgentic = n.type === 'agentic';
+      let shape;
+      if (isAgentic) {
+        shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        const w = focused ? 184 : 164;
+        const h = focused ? 68 : 60;
+        shape.setAttribute('x', x - w / 2);
+        shape.setAttribute('y', y - h / 2);
+        shape.setAttribute('width', w);
+        shape.setAttribute('height', h);
+        shape.setAttribute('rx', 10);
+      } else {
+        shape = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        shape.setAttribute('cx', x);
+        shape.setAttribute('cy', y);
+        shape.setAttribute('rx', focused ? '92' : '82');
+        shape.setAttribute('ry', focused ? '34' : '30');
+      }
 
-      g.appendChild(e);
+      shape.setAttribute('fill', `url(#grad-${currentDepth})`);
+      shape.setAttribute('stroke', focused ? colors.primary : colors.primary + '88');
+      shape.setAttribute('stroke-width', focused ? '3' : '2');
+
+      g.appendChild(shape);
       text.style.pointerEvents = 'none';
       g.appendChild(text);
 
