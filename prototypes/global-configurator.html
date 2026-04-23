@@ -587,6 +587,7 @@
       <button class="tab-pill" data-tab="main">Main Control</button>
       <button class="tab-pill" data-tab="navigate">Quick Navigate</button>
       <button class="tab-pill" data-tab="resources">Resources</button>
+      <button class="tab-pill" data-tab="agentic" id="agenticTabBtn" style="display:none;">Agentic parameters</button>
     </nav>
 
     <!-- CONTROLS PANE -->
@@ -694,6 +695,21 @@
         <div class="control-box">
           <h2>Current Node Library</h2>
           <div id="resourceList" class="subtitle">No resources yet for this node.</div>
+        </div>
+      </div>
+
+      <!-- AGENTIC PARAMETERS TAB -->
+      <div class="tab-content" data-tab="agentic" id="agenticTabContent" style="display:none;">
+        <div class="control-box">
+          <h2>Agentic Parameters</h2>
+          <div class="subtitle" id="agenticScope">Parameters for the currently focused agentic node.</div>
+          <label for="agenticRole" class="subtitle" style="display:block;margin-bottom:6px;">Role</label>
+          <input type="text" id="agenticRole" placeholder="e.g. Research Agent" />
+          <label for="agenticModel" class="subtitle" style="display:block;margin:10px 0 6px 0;">Preferred model</label>
+          <input type="text" id="agenticModel" placeholder="e.g. gpt-5" />
+          <label for="agenticTemp" class="subtitle" style="display:block;margin:10px 0 6px 0;">Temperature</label>
+          <input type="text" id="agenticTemp" placeholder="e.g. 0.3" />
+          <button id="saveAgenticParams" style="margin-top:10px">Save Agentic Parameters</button>
         </div>
       </div>
     </section>
@@ -817,6 +833,8 @@
     const relTypeSelect = document.getElementById('relType');
     const statDepth = document.getElementById('statDepth');
     const quickSearchInput = document.getElementById('quickSearch');
+    const agenticTabBtn = document.getElementById('agenticTabBtn');
+    const agenticTabContent = document.getElementById('agenticTabContent');
     const statNodes = document.getElementById('statNodes');
     const statLinks = document.getElementById('statLinks');
     const breadcrumb = document.getElementById('breadcrumb');
@@ -1951,6 +1969,46 @@
       });
     }
 
+    function renderAgenticTabVisibility() {
+      const focus = getFocusedNode();
+      const isAgentic = focus?.type === 'agentic';
+
+      if (agenticTabBtn) agenticTabBtn.style.display = isAgentic ? '' : 'none';
+      if (agenticTabContent) agenticTabContent.style.display = isAgentic ? '' : 'none';
+
+      const activePill = document.querySelector('.tab-pill.active');
+      const activeTab = activePill?.getAttribute('data-tab');
+      if (!isAgentic && activeTab === 'agentic') {
+        setActiveTab('resources', { allowCloseDesktop: false });
+      }
+    }
+
+    function renderAgenticParams() {
+      const focus = getFocusedNode();
+      const scope = document.getElementById('agenticScope');
+      const role = document.getElementById('agenticRole');
+      const model = document.getElementById('agenticModel');
+      const temp = document.getElementById('agenticTemp');
+      if (!scope || !role || !model || !temp) return;
+
+      if (!focus || focus.type !== 'agentic') {
+        scope.textContent = 'Select an agentic node to edit parameters.';
+        role.value = '';
+        model.value = '';
+        temp.value = '';
+        return;
+      }
+
+      if (!focus.agenticParams || typeof focus.agenticParams !== 'object') {
+        focus.agenticParams = { role: '', model: '', temperature: '' };
+      }
+
+      scope.textContent = `Parameters for: ${focus.label}`;
+      role.value = focus.agenticParams.role || '';
+      model.value = focus.agenticParams.model || '';
+      temp.value = focus.agenticParams.temperature || '';
+    }
+
     function render() {
       hideNodeContextMenu();
       const focus = getFocusedNode();
@@ -2045,6 +2103,8 @@
       renderQuick();
       updateStats();
       renderResources();
+      renderAgenticTabVisibility();
+      renderAgenticParams();
       refreshRelationshipBuilder();
       updateExportScopeSummary();
     }
@@ -2243,6 +2303,20 @@
       renderResources();
       showZoomHint('Resource added to focused node');
     };
+
+    document.getElementById('saveAgenticParams')?.addEventListener('click', () => {
+      const focus = getFocusedNode();
+      if (!focus || focus.type !== 'agentic') {
+        showZoomHint('Select an agentic node first');
+        return;
+      }
+      const role = (document.getElementById('agenticRole')?.value || '').trim();
+      const model = (document.getElementById('agenticModel')?.value || '').trim();
+      const temperature = (document.getElementById('agenticTemp')?.value || '').trim();
+      focus.agenticParams = { role, model, temperature };
+      showZoomHint('Agentic parameters saved');
+      renderAgenticParams();
+    });
 
     // ===== SAVE / LOAD =====
     function computeSeqFromNodes(nodes = []) {
