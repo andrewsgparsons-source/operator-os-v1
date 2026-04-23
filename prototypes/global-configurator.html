@@ -1118,7 +1118,7 @@
         });
 
         rel.jumps.forEach((id, i) => {
-          if (visible.has(id) && !pos[id]) pos[id] = { x: fx + 100, y: fy + 160 + i * 60 };
+          if (!pos[id]) pos[id] = { x: fx + 100, y: fy + 160 + i * 60 };
         });
         return pos;
       }
@@ -1140,6 +1140,14 @@
             const a = (Math.PI * 2 * i) / Math.max(1, nodesAtLevel.length) - Math.PI / 2;
             pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
           });
+        });
+
+        rel.jumps.forEach((id, i) => {
+          if (!pos[id]) {
+            const side = i % 2 === 0 ? -1 : 1;
+            const rank = Math.floor(i / 2);
+            pos[id] = { x: center.x + side * (260 + rank * 140), y: center.y + (side < 0 ? -110 : 110) };
+          }
         });
 
         return pos;
@@ -1165,7 +1173,7 @@
       });
 
       rel.jumps.forEach((id, i) => {
-        if (visible.has(id) && !pos[id]) {
+        if (!pos[id]) {
           const side = i % 2 === 0 ? -1 : 1;
           const rank = Math.floor(i / 2);
           pos[id] = { x: center.x + side * (240 + rank * 150), y: center.y + (side < 0 ? -80 : 80) };
