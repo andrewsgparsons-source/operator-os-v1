@@ -634,6 +634,7 @@
             <option value="topdown">Top-down</option>
             <option value="list">List (children on right)</option>
             <option value="radial">Radial</option>
+            <option value="organic">Organic (TheBrain-style)</option>
           </select>
           <label for="levelsVisible" class="subtitle" style="display:block;margin-bottom:6px;">Visible relationship levels</label>
           <select id="levelsVisible" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
@@ -1301,6 +1302,50 @@
         return pos;
       }
 
+      if (layoutMode === 'organic') {
+        pos[fid] = { x: center.x, y: center.y };
+
+        // Parents arc above focus
+        ancestors.forEach((nodesAtLevel, lvlIdx) => {
+          const radius = 170 + (lvlIdx * 120);
+          const startA = -Math.PI * 0.92;
+          const endA = -Math.PI * 0.08;
+          const span = endA - startA;
+          nodesAtLevel.forEach((id, i) => {
+            const t = nodesAtLevel.length === 1 ? 0.5 : (i / (nodesAtLevel.length - 1));
+            const a = startA + span * t;
+            pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+          });
+        });
+
+        // Children arc below focus
+        descendants.forEach((nodesAtLevel, lvlIdx) => {
+          const radius = 210 + (lvlIdx * 130);
+          const startA = Math.PI * 0.08;
+          const endA = Math.PI * 0.92;
+          const span = endA - startA;
+          nodesAtLevel.forEach((id, i) => {
+            const t = nodesAtLevel.length === 1 ? 0.5 : (i / (nodesAtLevel.length - 1));
+            const a = startA + span * t;
+            pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+          });
+        });
+
+        // Jumps distributed left/right side bands
+        rel.jumps.forEach((id, i) => {
+          if (!pos[id]) {
+            const side = i % 2 === 0 ? -1 : 1;
+            const rank = Math.floor(i / 2);
+            pos[id] = {
+              x: center.x + side * (250 + (rank % 3) * 90),
+              y: center.y + (rank * 55) - 80
+            };
+          }
+        });
+
+        return pos;
+      }
+
       // top-down (default)
       pos[fid] = { x: center.x, y: center.y };
 
@@ -1394,6 +1439,23 @@
       el.setAttribute('stroke-width', '2');
       if (dash) el.setAttribute('stroke-dasharray', '7 6');
       return el;
+    }
+
+    function curvedLink(x1, y1, x2, y2, color, dash = false) {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const midX = (x1 + x2) / 2;
+      const bend = Math.max(40, Math.abs(x2 - x1) * 0.22);
+      const c1x = midX - bend;
+      const c2x = midX + bend;
+      const d = `M ${x1} ${y1} C ${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}`;
+      p.setAttribute('d', d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', color);
+      p.setAttribute('stroke-width', '1.7');
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('opacity', '0.95');
+      if (dash) p.setAttribute('stroke-dasharray', '7 6');
+      return p;
     }
 
     function nodeShape(n, x, y, focused, colors, showNested) {
@@ -1505,7 +1567,11 @@
         const a = pos[l.from], b = pos[l.to];
         if (!a || !b) return;
         const color = l.type === 'jump' ? colors.primary + '88' : colors.line;
-        layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+        if (layoutMode === 'organic') {
+          layer.appendChild(curvedLink(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+        } else {
+          layer.appendChild(line(a.x, a.y, b.x, b.y, color, l.type === 'jump'));
+        }
       });
 
       // Draw nodes
