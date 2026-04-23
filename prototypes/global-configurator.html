@@ -1305,7 +1305,7 @@
       if (layoutMode === 'organic') {
         pos[fid] = { x: center.x, y: center.y };
 
-        // Parents arc above focus (tighter)
+        // Parents arc above focus
         ancestors.forEach((nodesAtLevel, lvlIdx) => {
           const radius = 145 + (lvlIdx * 95);
           const startA = -Math.PI * 0.90;
@@ -1318,27 +1318,32 @@
           });
         });
 
-        // Children arc below focus (tighter)
+        // Children in two columns under focus (left/right fan-out)
         descendants.forEach((nodesAtLevel, lvlIdx) => {
-          const radius = 175 + (lvlIdx * 105);
-          const startA = Math.PI * 0.10;
-          const endA = Math.PI * 0.90;
-          const span = endA - startA;
+          const colX = 250 + (lvlIdx * 120);
+          const baseY = center.y + 110 + (lvlIdx * 46);
+          let leftIdx = 0;
+          let rightIdx = 0;
           nodesAtLevel.forEach((id, i) => {
-            const t = nodesAtLevel.length === 1 ? 0.5 : (i / (nodesAtLevel.length - 1));
-            const a = startA + span * t;
-            pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+            const isLeft = i % 2 === 0;
+            if (isLeft) {
+              pos[id] = { x: center.x - colX, y: baseY + (leftIdx * 58) };
+              leftIdx += 1;
+            } else {
+              pos[id] = { x: center.x + colX, y: baseY + (rightIdx * 58) };
+              rightIdx += 1;
+            }
           });
         });
 
-        // Jumps distributed left/right side bands
+        // Jumps distributed upper left/right bands
         rel.jumps.forEach((id, i) => {
           if (!pos[id]) {
             const side = i % 2 === 0 ? -1 : 1;
             const rank = Math.floor(i / 2);
             pos[id] = {
-              x: center.x + side * (220 + (rank % 3) * 75),
-              y: center.y + (rank * 48) - 70
+              x: center.x + side * (240 + (rank % 3) * 80),
+              y: center.y - 120 + (rank * 42)
             };
           }
         });
@@ -1443,17 +1448,21 @@
 
     function curvedLink(x1, y1, x2, y2, color, dash = false) {
       const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      const midX = (x1 + x2) / 2;
-      const bend = Math.max(26, Math.abs(x2 - x1) * 0.18);
-      const c1x = midX - bend;
-      const c2x = midX + bend;
-      const d = `M ${x1} ${y1} C ${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}`;
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const bendX = Math.max(34, Math.abs(dx) * 0.25);
+      const bendY = Math.max(22, Math.abs(dy) * 0.22);
+      const c1x = x1 + (dx >= 0 ? bendX : -bendX);
+      const c2x = x2 - (dx >= 0 ? bendX : -bendX);
+      const c1y = y1 + bendY;
+      const c2y = y2 - bendY;
+      const d = `M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`;
       p.setAttribute('d', d);
       p.setAttribute('fill', 'none');
       p.setAttribute('stroke', color);
-      p.setAttribute('stroke-width', '1.35');
+      p.setAttribute('stroke-width', '1.5');
       p.setAttribute('stroke-linecap', 'round');
-      p.setAttribute('opacity', '0.8');
+      p.setAttribute('opacity', '0.86');
       if (dash) p.setAttribute('stroke-dasharray', '6 6');
       return p;
     }
@@ -1485,22 +1494,28 @@
       text.textContent = n.label;
 
       const isAgentic = n.type === 'agentic';
+      const organicLabelWidth = Math.max(82, Math.min(190, ((n.label || '').length * 4.8) + (focused ? 42 : 32)));
       let shape;
       if (isAgentic) {
         shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        const w = focused ? 184 : 164;
-        const h = focused ? 68 : 60;
+        const w = organicMode ? organicLabelWidth * 2 : (focused ? 184 : 164);
+        const h = organicMode ? (focused ? 54 : 48) : (focused ? 68 : 60);
         shape.setAttribute('x', x - w / 2);
         shape.setAttribute('y', y - h / 2);
         shape.setAttribute('width', w);
         shape.setAttribute('height', h);
-        shape.setAttribute('rx', 10);
+        shape.setAttribute('rx', organicMode ? 12 : 10);
       } else {
         shape = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
         shape.setAttribute('cx', x);
         shape.setAttribute('cy', y);
-        shape.setAttribute('rx', focused ? '92' : '82');
-        shape.setAttribute('ry', focused ? '34' : '30');
+        if (organicMode) {
+          shape.setAttribute('rx', `${organicLabelWidth}`);
+          shape.setAttribute('ry', focused ? '28' : '24');
+        } else {
+          shape.setAttribute('rx', focused ? '92' : '82');
+          shape.setAttribute('ry', focused ? '34' : '30');
+        }
       }
 
       if (organicMode) {
