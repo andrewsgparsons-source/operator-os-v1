@@ -674,6 +674,7 @@
     const statLinks = document.getElementById('statLinks');
     const breadcrumb = document.getElementById('breadcrumb');
     const zoomHint = document.getElementById('zoomHint');
+    let lastAutoResourceTitle = '';
 
     // ===== HELPER FUNCTIONS =====
     function nextId() {
@@ -1232,8 +1233,13 @@
 
       if (!Array.isArray(focus.resources)) focus.resources = [];
       scope.textContent = `Resources dedicated to focused node: ${focus.label}`;
-      if (titleInput && !titleInput.value.trim()) {
-        titleInput.value = focus.label || '';
+      const preferredTitle = (focus.label || focus.id || '').trim();
+      if (titleInput) {
+        const current = (titleInput.value || '').trim();
+        if (!current || current === lastAutoResourceTitle) {
+          titleInput.value = preferredTitle;
+          lastAutoResourceTitle = preferredTitle;
+        }
       }
 
       if (!focus.resources.length) {
@@ -1580,7 +1586,9 @@
       if (!Array.isArray(focus.resources)) focus.resources = [];
       focus.resources.push({ id: `r${Date.now()}`, title, url, note, addedAt: new Date().toISOString() });
 
-      titleEl.value = focus.label || '';
+      const preferredTitle = (focus.label || focus.id || '').trim();
+      titleEl.value = preferredTitle;
+      lastAutoResourceTitle = preferredTitle;
       urlEl.value = '';
       noteEl.value = '';
       renderResources();
