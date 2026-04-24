@@ -5028,6 +5028,28 @@
           "addedAt": "2026-04-24T05:16:24.173Z"
         }
       ]
+    },
+    {
+      "id": "n79",
+      "label": "agent orchestration layer",
+      "type": "standard",
+      "nested": null,
+      "resources": [
+        {
+          "id": "r1777009416410",
+          "title": "orchestration model",
+          "url": "",
+          "note": "Cross-cutting orchestration layer: any node can become actionable via assignable parameters. Keep functionality assessment as thought-space; orchestration reads parameters across the map.",
+          "addedAt": "2026-04-24T05:43:36.410Z"
+        },
+        {
+          "id": "r1777009416424",
+          "title": "assignable per-node parameters",
+          "url": "",
+          "note": "actionable, status (idea/queued/active/blocked/done), priority (P1-P4), assignee (agent/human), dueAt, effort, orchestrationNote.",
+          "addedAt": "2026-04-24T05:43:36.423Z"
+        }
+      ]
     }
   ],
   "links": [
@@ -5320,10 +5342,15 @@
       "from": "n15",
       "to": "n78",
       "type": "child"
+    },
+    {
+      "from": "n15",
+      "to": "n79",
+      "type": "child"
     }
   ],
   "focusId": "n10",
-  "seq": 78,
+  "seq": 79,
   "manualPos": {
     "n3": {
       "x": 597.0631713867188,
