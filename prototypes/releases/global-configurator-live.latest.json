@@ -1,7 +1,7 @@
 {
-  "lockedAt": "2026-04-24T22:38:09+01:00",
+  "lockedAt": "2026-04-24T22:50:05+01:00",
   "sourceHtml": "prototypes/global-configurator.html",
-  "sourceState": "prototypes/data/snapshots/global-configurator-state-2026-04-24-2238-configurator-vision.json",
-  "lockedHtml": "prototypes/releases/global-configurator-live-2026-04-24-2238.html",
-  "lockedState": "prototypes/releases/global-configurator-state-2026-04-24-2238.json"
+  "sourceState": "prototypes/releases/global-configurator-state-2026-04-24-2238.json",
+  "lockedHtml": "prototypes/releases/global-configurator-live-2026-04-24-2250.html",
+  "lockedState": "prototypes/releases/global-configurator-state-2026-04-24-2250.json"
 }

@@ -1,0 +1,3187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Global Configurator</title>
+  <style>
+    /* ============================================================
+       NESTED MINDMAP — Infinite Zoom, Fractal Structure
+       ============================================================ */
+    :root {
+      --primary: #1E5BA8;
+      --primary-light: #E3EEF9;
+      --primary-hover: #143D6F;
+      --accent: #5B9FD8;
+      --accent-light: #D1E7F8;
+      --bg: #F5F9FC;
+      --bg-panel: #FFFFFF;
+      --text: #1A1A1A;
+      --text-secondary: #5C5C5C;
+      --text-muted: #8A8A8A;
+      --border: #D1E0ED;
+      --shadow: 0 2px 12px rgba(30, 91, 168, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      color: var(--text);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    #mindmapContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ===== BREADCRUMB TRAIL ===== */
+    #breadcrumb {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .breadcrumb-item {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .breadcrumb-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .breadcrumb-sep {
+      color: var(--text-muted);
+    }
+
+    /* ===== GRAPH PREVIEW (TOP) ===== */
+    #graphPane {
+      position: relative;
+      flex: 0 0 auto;
+      height: 55vh;
+      height: 55dvh;
+      min-height: 15vh;
+      max-height: 80vh;
+      background: #ffffff;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #flowchartViewer {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      display: none;
+      z-index: 8;
+      border-top: 1px solid #d9e8f5;
+    }
+
+    #flowchartViewer.active { display: block; }
+
+    #flowchartFrame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #ffffff;
+      touch-action: none;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .overlay-row {
+      display: flex;
+      gap: 6px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+      box-shadow: var(--shadow);
+    }
+
+    .overlay button {
+      width: auto;
+      padding: 6px 12px;
+      margin: 0;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .overlay button:hover {
+      background: var(--primary-light);
+    }
+
+    .overlay button:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 3;
+    }
+
+    .zoom-hint.show {
+      opacity: 1;
+    }
+
+    .node-context-menu {
+      position: fixed;
+      z-index: 9999;
+      min-width: 190px;
+      background: rgba(255,255,255,0.98);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      padding: 6px;
+      display: none;
+    }
+
+    .node-context-menu.show {
+      display: block;
+    }
+
+    .node-context-menu button {
+      width: 100%;
+      margin: 0 0 6px 0;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .node-context-menu button:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ===== DRAG HANDLE (DIVIDER) ===== */
+    #dragHandle {
+      flex: 0 0 auto;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: row-resize;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #dragHandle .handle-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    #dragHandle .handle-arrow:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    #dragHandle .handle-bar {
+      width: 48px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background var(--transition);
+    }
+
+    #dragHandle:active .handle-bar {
+      background: var(--primary);
+    }
+
+    /* ===== TAB NAVIGATION ===== */
+    #tabNav {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 12px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .tab-pill {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tab-pill::after {
+      content: '›';
+      font-size: 14px;
+      font-weight: 800;
+      opacity: 0.8;
+      transition: transform var(--transition), opacity var(--transition);
+    }
+
+    .tab-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .tab-pill.active::after {
+      transform: translateX(2px);
+      opacity: 1;
+    }
+
+    .tab-pill:not(.active):hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(125, 180, 232, 0.28);
+    }
+
+    /* ===== CONTROLS AREA (BOTTOM) ===== */
+    #controlsPane {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: var(--bg);
+      padding: 0;
+      min-height: 0;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 16px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .control-box {
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-box h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .control-box .subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-panel);
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.4;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-top: 10px;
+      font-family: inherit;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button.secondary {
+      background: var(--bg-panel);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+
+    button.secondary:hover {
+      background: var(--primary-light);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .resource-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .resource-tab {
+      border: 1.5px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      line-height: 1.2;
+    }
+
+    .resource-tab.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 700;
+    }
+
+    .resource-list-scroll {
+      max-height: 42dvh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg-panel);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .chip:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .chip:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .info-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .info-line:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Scroll fade indicator */
+    #controlsPane::after {
+      content: '';
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events: none;
+      display: block;
+      z-index: 1;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (min-width: 1024px) {
+      #mindmapContainer {
+        --tab-w: 160px;
+        --panel-w: 0px;
+        display: grid;
+        grid-template-columns: var(--tab-w) var(--panel-w) 1fr;
+        grid-template-rows: auto 1fr;
+        transition: grid-template-columns var(--transition);
+      }
+
+      #mindmapContainer.controls-open {
+        --panel-w: 360px;
+      }
+
+      #breadcrumb {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+
+      #tabNav {
+        grid-column: 1;
+        grid-row: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+        border-right: 1px solid var(--border);
+      }
+
+      .tab-pill {
+        text-align: left;
+      }
+
+      #controlsPane {
+        grid-column: 2;
+        grid-row: 2;
+        border-right: 1px solid var(--border);
+        border-top: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: opacity var(--transition), transform var(--transition);
+        pointer-events: none;
+      }
+
+      #mindmapContainer.controls-open #controlsPane {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
+      }
+
+      #graphPane {
+        grid-column: 3;
+        grid-row: 2;
+        height: auto;
+        min-height: 0;
+      }
+
+      #dragHandle {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #graphPane {
+        height: 50vh;
+        height: 50dvh;
+      }
+
+      /* Mobile: keep only nested navigation controls */
+      .overlay {
+        top: 8px;
+        left: 10px;
+        right: auto;
+      }
+
+      .overlay-row:first-child {
+        display: none;
+      }
+
+      .overlay-row {
+        gap: 5px;
+        padding: 5px;
+      }
+
+      .overlay button {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+
+      #resourceNote {
+        min-height: 45dvh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="mindmapContainer">
+    <!-- BREADCRUMB TRAIL -->
+    <div id="breadcrumb"></div>
+
+    <!-- GRAPH PANE -->
+    <section id="graphPane">
+      <svg id="stage" viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="flowchartViewer" aria-label="Flowchart viewer">
+        <iframe id="flowchartFrame" title="Flowchart asset" loading="lazy"></iframe>
+      </div>
+      <div class="overlay">
+        <div class="overlay-row">
+          <button id="zoomOut">−</button>
+          <button id="zoomReset">100%</button>
+          <button id="zoomIn">+</button>
+        </div>
+        <div class="overlay-row">
+          <button id="enterNode">Nest</button>
+          <button id="exitNode">Return Nest</button>
+        </div>
+      </div>
+      <div class="zoom-hint" id="zoomHint"></div>
+    </section>
+
+    <!-- DRAG HANDLE -->
+    <div id="dragHandle">
+      <span class="handle-arrow" id="collapseUp">▲</span>
+      <div class="handle-bar"></div>
+      <span class="handle-arrow" id="expandDown">▼</span>
+    </div>
+
+    <!-- TAB NAVIGATION -->
+    <nav id="tabNav">
+      <button class="tab-pill" data-tab="save">Save</button>
+      <button class="tab-pill" data-tab="main">Main Control</button>
+      <button class="tab-pill" data-tab="navigate">Quick Navigate</button>
+      <button class="tab-pill" data-tab="resources">Resources</button>
+      <button class="tab-pill" data-tab="agentic" id="agenticTabBtn" style="display:none;">Agentic parameters</button>
+    </nav>
+
+    <!-- CONTROLS PANE -->
+    <section id="controlsPane">
+      <!-- SAVE TAB -->
+      <div class="tab-content" data-tab="save">
+        <div class="control-box">
+          <h2>Save / Load JSON</h2>
+          <div class="subtitle">Choose export scope before saving/copying JSON.</div>
+          <label for="exportScope" class="info-label" style="display:block;margin:4px 0 8px 0;">Export scope</label>
+          <select id="exportScope" style="margin-bottom:8px;">
+            <option value="current">Option 1 — As is (current map level + its nested maps)</option>
+            <option value="all">Option 2 — Everything (full root map + all nested maps)</option>
+            <option value="downstream">Option 3 — Subsequent nodes only (focused node + downstream children + nested maps)</option>
+          </select>
+          <div id="exportScopeSummary" class="subtitle" style="margin:0 0 10px 0;">Will export: 0 nodes, 0 links, 0 nested maps</div>
+          <button id="exportJson">⬇ Export JSON</button>
+          <button id="copyJson" class="secondary">⧉ Copy JSON</button>
+          <label for="importScope" class="info-label" style="display:block;margin:6px 0 8px 0;">Import scope</label>
+          <select id="importScope" style="margin-bottom:8px;">
+            <option value="currentOnly">Option 1 — Import current level map ONLY</option>
+            <option value="global">Option 2 — Import global map</option>
+            <option value="subsequent">Option 3 — Import subsequent to existing focused node</option>
+            <option value="focusNode">Option 4 — Import map from focus node</option>
+          </select>
+          <button id="importJsonBtn" class="secondary">⬆ Import JSON</button>
+          <input type="file" id="importJsonFile" accept="application/json" style="display:none" />
+        </div>
+        <div class="control-box">
+          <h2>Current Scope</h2>
+          <div class="info-line"><span class="info-label">Focused Node</span><span class="info-value" id="focusName">Focus Node</span></div>
+          <div class="info-line"><span class="info-label">Current Level</span><span class="info-value" id="statDepth">0</span></div>
+          <div class="info-line"><span class="info-label">Nodes Here</span><span class="info-value" id="statNodes">1</span></div>
+          <div class="info-line"><span class="info-label">Links Here</span><span class="info-value" id="statLinks">0</span></div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTROL TAB -->
+      <div class="tab-content" data-tab="main">
+        <div class="control-box">
+          <h2>Main Control</h2>
+          <div class="subtitle">Create and connect nodes for the current map level.</div>
+          <label for="layoutMode" class="subtitle" style="display:block;margin-bottom:6px;">View mode</label>
+          <select id="layoutMode" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="topdown">Top-down</option>
+            <option value="list">List (children on right)</option>
+            <option value="radial">Radial</option>
+            <option value="organic">Organic (TheBrain-style)</option>
+          </select>
+          <label for="levelsVisible" class="subtitle" style="display:block;margin-bottom:6px;">Visible relationship levels</label>
+          <select id="levelsVisible" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="1">1 level</option>
+            <option value="2">2 levels</option>
+            <option value="3">3 levels</option>
+            <option value="4">4 levels</option>
+          </select>
+          <label for="cameraMode" class="subtitle" style="display:block;margin-bottom:6px;">Navigation mode</label>
+          <select id="cameraMode" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="focus">Focus lock (center selected node)</option>
+            <option value="free">Free pan canvas</option>
+          </select>
+          <label for="activeEditor" class="subtitle" style="display:block;margin-bottom:6px;">Active editor</label>
+          <select id="activeEditor" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="andrew">Andrew (blue)</option>
+            <option value="andy">Andy (green)</option>
+            <option value="james">James (pale red)</option>
+          </select>
+          <input type="text" id="nodeLabel" placeholder="Node label (e.g. Recruitment Agent)" />
+          <button id="addChild">+ Add Child to Focus</button>
+          <input type="text" id="renameNodeLabel" placeholder="Rename focused node" style="margin-top:8px" />
+          <button id="renameNode" class="secondary">✎ Rename Focused Node</button>
+          <button id="addParent" class="secondary">+ Add Parent Above Focus</button>
+          <button id="addJump" class="secondary">+ Add Jump Link to Focus</button>
+          <button id="focusRoot" class="secondary">⌂ Focus Root Node</button>
+
+          <div class="subtitle" style="margin-top:10px;">Create relationship between any existing nodes</div>
+          <label for="relFrom" class="subtitle" style="display:block;margin-bottom:6px;">From node</label>
+          <select id="relFrom" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;"></select>
+          <label for="relType" class="subtitle" style="display:block;margin-bottom:6px;">Relationship type</label>
+          <select id="relType" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;">
+            <option value="parent">Parent</option>
+            <option value="child">Child</option>
+            <option value="jump">Jump (same level)</option>
+            <option value="xjump">XJump (cross-level)</option>
+          </select>
+          <label for="relTo" class="subtitle" style="display:block;margin-bottom:6px;">To node</label>
+          <select id="relTo" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-bottom:8px;"></select>
+          <button id="createRelation" class="secondary">+ Create Relationship</button>
+          <button id="followXJump" class="secondary">⇢ Follow XJump from Focus</button>
+        </div>
+      </div>
+
+      <!-- QUICK NAVIGATE TAB -->
+      <div class="tab-content" data-tab="navigate">
+        <div class="control-box">
+          <h2>Quick Navigate</h2>
+          <div class="subtitle">Tap any node to focus</div>
+          <input type="text" id="quickSearch" placeholder="Search nodes..." style="margin-bottom:8px" />
+          <div id="quickNodes" class="chips"></div>
+        </div>
+      </div>
+
+      <!-- RESOURCES TAB -->
+      <div class="tab-content" data-tab="resources">
+        <div class="control-box">
+          <h2>Node Resources</h2>
+          <div class="subtitle" id="resourcesScope">Resources dedicated to the current focused node.</div>
+          <input type="text" id="resourceTitle" placeholder="Resource title" />
+          <input type="text" id="resourceUrl" placeholder="Resource URL (optional)" style="margin-top:8px" />
+          <textarea id="resourceNote" placeholder="Write note here… (timestamp will be added automatically)" style="margin-top:8px"></textarea>
+          <div class="subtitle" style="margin-top:10px;">AI Assist (suggest-only)</div>
+          <select id="aiAssistMode" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-panel);color:var(--text);font-size:14px;margin-top:6px;">
+            <option value="rewrite">Rewrite clearly</option>
+            <option value="summary">Summarize</option>
+            <option value="actions">Turn into action list</option>
+            <option value="nextnodes">Suggest next nodes/links</option>
+          </select>
+          <button id="runAiAssist" class="secondary" style="margin-top:8px">✨ Generate AI Suggestion</button>
+          <textarea id="aiAssistOutput" placeholder="AI suggestions appear here…" style="margin-top:8px;min-height:120px"></textarea>
+          <button id="insertAiAssist" class="secondary" style="margin-top:8px">Insert Suggestion into Note</button>
+          <button id="addResource" style="margin-top:8px">+ Add Resource to Focused Node</button>
+        </div>
+        <div class="control-box">
+          <h2>Current Node Library</h2>
+          <div id="resourceTabs" class="resource-tabs"></div>
+          <div id="resourceList" class="subtitle resource-list-scroll">No resources yet for this node.</div>
+        </div>
+      </div>
+
+      <!-- AGENTIC PARAMETERS TAB -->
+      <div class="tab-content" data-tab="agentic" id="agenticTabContent" style="display:none;">
+        <div class="control-box">
+          <h2>Agentic Parameters</h2>
+          <div class="subtitle" id="agenticScope">Parameters for the currently focused agentic node.</div>
+          <label for="agenticRole" class="subtitle" style="display:block;margin-bottom:6px;">Role</label>
+          <input type="text" id="agenticRole" placeholder="e.g. Research Agent" />
+          <label for="agenticModel" class="subtitle" style="display:block;margin:10px 0 6px 0;">Preferred model</label>
+          <input type="text" id="agenticModel" placeholder="e.g. gpt-5" />
+          <label for="agenticTemp" class="subtitle" style="display:block;margin:10px 0 6px 0;">Temperature</label>
+          <input type="text" id="agenticTemp" placeholder="e.g. 0.3" />
+          <button id="saveAgenticParams" style="margin-top:10px">Save Agentic Parameters</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="nodeContextMenu" class="node-context-menu" role="menu" aria-label="Node actions">
+    <button id="ctxRename">✎ Rename node</button>
+    <button id="ctxTypeStandard" class="secondary">◯ Set type: Standard</button>
+    <button id="ctxTypeAgentic" class="secondary">▭ Set type: Agentic</button>
+    <button id="ctxDeleteNode" class="secondary">🗑 Delete node (+ downstream)</button>
+  </div>
+
+  <script>
+    // ===== COLOR SCHEMES BY DEPTH =====
+    const colorSchemes = [
+      { primary: '#1E5BA8', light: '#D1E7F8', grad1: '#D1E7F8', grad2: '#7FB9E8', line: '#A8CCE8' }, // Blue
+      { primary: '#7B2D8E', light: '#E8D1F0', grad1: '#E8D1F0', grad2: '#B87FC8', line: '#C8A8E8' }, // Purple
+      { primary: '#2D8E7B', light: '#D1F0E8', grad1: '#D1F0E8', grad2: '#7FC8B8', line: '#A8E8C8' }, // Teal
+      { primary: '#8E5A2D', light: '#F0E2D1', grad1: '#F0E2D1', grad2: '#C8A87F', line: '#E8C8A8' }, // Brown
+      { primary: '#2D5A8E', light: '#D1E2F0', grad1: '#D1E2F0', grad2: '#7FA8C8', line: '#A8C8E8' }, // Steel
+    ];
+
+    function getColorScheme(depth) {
+      return colorSchemes[depth % colorSchemes.length];
+    }
+
+    // ===== NAVIGATION STATE =====
+    const MAP_DATA_URL = './global-configurator-state-2026-04-24-2250.json';
+    const fallbackMindmap = {
+      nodes: [
+        { id: 'n1', label: 'Focus Node', type: 'standard', nested: null }
+      ],
+      links: [],
+      focusId: 'n1',
+      seq: 1
+    };
+
+    function cloneMindmap(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function sanitizeMindmap(data) {
+      if (!data || !Array.isArray(data.nodes) || !Array.isArray(data.links)) {
+        return cloneMindmap(fallbackMindmap);
+      }
+      const safe = cloneMindmap(data);
+      safe.nodes = safe.nodes.map(n => {
+        const meta = (n && typeof n.meta === 'object' && n.meta) ? n.meta : {};
+        const editLog = Array.isArray(meta.editLog) ? meta.editLog : [];
+        return {
+          ...n,
+          type: ((n.type === 'agentic' || n.type === 'flowchart') ? n.type : 'standard'),
+          meta: {
+            ...meta,
+            createdBy: meta.createdBy || 'andrew',
+            createdAt: meta.createdAt || null,
+            editLog
+          }
+        };
+      });
+      if (!safe.focusId && safe.nodes[0]) safe.focusId = safe.nodes[0].id;
+      if (typeof safe.seq !== 'number') {
+        safe.seq = safe.nodes.reduce((max, n) => {
+          const m = /^n(\d+)$/.exec(n.id || '');
+          return Math.max(max, m ? Number(m[1]) : 0);
+        }, 1);
+      }
+      return safe;
+    }
+
+    async function loadRootMindmap() {
+      try {
+        const res = await fetch(MAP_DATA_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return sanitizeMindmap(data);
+      } catch (err) {
+        console.warn('Using fallback mindmap data:', err.message);
+        return cloneMindmap(fallbackMindmap);
+      }
+    }
+
+    let rootMindmap = cloneMindmap(fallbackMindmap);
+    let navStack = []; // Stack of { mindmap, nodeId } to track path
+    let currentMindmap = rootMindmap;
+    let currentDepth = 0;
+
+    // ===== VIEW STATE =====
+    const W = 1200, H = 760;
+    const center = { x: W / 2, y: H / 2 };
+    let scale = 1;
+    let layoutMode = 'topdown';
+    let hierarchyLevelsVisible = 1;
+    let cameraMode = 'focus'; // focus|free
+    let panX = 0;
+    let panY = 0;
+    let enterArmed = true; // Auto-enter armed for the next deliberate zoom cycle
+
+    // Motion system (TheBrain-like focus transitions)
+    const MOTION_MS = 320;
+    let layoutAnimFrom = null;
+    let layoutAnimTo = null;
+    let layoutAnimStart = 0;
+    let layoutAnimActive = false;
+    let lastLayoutSignature = '';
+    let lastResolvedPositions = null;
+    let aboveEnterThreshold = false; // Hysteresis guard: trigger once per threshold crossing
+    let entryUsedThisGesture = false; // Hard guard: one level entry per zoom gesture
+
+    // Manual node drag state
+    let dragState = null;
+    let suppressNodeClickUntil = 0;
+
+    // Flowchart asset viewer state
+    let flowchartActive = false;
+    let flowchartFocusNodeId = null;
+
+    // Mobile tap-selection fallback cache (screen-space hit targets)
+    let lastNodeHitTargets = [];
+
+    // Transition thresholds
+    // Delay nested click-in until much deeper zoom (container boundary feels "off-screen").
+    const TRANSITION_END = 7.2;      // Fully switch to nested level much later
+    const TRANSITION_START = 5.4;    // Start nested preview a little sooner
+    const AUTO_CREATE_NESTED_AT = 6.0; // If missing, create nested map around boundary-disappear onset
+    const EXIT_PREVIEW_START = 0.95; // Start showing parent-level reverse preview while zooming out
+    const EXIT_THRESHOLD = 0.35;     // Commit exit to parent level
+
+    // ===== DOM ELEMENTS =====
+    const mindmapContainerEl = document.getElementById('mindmapContainer');
+    const svg = document.getElementById('stage');
+    const flowchartViewer = document.getElementById('flowchartViewer');
+    const flowchartFrame = document.getElementById('flowchartFrame');
+    const input = document.getElementById('nodeLabel');
+    const renameInput = document.getElementById('renameNodeLabel');
+    const focusName = document.getElementById('focusName');
+    const quickNodes = document.getElementById('quickNodes');
+    const layoutModeSelect = document.getElementById('layoutMode');
+    const levelsVisibleSelect = document.getElementById('levelsVisible');
+    const cameraModeSelect = document.getElementById('cameraMode');
+    const activeEditorSelect = document.getElementById('activeEditor');
+    const relFromSelect = document.getElementById('relFrom');
+    const relToSelect = document.getElementById('relTo');
+    const relTypeSelect = document.getElementById('relType');
+    const statDepth = document.getElementById('statDepth');
+    const quickSearchInput = document.getElementById('quickSearch');
+    const agenticTabBtn = document.getElementById('agenticTabBtn');
+    const agenticTabContent = document.getElementById('agenticTabContent');
+    const statNodes = document.getElementById('statNodes');
+    const statLinks = document.getElementById('statLinks');
+    const breadcrumb = document.getElementById('breadcrumb');
+    const zoomHint = document.getElementById('zoomHint');
+    const nodeContextMenu = document.getElementById('nodeContextMenu');
+    let contextNodeId = null;
+    let contextMenuOpenedAt = 0;
+    let lastAutoResourceTitle = '';
+    let selectedResourceIndex = 0;
+    let xjumpRefMap = new Map();
+
+    try {
+      const savedEditor = (localStorage.getItem('gc.activeEditor') || 'andrew').toLowerCase();
+      if (activeEditorSelect && ['andrew', 'andy', 'james'].includes(savedEditor)) {
+        activeEditorSelect.value = savedEditor;
+      }
+    } catch (_) {}
+
+    // ===== HELPER FUNCTIONS =====
+    function nextId() {
+      currentMindmap.seq += 1;
+      return 'n' + currentMindmap.seq;
+    }
+
+    function getNode(id, mindmap = currentMindmap) {
+      return mindmap.nodes.find(n => n.id === id);
+    }
+
+    function formatTimestamp(iso) {
+      try {
+        return new Date(iso).toLocaleString();
+      } catch (_) {
+        return iso || '';
+      }
+    }
+
+    const editorStrokeColors = {
+      andrew: '#1E5BA8',
+      andy: '#2E9F4A',
+      james: '#E3A4A4'
+    };
+
+    function getActiveEditor() {
+      const v = (activeEditorSelect?.value || 'andrew').toLowerCase();
+      return editorStrokeColors[v] ? v : 'andrew';
+    }
+
+    function ensureNodeMeta(node) {
+      if (!node || typeof node !== 'object') return { createdBy: 'andrew', createdAt: null, editLog: [] };
+      if (!node.meta || typeof node.meta !== 'object') node.meta = {};
+      if (!node.meta.createdBy) node.meta.createdBy = 'andrew';
+      if (!('createdAt' in node.meta)) node.meta.createdAt = null;
+      if (!Array.isArray(node.meta.editLog)) node.meta.editLog = [];
+      return node.meta;
+    }
+
+    function logNodeEdit(node, action, change = {}) {
+      const meta = ensureNodeMeta(node);
+      meta.editLog.push({
+        at: new Date().toISOString(),
+        by: getActiveEditor(),
+        action,
+        change
+      });
+    }
+
+    function getFocusedNode() {
+      return getNode(currentMindmap.focusId);
+    }
+
+    function hasNestedContent(nodeId) {
+      const node = getNode(nodeId);
+      return node && node.nested && (node.nested.nodes.length > 0 || node.nested.links.length > 0);
+    }
+
+    function ensureNestedMindmap(node) {
+      if (!node.nested) {
+        node.nested = {
+          nodes: [{ id: 'n1', label: node.label, type: 'standard', nested: null }],
+          links: [],
+          focusId: 'n1',
+          seq: 1
+        };
+      }
+      return node.nested;
+    }
+
+    function showFlowchartAsset(url, nodeId = null) {
+      if (!flowchartViewer || !flowchartFrame || !url) return;
+      flowchartFrame.src = url;
+      flowchartViewer.classList.add('active');
+      flowchartActive = true;
+      flowchartFocusNodeId = nodeId;
+      // Entering flowchart is a terminal nested view; pinch should start from neutral.
+      scale = 1;
+    }
+
+    function hideFlowchartAsset() {
+      if (!flowchartViewer || !flowchartFrame) return;
+      flowchartViewer.classList.remove('active');
+      flowchartFrame.src = 'about:blank';
+      flowchartActive = false;
+      flowchartFocusNodeId = null;
+    }
+
+    // ===== NESTED NAVIGATION =====
+    function enterNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      // Flowchart nodes open a full-screen embedded asset when available.
+      if (node.type === 'flowchart' && node.flowchartUrl) {
+        navStack.push({ mindmap: currentMindmap, nodeId: nodeId, flowchart: true });
+        currentDepth = navStack.length;
+        scale = 1;
+        enterArmed = true;
+        aboveEnterThreshold = false;
+        entryUsedThisGesture = true;
+        showFlowchartAsset(node.flowchartUrl, node.id);
+        updateBreadcrumb();
+        showZoomHint('Opened flowchart asset ↓');
+        return;
+      }
+
+      ensureNestedMindmap(node);
+
+      // Push current state to nav stack
+      navStack.push({ mindmap: currentMindmap, nodeId: nodeId });
+      currentMindmap = node.nested;
+      currentDepth = navStack.length;
+      scale = 1;
+      enterArmed = true;
+      aboveEnterThreshold = false;
+      entryUsedThisGesture = true;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Entered nested mindmap ↓');
+    }
+
+    function exitNode() {
+      if (navStack.length === 0) {
+        showZoomHint('Already at root level');
+        return;
+      }
+
+      const prev = navStack.pop();
+      if (flowchartActive) hideFlowchartAsset();
+      currentMindmap = prev.mindmap;
+      currentMindmap.focusId = prev.nodeId; // Focus container node we exited from
+      currentDepth = navStack.length;
+      // Clean settle on previous level root-view scale to avoid re-showing same nested preview.
+      scale = 1;
+      enterArmed = true;
+      aboveEnterThreshold = false;
+      entryUsedThisGesture = false;
+
+      render();
+      updateBreadcrumb();
+      showZoomHint('Exited to container level ↑');
+    }
+
+    function jumpToLevel(levelIndex) {
+      if (levelIndex < 0 || levelIndex > navStack.length) return;
+      if (flowchartActive) hideFlowchartAsset();
+
+      if (levelIndex === 0) {
+        navStack = [];
+        currentMindmap = rootMindmap;
+        currentDepth = 0;
+      } else {
+        const targetStack = navStack.slice(0, levelIndex);
+        const targetState = targetStack[targetStack.length - 1];
+        navStack = targetStack;
+        currentMindmap = targetState.mindmap;
+        currentDepth = navStack.length;
+      }
+
+      scale = 1;
+      entryUsedThisGesture = false;
+      render();
+      updateBreadcrumb();
+    }
+
+    function updateBreadcrumb() {
+      breadcrumb.innerHTML = '';
+
+      const rootItem = document.createElement('span');
+      rootItem.className = 'breadcrumb-item';
+      rootItem.textContent = '🏠 Root';
+      rootItem.onclick = () => jumpToLevel(0);
+      breadcrumb.appendChild(rootItem);
+
+      navStack.forEach((item, idx) => {
+        const sep = document.createElement('span');
+        sep.className = 'breadcrumb-sep';
+        sep.textContent = ' › ';
+        breadcrumb.appendChild(sep);
+
+        const node = item.mindmap.nodes.find(n => n.id === item.nodeId);
+        const crumb = document.createElement('span');
+        crumb.className = 'breadcrumb-item';
+        crumb.textContent = node ? node.label : item.nodeId;
+        crumb.onclick = () => jumpToLevel(idx + 1);
+        breadcrumb.appendChild(crumb);
+      });
+    }
+
+    function showZoomHint(text) {
+      zoomHint.textContent = text;
+      zoomHint.classList.add('show');
+      setTimeout(() => zoomHint.classList.remove('show'), 2000);
+    }
+
+    function ensureManualPos(mindmap) {
+      if (!mindmap.manualPos || typeof mindmap.manualPos !== 'object') {
+        mindmap.manualPos = {};
+      }
+      return mindmap.manualPos;
+    }
+
+    function screenToMap(clientX, clientY, tx, ty, scaleVal) {
+      const pt = svg.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return null;
+      const svgPt = pt.matrixTransform(ctm.inverse());
+      return {
+        x: (svgPt.x - tx) / scaleVal,
+        y: (svgPt.y - ty) / scaleVal
+      };
+    }
+
+    function beginNodeDrag(evt, nodeId, mindmap, tx, ty, scaleVal, initialPos = null) {
+      if (!(evt.button === 0 || evt.pointerType === 'touch' || evt.pointerType === 'pen')) return;
+      if (!mindmap || mindmap !== currentMindmap) return;
+
+      const start = screenToMap(evt.clientX, evt.clientY, tx, ty, scaleVal);
+      if (!start) return;
+
+      const manual = ensureManualPos(mindmap);
+      const existing = manual[nodeId] || initialPos || { x: start.x, y: start.y };
+
+      dragState = {
+        nodeId,
+        mindmap,
+        tx,
+        ty,
+        scaleVal,
+        offsetX: existing.x - start.x,
+        offsetY: existing.y - start.y,
+        moved: false,
+        pointerId: evt.pointerId
+      };
+
+      try { evt.target.setPointerCapture?.(evt.pointerId); } catch (_) {}
+      evt.preventDefault();
+    }
+
+    function onNodeDragMove(evt) {
+      if (!dragState) return;
+      if (dragState.pointerId != null && evt.pointerId != null && evt.pointerId !== dragState.pointerId) return;
+
+      const p = screenToMap(evt.clientX, evt.clientY, dragState.tx, dragState.ty, dragState.scaleVal);
+      if (!p) return;
+
+      const manual = ensureManualPos(dragState.mindmap);
+      manual[dragState.nodeId] = {
+        x: p.x + dragState.offsetX,
+        y: p.y + dragState.offsetY
+      };
+
+      dragState.moved = true;
+      render();
+    }
+
+    function onNodeDragEnd() {
+      if (!dragState) return;
+      if (dragState.moved) suppressNodeClickUntil = Date.now() + 220;
+      dragState = null;
+    }
+
+    // ===== NODE OPERATIONS =====
+    function addNodeWith(type) {
+      const label = (input.value || '').trim() || defaultLabel(type);
+      const id = nextId();
+      const now = new Date().toISOString();
+      const createdBy = getActiveEditor();
+      const node = {
+        id,
+        label,
+        type: 'standard',
+        nested: null,
+        meta: {
+          createdBy,
+          createdAt: now,
+          editLog: []
+        }
+      };
+      logNodeEdit(node, 'create', { via: type, label });
+      currentMindmap.nodes.push(node);
+
+      if (type === 'child') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'child' });
+      }
+      if (type === 'parent') {
+        currentMindmap.links.push({ from: id, to: currentMindmap.focusId, type: 'parent' });
+      }
+      if (type === 'jump') {
+        currentMindmap.links.push({ from: currentMindmap.focusId, to: id, type: 'jump' });
+      }
+
+      currentMindmap.focusId = id;
+      input.value = '';
+      render();
+      updateStats();
+    }
+
+    function defaultLabel(type) {
+      if (type === 'child') return 'Child idea';
+      if (type === 'parent') return 'Parent context';
+      return 'Jump idea';
+    }
+
+    function collectGlobalNodeRefs(mindmap = rootMindmap, path = [], containerStack = []) {
+      const refs = [];
+      (mindmap.nodes || []).forEach(n => {
+        const nextPath = [...path, n.label || n.id];
+        const stackIds = [...containerStack];
+        const key = `${stackIds.join('/') || 'root'}::${n.id}`;
+        refs.push({ key, id: n.id, label: n.label || n.id, path: nextPath.join(' › '), stackIds });
+        if (n.nested && Array.isArray(n.nested.nodes)) {
+          refs.push(...collectGlobalNodeRefs(n.nested, nextPath, [...containerStack, n.id]));
+        }
+      });
+      return refs;
+    }
+
+    function refreshRelationshipBuilder() {
+      if (!relFromSelect || !relToSelect) return;
+      const nodes = currentMindmap.nodes || [];
+      const selectedFrom = relFromSelect.value || currentMindmap.focusId || '';
+      const selectedTo = relToSelect.value || currentMindmap.focusId || '';
+      const relType = relTypeSelect?.value || 'child';
+
+      const fromOptions = nodes.map(n => `<option value="${n.id}">${n.label || n.id}</option>`).join('');
+      relFromSelect.innerHTML = fromOptions;
+
+      if (relType === 'xjump') {
+        const all = collectGlobalNodeRefs(rootMindmap);
+        xjumpRefMap = new Map(all.map(r => [r.key, r]));
+        relToSelect.innerHTML = all.map(n => `<option value="${n.key}">${n.path}</option>`).join('');
+        if (all.some(n => n.key === selectedTo)) relToSelect.value = selectedTo;
+      } else {
+        const options = nodes.map(n => `<option value="${n.id}">${n.label || n.id}</option>`).join('');
+        relToSelect.innerHTML = options;
+        if (nodes.some(n => n.id === selectedTo)) relToSelect.value = selectedTo;
+      }
+
+      if (nodes.some(n => n.id === selectedFrom)) relFromSelect.value = selectedFrom;
+      if (!relFromSelect.value && nodes[0]) relFromSelect.value = nodes[0].id;
+      if (!relToSelect.value) {
+        if (relType === 'xjump') {
+          const all = collectGlobalNodeRefs(rootMindmap);
+          if (all[0]) relToSelect.value = all[0].key;
+        } else if (nodes[0]) {
+          relToSelect.value = nodes[0].id;
+        }
+      }
+    }
+
+    function findNodeLocationByRef(targetId, stackIds = []) {
+      let mm = rootMindmap;
+      let stack = [];
+      for (const containerId of stackIds) {
+        const containerNode = (mm.nodes || []).find(n => n.id === containerId);
+        if (!containerNode || !containerNode.nested) return null;
+        stack.push({ mindmap: mm, nodeId: containerId });
+        mm = containerNode.nested;
+      }
+      if (!(mm.nodes || []).some(n => n.id === targetId)) return null;
+      return { mindmap: mm, stack };
+    }
+
+    function findNodeLocation(targetId, mindmap = rootMindmap, stack = []) {
+      if ((mindmap.nodes || []).some(n => n.id === targetId)) {
+        return { mindmap, stack };
+      }
+      for (const n of (mindmap.nodes || [])) {
+        if (n.nested && Array.isArray(n.nested.nodes)) {
+          const found = findNodeLocation(targetId, n.nested, [...stack, { mindmap, nodeId: n.id }]);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+
+    function navigateToNodeGlobal(targetId, stackIds = null) {
+      const loc = Array.isArray(stackIds)
+        ? (findNodeLocationByRef(targetId, stackIds) || findNodeLocation(targetId, rootMindmap, []))
+        : findNodeLocation(targetId, rootMindmap, []);
+      if (!loc) return false;
+      navStack = loc.stack;
+      currentMindmap = loc.mindmap;
+      currentDepth = navStack.length;
+      currentMindmap.focusId = targetId;
+      scale = 1;
+      render();
+      return true;
+    }
+
+    function createRelationship() {
+      const from = relFromSelect?.value;
+      const to = relToSelect?.value;
+      const type = relTypeSelect?.value || 'child';
+
+      if (!from || !to) {
+        showZoomHint('Pick both nodes');
+        return;
+      }
+
+      if (type === 'xjump') {
+        const ref = xjumpRefMap.get(to);
+        if (!ref) {
+          showZoomHint('Pick an XJump target');
+          return;
+        }
+        if (from === ref.id && (!ref.stackIds || !ref.stackIds.length)) {
+          showZoomHint('Pick a different node');
+          return;
+        }
+        const exists = currentMindmap.links.some(l => l.from === from && l.type === 'xjump' && l.to === ref.id && JSON.stringify(l.toStackIds || []) === JSON.stringify(ref.stackIds || []));
+        if (exists) {
+          showZoomHint('XJump already exists');
+          return;
+        }
+        currentMindmap.links.push({ from, to: ref.id, toStackIds: ref.stackIds || [], toPath: ref.path, type: 'xjump' });
+        const fromNode = getNode(from);
+        if (fromNode) logNodeEdit(fromNode, 'link_add', { direction: 'from', to: ref.id, toPath: ref.path, type: 'xjump' });
+        currentMindmap.focusId = from;
+        render();
+        showZoomHint('Cross-level XJump created');
+        return;
+      }
+
+      if (from === to) {
+        showZoomHint('Pick two different nodes');
+        return;
+      }
+
+      const exists = currentMindmap.links.some(l => l.from === from && l.to === to && l.type === type);
+      if (exists) {
+        showZoomHint('Relationship already exists');
+        return;
+      }
+
+      currentMindmap.links.push({ from, to, type });
+      const fromNode = getNode(from);
+      const toNode = getNode(to);
+      if (fromNode) logNodeEdit(fromNode, 'link_add', { direction: 'from', to, type });
+      if (toNode) logNodeEdit(toNode, 'link_add', { direction: 'to', from, type });
+      currentMindmap.focusId = to;
+      render();
+      showZoomHint(`Relationship added: ${type}`);
+    }
+
+    function renameNodeById(nodeId, nextLabel) {
+      const node = getNode(nodeId);
+      if (!node) return false;
+      const clean = (nextLabel || '').trim();
+      if (!clean) return false;
+      const prev = node.label || '';
+      node.label = clean;
+      logNodeEdit(node, 'rename', { from: prev, to: clean });
+      return true;
+    }
+
+    function renameFocusedNode() {
+      const focused = getFocusedNode();
+      if (!focused) {
+        showZoomHint('No focused node to rename');
+        return;
+      }
+
+      const nextLabel = (renameInput?.value || '').trim();
+      if (!nextLabel) {
+        showZoomHint('Enter a new node name first');
+        return;
+      }
+
+      if (renameNodeById(focused.id, nextLabel)) {
+        if (renameInput) renameInput.value = '';
+        render();
+        showZoomHint('Focused node renamed');
+      }
+    }
+
+    function promptRenameNode(nodeId) {
+      const node = getNode(nodeId);
+      if (!node) return;
+
+      const proposed = window.prompt('Rename node:', node.label || '');
+      if (proposed === null) return; // user cancelled
+
+      if (renameNodeById(nodeId, proposed)) {
+        if (renameInput) renameInput.value = '';
+        render();
+        showZoomHint('Node renamed');
+      } else {
+        showZoomHint('Rename cancelled (empty name)');
+      }
+    }
+
+    function setNodeType(nodeId, type) {
+      const node = getNode(nodeId);
+      if (!node) return;
+      const prev = node.type;
+      node.type = (type === 'agentic') ? 'agentic' : 'standard';
+      logNodeEdit(node, 'set_type', { from: prev, to: node.type });
+      render();
+      showZoomHint(`Node type set: ${node.type}`);
+    }
+
+    function hideNodeContextMenu() {
+      nodeContextMenu?.classList.remove('show');
+      contextNodeId = null;
+    }
+
+    function showNodeContextMenu(nodeId, clientX, clientY) {
+      if (!nodeContextMenu) return;
+      contextNodeId = nodeId;
+
+      const menuWidth = 210;
+      const menuHeight = 190;
+      const margin = 8;
+      const left = Math.min(Math.max(margin, clientX), window.innerWidth - menuWidth - margin);
+      const top = Math.min(Math.max(margin, clientY), window.innerHeight - menuHeight - margin);
+
+      nodeContextMenu.style.left = `${left}px`;
+      nodeContextMenu.style.top = `${top}px`;
+      nodeContextMenu.classList.add('show');
+      contextMenuOpenedAt = Date.now();
+    }
+
+    function relationship(fid, mindmap) {
+      const parents = mindmap.links
+        .filter(l => l.to === fid && (l.type === 'parent' || l.type === 'child'))
+        .map(l => l.from)
+        .filter((id, i, arr) => id && arr.indexOf(id) === i);
+      const parent = parents[0] || null;
+
+      const children = mindmap.links
+        .filter(l => l.from === fid && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.to)
+        .filter(id => !parents.includes(id));
+
+      const jumps = mindmap.links
+        .filter(l => (l.type === 'jump' || l.type === 'xjump') && (l.from === fid || l.to === fid))
+        .map(l => l.from === fid ? l.to : l.from);
+
+      return { parent, parents, children, jumps };
+    }
+
+    function childrenOf(nodeId, mindmap) {
+      return mindmap.links
+        .filter(l => l.from === nodeId && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.to);
+    }
+
+    function collectStructuralDescendants(rootId, mindmap) {
+      const descendants = new Set();
+      const q = [rootId];
+      const visited = new Set();
+
+      while (q.length) {
+        const id = q.shift();
+        if (!id || visited.has(id)) continue;
+        visited.add(id);
+
+        const kids = childrenOf(id, mindmap);
+        for (const k of kids) {
+          if (!k || visited.has(k)) continue;
+          descendants.add(k);
+          q.push(k);
+        }
+      }
+
+      descendants.delete(rootId);
+      return descendants;
+    }
+
+    function hasExternalParentLink(nodeId, candidateSet, mindmap) {
+      return mindmap.links.some(l =>
+        (l.type === 'child' || l.type === 'parent') &&
+        l.to === nodeId &&
+        !candidateSet.has(l.from)
+      );
+    }
+
+    function deleteNodeWithDownstream(rootId) {
+      const rootNode = getNode(rootId);
+      if (!rootNode) {
+        showZoomHint('Node not found');
+        return;
+      }
+
+      const initialDesc = collectStructuralDescendants(rootId, currentMindmap);
+      const candidate = new Set([rootId, ...initialDesc]);
+
+      // Protect descendants that are also parent-targeted from outside candidate set.
+      const protectedNodes = new Set();
+      for (const id of initialDesc) {
+        if (hasExternalParentLink(id, candidate, currentMindmap)) {
+          protectedNodes.add(id);
+        }
+      }
+
+      // Also protect descendants of protected nodes (loop/cross-link safety).
+      const protectedClosure = new Set();
+      for (const pid of protectedNodes) {
+        protectedClosure.add(pid);
+        const d = collectStructuralDescendants(pid, currentMindmap);
+        d.forEach(x => protectedClosure.add(x));
+      }
+
+      const deleteSet = new Set([rootId]);
+      for (const id of initialDesc) {
+        if (!protectedClosure.has(id)) deleteSet.add(id);
+      }
+
+      const deletedCount = deleteSet.size;
+      currentMindmap.nodes = currentMindmap.nodes.filter(n => !deleteSet.has(n.id));
+      currentMindmap.links = currentMindmap.links.filter(l => !deleteSet.has(l.from) && !deleteSet.has(l.to));
+
+      if (!currentMindmap.nodes.length) {
+        currentMindmap.nodes.push({ id: 'n1', label: 'Focus Node', type: 'standard', nested: null });
+        currentMindmap.links = [];
+        currentMindmap.focusId = 'n1';
+        currentMindmap.seq = Math.max(1, currentMindmap.seq || 1);
+      } else if (!currentMindmap.nodes.some(n => n.id === currentMindmap.focusId)) {
+        currentMindmap.focusId = currentMindmap.nodes[0].id;
+      }
+
+      render();
+      updateBreadcrumb();
+      const kept = protectedClosure.size;
+      showZoomHint(`Deleted ${deletedCount} node(s)${kept ? `, kept ${kept} protected` : ''}`);
+    }
+
+    function parentsOf(nodeId, mindmap) {
+      return mindmap.links
+        .filter(l => l.to === nodeId && (l.type === 'child' || l.type === 'parent'))
+        .map(l => l.from);
+    }
+
+    function collectHierarchy(fid, mindmap, maxLevels) {
+      const descendants = [];
+      const ancestors = [];
+      const visible = new Set([fid]);
+
+      let currentDown = [fid];
+      for (let d = 1; d <= maxLevels; d++) {
+        const next = [];
+        currentDown.forEach(id => {
+          childrenOf(id, mindmap).forEach(cid => {
+            if (!visible.has(cid)) {
+              visible.add(cid);
+              next.push(cid);
+            }
+          });
+        });
+        if (!next.length) break;
+        descendants.push(next);
+        currentDown = next;
+      }
+
+      let currentUp = [fid];
+      for (let d = 1; d <= maxLevels; d++) {
+        const next = [];
+        currentUp.forEach(id => {
+          parentsOf(id, mindmap).forEach(pid => {
+            if (!visible.has(pid)) {
+              visible.add(pid);
+              next.push(pid);
+            }
+          });
+        });
+        if (!next.length) break;
+        ancestors.push(next);
+        currentUp = next;
+      }
+
+      return { visible, descendants, ancestors };
+    }
+
+    function place(fid, mindmap) {
+      const rel = relationship(fid, mindmap);
+      const { visible, descendants, ancestors } = collectHierarchy(fid, mindmap, hierarchyLevelsVisible);
+      const pos = {};
+
+      const applyManualPositions = () => {
+        const manual = mindmap.manualPos || {};
+        Object.keys(pos).forEach(id => {
+          if (cameraMode === 'focus' && id === fid) return; // keep selected focus node centered in focus-lock mode
+          if (manual[id] && Number.isFinite(manual[id].x) && Number.isFinite(manual[id].y)) {
+            pos[id] = { x: manual[id].x, y: manual[id].y };
+          }
+        });
+      };
+
+      if (layoutMode === 'list') {
+        const fx = center.x - 260;
+        const fy = center.y;
+        pos[fid] = { x: fx, y: fy };
+
+        ancestors.forEach((nodesAtLevel, lvlIdx) => {
+          const y = fy - 170 * (lvlIdx + 1);
+          const spread = (nodesAtLevel.length - 1) * 160;
+          nodesAtLevel.forEach((id, i) => {
+            pos[id] = { x: fx - spread / 2 + i * 160, y };
+          });
+        });
+
+        descendants.forEach((nodesAtLevel, lvlIdx) => {
+          const x = fx + 320 * (lvlIdx + 1);
+          const startY = fy - ((nodesAtLevel.length - 1) * 80) / 2;
+          nodesAtLevel.forEach((id, i) => {
+            pos[id] = { x, y: startY + i * 80 };
+          });
+        });
+
+        rel.jumps.forEach((id, i) => {
+          if (!pos[id]) pos[id] = { x: fx + 100, y: fy + 160 + i * 60 };
+        });
+        applyManualPositions();
+        return pos;
+      }
+
+      if (layoutMode === 'radial') {
+        pos[fid] = { x: center.x, y: center.y };
+
+        ancestors.forEach((nodesAtLevel, lvlIdx) => {
+          const y = center.y - 190 - (lvlIdx * 110);
+          const spread = (nodesAtLevel.length - 1) * 170;
+          nodesAtLevel.forEach((id, i) => {
+            pos[id] = { x: center.x - spread / 2 + i * 170, y };
+          });
+        });
+
+        descendants.forEach((nodesAtLevel, lvlIdx) => {
+          const radius = 220 + (lvlIdx * 120);
+          nodesAtLevel.forEach((id, i) => {
+            const a = (Math.PI * 2 * i) / Math.max(1, nodesAtLevel.length) - Math.PI / 2;
+            pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+          });
+        });
+
+        rel.jumps.forEach((id, i) => {
+          if (!pos[id]) {
+            const side = i % 2 === 0 ? -1 : 1;
+            const rank = Math.floor(i / 2);
+            pos[id] = { x: center.x + side * (260 + rank * 140), y: center.y + (side < 0 ? -110 : 110) };
+          }
+        });
+
+        applyManualPositions();
+        return pos;
+      }
+
+      if (layoutMode === 'organic') {
+        pos[fid] = { x: center.x, y: center.y };
+
+        // Parents arc above focus
+        ancestors.forEach((nodesAtLevel, lvlIdx) => {
+          const radius = 145 + (lvlIdx * 95);
+          const startA = -Math.PI * 0.90;
+          const endA = -Math.PI * 0.10;
+          const span = endA - startA;
+          nodesAtLevel.forEach((id, i) => {
+            const t = nodesAtLevel.length === 1 ? 0.5 : (i / (nodesAtLevel.length - 1));
+            const a = startA + span * t;
+            pos[id] = { x: center.x + Math.cos(a) * radius, y: center.y + Math.sin(a) * radius };
+          });
+        });
+
+        // Children in two columns under focus (left/right fan-out)
+        descendants.forEach((nodesAtLevel, lvlIdx) => {
+          const colX = 250 + (lvlIdx * 120);
+          const baseY = center.y + 110 + (lvlIdx * 46);
+          let leftIdx = 0;
+          let rightIdx = 0;
+          nodesAtLevel.forEach((id, i) => {
+            const isLeft = i % 2 === 0;
+            if (isLeft) {
+              pos[id] = { x: center.x - colX, y: baseY + (leftIdx * 58) };
+              leftIdx += 1;
+            } else {
+              pos[id] = { x: center.x + colX, y: baseY + (rightIdx * 58) };
+              rightIdx += 1;
+            }
+          });
+        });
+
+        // Jumps distributed upper left/right bands
+        rel.jumps.forEach((id, i) => {
+          if (!pos[id]) {
+            const side = i % 2 === 0 ? -1 : 1;
+            const rank = Math.floor(i / 2);
+            pos[id] = {
+              x: center.x + side * (240 + (rank % 3) * 80),
+              y: center.y - 120 + (rank * 42)
+            };
+          }
+        });
+
+        applyManualPositions();
+        return pos;
+      }
+
+      // top-down (default)
+      pos[fid] = { x: center.x, y: center.y };
+
+      ancestors.forEach((nodesAtLevel, lvlIdx) => {
+        const y = center.y - 180 * (lvlIdx + 1);
+        const spread = (nodesAtLevel.length - 1) * 170;
+        nodesAtLevel.forEach((id, i) => {
+          pos[id] = { x: center.x - spread / 2 + i * 170, y };
+        });
+      });
+
+      descendants.forEach((nodesAtLevel, lvlIdx) => {
+        const y = center.y + 180 * (lvlIdx + 1);
+        const spread = (nodesAtLevel.length - 1) * 170;
+        nodesAtLevel.forEach((id, i) => {
+          pos[id] = { x: center.x - spread / 2 + i * 170, y };
+        });
+      });
+
+      rel.jumps.forEach((id, i) => {
+        if (!pos[id]) {
+          const side = i % 2 === 0 ? -1 : 1;
+          const rank = Math.floor(i / 2);
+          pos[id] = { x: center.x + side * (240 + rank * 150), y: center.y + (side < 0 ? -80 : 80) };
+        }
+      });
+
+      applyManualPositions();
+      return pos;
+    }
+
+    function layoutSignature(mindmap, depth) {
+      return [
+        depth,
+        layoutMode,
+        hierarchyLevelsVisible,
+        mindmap.focusId,
+        mindmap.nodes.map(n => n.id).join(','),
+        mindmap.links.length
+      ].join('|');
+    }
+
+    function resolveAnimatedPositions(targetPos, signature) {
+      const now = performance.now();
+      if (!lastLayoutSignature) {
+        lastLayoutSignature = signature;
+        lastResolvedPositions = targetPos;
+        return targetPos;
+      }
+
+      if (signature !== lastLayoutSignature) {
+        layoutAnimFrom = lastResolvedPositions || targetPos;
+        layoutAnimTo = targetPos;
+        layoutAnimStart = now;
+        layoutAnimActive = true;
+        lastLayoutSignature = signature;
+      }
+
+      if (!layoutAnimActive || !layoutAnimFrom || !layoutAnimTo) {
+        lastResolvedPositions = targetPos;
+        return targetPos;
+      }
+
+      const t = Math.min(1, (now - layoutAnimStart) / MOTION_MS);
+      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      const out = {};
+
+      Object.keys(layoutAnimTo).forEach(id => {
+        const a = layoutAnimFrom[id] || layoutAnimTo[id];
+        const b = layoutAnimTo[id];
+        out[id] = {
+          x: a.x + (b.x - a.x) * ease,
+          y: a.y + (b.y - a.y) * ease
+        };
+      });
+
+      lastResolvedPositions = out;
+      if (t >= 1) {
+        layoutAnimActive = false;
+        layoutAnimFrom = null;
+        layoutAnimTo = null;
+      }
+      return out;
+    }
+
+    // ===== RENDERING =====
+    function line(x1, y1, x2, y2, color, dash = false) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      el.setAttribute('x1', x1); el.setAttribute('y1', y1);
+      el.setAttribute('x2', x2); el.setAttribute('y2', y2);
+      el.setAttribute('stroke', color);
+      el.setAttribute('stroke-width', '2');
+      if (dash) el.setAttribute('stroke-dasharray', '7 6');
+      return el;
+    }
+
+    function curvedLink(x1, y1, x2, y2, color, dash = false) {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const bendX = Math.max(34, Math.abs(dx) * 0.25);
+      const bendY = Math.max(22, Math.abs(dy) * 0.22);
+      const c1x = x1 + (dx >= 0 ? bendX : -bendX);
+      const c2x = x2 - (dx >= 0 ? bendX : -bendX);
+      const c1y = y1 + bendY;
+      const c2y = y2 - bendY;
+      const d = `M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`;
+      p.setAttribute('d', d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', color);
+      p.setAttribute('stroke-width', '1.5');
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('opacity', '0.86');
+      if (dash) p.setAttribute('stroke-dasharray', '6 6');
+      return p;
+    }
+
+    function nodeVisualMetrics(n, focused) {
+      const organicMode = layoutMode === 'organic';
+      const isAgentic = n?.type === 'agentic' || n?.type === 'flowchart';
+      const organicLabelWidth = Math.max(82, Math.min(190, (((n?.label || '').length) * 4.8) + (focused ? 42 : 32)));
+
+      if (isAgentic) {
+        const w = organicMode ? organicLabelWidth * 2 : (focused ? 184 : 164);
+        const h = organicMode ? (focused ? 54 : 48) : (focused ? 68 : 60);
+        return { shape: 'rect', hw: w / 2, hh: h / 2 };
+      }
+
+      const rx = organicMode ? organicLabelWidth : (focused ? 92 : 82);
+      const ry = organicMode ? (focused ? 28 : 24) : (focused ? 34 : 30);
+      return { shape: 'ellipse', rx, ry };
+    }
+
+    function edgeAnchor(from, to, metrics) {
+      const dx = (to.x - from.x) || 0.0001;
+      const dy = (to.y - from.y) || 0.0001;
+
+      if (metrics.shape === 'rect') {
+        const t = 1 / Math.max(Math.abs(dx) / metrics.hw, Math.abs(dy) / metrics.hh);
+        return { x: from.x + dx * t, y: from.y + dy * t };
+      }
+
+      // ellipse
+      const denom = Math.sqrt((dx * dx) / (metrics.rx * metrics.rx) + (dy * dy) / (metrics.ry * metrics.ry));
+      const t = denom > 0 ? 1 / denom : 1;
+      return { x: from.x + dx * t, y: from.y + dy * t };
+    }
+
+    function nodeCollisionRadius(node, focused) {
+      const m = nodeVisualMetrics(node, focused);
+      if (m.shape === 'rect') {
+        return Math.sqrt((m.hw * m.hw) + (m.hh * m.hh)) * 0.82;
+      }
+      return Math.max(m.rx, m.ry) * 0.92;
+    }
+
+    function resolveNodeOverlaps(pos, mindmap) {
+      const ids = Object.keys(pos || {});
+      if (ids.length < 2) return pos;
+
+      const focusId = mindmap.focusId;
+      const pad = 10;
+
+      for (let iter = 0; iter < 18; iter++) {
+        let moved = false;
+
+        for (let i = 0; i < ids.length; i++) {
+          const aId = ids[i];
+          const aPos = pos[aId];
+          const aNode = getNode(aId, mindmap);
+          if (!aPos || !aNode) continue;
+
+          for (let j = i + 1; j < ids.length; j++) {
+            const bId = ids[j];
+            const bPos = pos[bId];
+            const bNode = getNode(bId, mindmap);
+            if (!bPos || !bNode) continue;
+
+            let dx = bPos.x - aPos.x;
+            let dy = bPos.y - aPos.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < 0.001) {
+              dx = (Math.random() - 0.5) * 0.01;
+              dy = (Math.random() - 0.5) * 0.01;
+              dist = Math.hypot(dx, dy);
+            }
+
+            const ra = nodeCollisionRadius(aNode, aId === focusId);
+            const rb = nodeCollisionRadius(bNode, bId === focusId);
+            const minDist = ra + rb + pad;
+
+            if (dist < minDist) {
+              const overlap = (minDist - dist);
+              const ux = dx / dist;
+              const uy = dy / dist;
+
+              if (aId === focusId && bId !== focusId) {
+                bPos.x += ux * overlap;
+                bPos.y += uy * overlap;
+              } else if (bId === focusId && aId !== focusId) {
+                aPos.x -= ux * overlap;
+                aPos.y -= uy * overlap;
+              } else {
+                const push = overlap / 2;
+                aPos.x -= ux * push;
+                aPos.y -= uy * push;
+                bPos.x += ux * push;
+                bPos.y += uy * push;
+              }
+
+              moved = true;
+            }
+          }
+        }
+
+        if (!moved) break;
+      }
+
+      return pos;
+    }
+
+    function nodeShape(n, x, y, focused, colors, showNested, dragMeta = null) {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.style.cursor = 'pointer';
+      g.addEventListener('click', () => {
+        if (Date.now() < suppressNodeClickUntil) return;
+        currentMindmap.focusId = n.id;
+        render();
+      });
+
+      g.addEventListener('pointerdown', (evt) => {
+        if (!dragMeta?.draggable) return;
+        beginNodeDrag(evt, n.id, dragMeta.mindmap, dragMeta.tx, dragMeta.ty, dragMeta.scale, { x, y });
+      });
+
+      g.addEventListener('contextmenu', (evt) => {
+        evt.preventDefault();
+        currentMindmap.focusId = n.id;
+        render();
+        showNodeContextMenu(n.id, evt.clientX, evt.clientY);
+      });
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x);
+      text.setAttribute('y', y + 5);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'middle');
+      const organicMode = layoutMode === 'organic';
+      text.setAttribute('font-size', organicMode ? (focused ? '14' : '12') : (focused ? '15' : '13'));
+      text.setAttribute('font-weight', organicMode ? (focused ? '650' : '520') : (focused ? '700' : '600'));
+      text.setAttribute('fill', organicMode ? (focused ? '#154A6F' : '#286F92') : (focused ? '#143D6F' : '#1E5BA8'));
+      text.textContent = n.label;
+
+      const isAgentic = n.type === 'agentic';
+      const isFlowchart = n.type === 'flowchart';
+      const organicLabelWidth = Math.max(82, Math.min(190, ((n.label || '').length * 4.8) + (focused ? 42 : 32)));
+      let shape;
+      if (isAgentic || isFlowchart) {
+        shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        const w = organicMode ? organicLabelWidth * 2 : (focused ? 184 : 164);
+        const h = organicMode ? (focused ? 54 : 48) : (focused ? 68 : 60);
+        shape.setAttribute('x', x - w / 2);
+        shape.setAttribute('y', y - h / 2);
+        shape.setAttribute('width', w);
+        shape.setAttribute('height', h);
+        shape.setAttribute('rx', isFlowchart ? (organicMode ? 16 : 14) : (organicMode ? 12 : 10));
+      } else {
+        shape = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        shape.setAttribute('cx', x);
+        shape.setAttribute('cy', y);
+        if (organicMode) {
+          shape.setAttribute('rx', `${organicLabelWidth}`);
+          shape.setAttribute('ry', focused ? '28' : '24');
+        } else {
+          shape.setAttribute('rx', focused ? '92' : '82');
+          shape.setAttribute('ry', focused ? '34' : '30');
+        }
+      }
+
+      const creator = (n?.meta?.createdBy || 'andrew').toLowerCase();
+      const creatorStroke = editorStrokeColors[creator] || colors.primary;
+      const creatorStrokeSoft = creator === 'andrew' ? (colors.primary + '88') : creatorStroke;
+
+      if (isFlowchart) {
+        shape.setAttribute('fill', focused ? '#EEF7FF' : '#F7FBFF');
+        shape.setAttribute('stroke', focused ? '#6FA4D8' : '#9CC0E3');
+        shape.setAttribute('stroke-width', focused ? '3' : '2');
+      } else if (organicMode) {
+        shape.setAttribute('fill', focused ? colors.grad1 : '#eef9ff');
+        shape.setAttribute('stroke', focused ? creatorStroke : creatorStrokeSoft);
+        shape.setAttribute('stroke-width', focused ? '2.4' : '1.6');
+      } else {
+        shape.setAttribute('fill', `url(#grad-${currentDepth})`);
+        shape.setAttribute('stroke', focused ? creatorStroke : creatorStrokeSoft);
+        shape.setAttribute('stroke-width', focused ? '3' : '2');
+      }
+
+      g.appendChild(shape);
+      text.style.pointerEvents = 'none';
+      g.appendChild(text);
+
+      // Nested indicator
+      if (showNested && hasNestedContent(n.id)) {
+        const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        indicator.setAttribute('cx', x + (focused ? 70 : 62));
+        indicator.setAttribute('cy', y - (focused ? 18 : 16));
+        indicator.setAttribute('r', '6');
+        indicator.setAttribute('fill', '#FFB800');
+        indicator.setAttribute('stroke', '#fff');
+        indicator.setAttribute('stroke-width', '1.5');
+        g.appendChild(indicator);
+      }
+
+      return g;
+    }
+
+    function defs(colors, depth) {
+      const d = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      grad.setAttribute('id', `grad-${depth}`);
+      grad.setAttribute('x1', '0%'); grad.setAttribute('y1', '0%');
+      grad.setAttribute('x2', '0%'); grad.setAttribute('y2', '100%');
+
+      const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', colors.grad1);
+      const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', colors.grad2);
+
+      grad.appendChild(s1); grad.appendChild(s2); d.appendChild(grad);
+      return d;
+    }
+
+    function renderMindmapLayer(mindmap, depth, layerScale, layerOpacity, focusPosOverride = null, positionsOverride = null) {
+      const colors = getColorScheme(depth);
+      const basePos = positionsOverride || place(mindmap.focusId, mindmap);
+      const pos = Object.fromEntries(Object.entries(basePos).map(([k, v]) => [k, { x: v.x, y: v.y }]));
+      resolveNodeOverlaps(pos, mindmap);
+      
+      // Camera transform: either focus-lock centering or free-pan canvas
+      const focusPos = focusPosOverride || pos[mindmap.focusId];
+      let tx = 0, ty = 0;
+      if (cameraMode === 'focus') {
+        if (focusPos) {
+          tx = center.x - (focusPos.x * layerScale);
+          ty = center.y - (focusPos.y * layerScale);
+        }
+      } else {
+        tx = panX;
+        ty = panY;
+      }
+
+      const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      layer.setAttribute('transform', `translate(${tx}, ${ty}) scale(${layerScale})`);
+      layer.setAttribute('opacity', layerOpacity);
+
+      // Draw links (attach at node boundaries for clarity)
+      mindmap.links.forEach(l => {
+        const a = pos[l.from], b = pos[l.to];
+        if (!a || !b) return;
+
+        const na = getNode(l.from, mindmap);
+        const nb = getNode(l.to, mindmap);
+        if (!na || !nb) return;
+
+        const ma = nodeVisualMetrics(na, l.from === mindmap.focusId);
+        const mb = nodeVisualMetrics(nb, l.to === mindmap.focusId);
+        const aEdge = edgeAnchor(a, b, ma);
+        const bEdge = edgeAnchor(b, a, mb);
+
+        const color = layoutMode === 'organic'
+          ? (l.type === 'jump' ? '#4bb4ce' : '#8fd3e4')
+          : (l.type === 'jump' ? colors.primary + '88' : colors.line);
+
+        if (layoutMode === 'organic') {
+          layer.appendChild(curvedLink(aEdge.x, aEdge.y, bEdge.x, bEdge.y, color, l.type === 'jump'));
+        } else {
+          layer.appendChild(line(aEdge.x, aEdge.y, bEdge.x, bEdge.y, color, l.type === 'jump'));
+        }
+      });
+
+      // Draw nodes
+      const shouldTrackHits = depth === currentDepth && layerOpacity > 0.9;
+      if (shouldTrackHits) lastNodeHitTargets = [];
+
+      Object.entries(pos).forEach(([id, p]) => {
+        const n = getNode(id, mindmap);
+        if (!n) return;
+        const isFocused = id === mindmap.focusId;
+        const showNested = (layerOpacity > 0.5); // Only show nested indicators when layer is dominant
+        const dragMeta = {
+          draggable: depth === currentDepth && layerOpacity > 0.9,
+          mindmap,
+          tx,
+          ty,
+          scale: layerScale
+        };
+        layer.appendChild(nodeShape(n, p.x, p.y, isFocused, colors, showNested, dragMeta));
+
+        if (shouldTrackHits) {
+          const hitRadius = Math.max(30, nodeCollisionRadius(n, isFocused) * layerScale * 0.92);
+          lastNodeHitTargets.push({
+            id,
+            x: (p.x * layerScale) + tx,
+            y: (p.y * layerScale) + ty,
+            r: hitRadius,
+            focused: isFocused
+          });
+        }
+      });
+
+      return layer;
+    }
+
+    function renderQuick() {
+      quickNodes.innerHTML = '';
+      const q = (quickSearchInput?.value || '').trim().toLowerCase();
+      const pool = currentMindmap.nodes
+        .filter(n => {
+          if (!q) return true;
+          return `${n.label || ''} ${n.id || ''}`.toLowerCase().includes(q);
+        })
+        .slice(-80);
+
+      if (!pool.length) {
+        const empty = document.createElement('div');
+        empty.className = 'subtitle';
+        empty.textContent = q ? 'No matching nodes.' : 'No nodes.';
+        quickNodes.appendChild(empty);
+        return;
+      }
+
+      pool.forEach(n => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = n.label;
+        chip.onclick = () => {
+          currentMindmap.focusId = n.id;
+          render();
+        };
+        quickNodes.appendChild(chip);
+      });
+    }
+
+    function updateStats() {
+      statDepth.textContent = currentDepth;
+      statNodes.textContent = currentMindmap.nodes.length;
+      statLinks.textContent = currentMindmap.links.length;
+    }
+
+    function renderResources() {
+      const focus = getFocusedNode();
+      const scope = document.getElementById('resourcesScope');
+      const list = document.getElementById('resourceList');
+      const titleInput = document.getElementById('resourceTitle');
+      if (!focus) {
+        scope.textContent = 'No focused node.';
+        list.textContent = 'No resources yet for this node.';
+        return;
+      }
+
+      if (!Array.isArray(focus.resources)) focus.resources = [];
+      const createdAt = focus?.meta?.createdAt ? formatTimestamp(focus.meta.createdAt) : 'unknown';
+      scope.textContent = `Resources for focused node: ${focus.label} · Created: ${createdAt}`;
+      const preferredTitle = (focus.label || focus.id || '').trim();
+      if (titleInput) {
+        const current = (titleInput.value || '').trim();
+        if (!current || current === lastAutoResourceTitle) {
+          titleInput.value = preferredTitle;
+          lastAutoResourceTitle = preferredTitle;
+        }
+      }
+
+      const tabs = document.getElementById('resourceTabs');
+      if (!focus.resources.length) {
+        if (tabs) tabs.innerHTML = '';
+        list.textContent = 'No resources yet for this node.';
+        return;
+      }
+
+      selectedResourceIndex = Math.max(0, Math.min(selectedResourceIndex, focus.resources.length - 1));
+      if (tabs) {
+        tabs.innerHTML = '';
+        focus.resources.forEach((r, idx) => {
+          const tab = document.createElement('button');
+          tab.className = `resource-tab${idx === selectedResourceIndex ? ' active' : ''}`;
+          tab.textContent = `${idx + 1}`;
+          tab.title = r.title || `Resource ${idx + 1}`;
+          tab.onclick = () => {
+            selectedResourceIndex = idx;
+            renderResources();
+          };
+          tabs.appendChild(tab);
+        });
+      }
+
+      const r = focus.resources[selectedResourceIndex];
+      list.innerHTML = '';
+      const row = document.createElement('div');
+      row.style.padding = '10px';
+      row.style.border = '1px solid var(--border)';
+      row.style.borderRadius = '8px';
+      row.style.marginBottom = '8px';
+      row.style.background = 'var(--bg-panel)';
+
+      const title = document.createElement('div');
+      title.style.fontWeight = '700';
+      title.textContent = r.title || `Resource ${selectedResourceIndex + 1}`;
+      row.appendChild(title);
+
+      const added = document.createElement('div');
+      added.className = 'subtitle';
+      added.style.marginTop = '4px';
+      added.style.marginBottom = '0';
+      added.textContent = `Added: ${formatTimestamp(r.addedAt || '')}`;
+      row.appendChild(added);
+
+      if (r.url) {
+        const link = document.createElement('a');
+        link.href = r.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = r.url;
+        link.style.display = 'block';
+        link.style.marginTop = '4px';
+        link.style.wordBreak = 'break-all';
+        row.appendChild(link);
+      }
+
+      if (r.note) {
+        const note = document.createElement('div');
+        note.style.marginTop = '6px';
+        note.style.whiteSpace = 'pre-wrap';
+        note.textContent = r.note;
+        row.appendChild(note);
+      }
+
+      const editNote = document.createElement('button');
+      editNote.className = 'secondary';
+      editNote.style.marginTop = '8px';
+      editNote.style.marginRight = '6px';
+      editNote.textContent = 'Edit Note';
+      editNote.onclick = () => {
+        const currentNote = r.note || '';
+        const nextNote = window.prompt('Edit note:', currentNote);
+        if (nextNote === null) return;
+        r.note = nextNote.trim();
+        renderResources();
+        showZoomHint('Resource note updated');
+      };
+      row.appendChild(editNote);
+
+      const del = document.createElement('button');
+      del.className = 'secondary';
+      del.style.marginTop = '8px';
+      del.textContent = 'Remove';
+      del.onclick = () => {
+        focus.resources.splice(selectedResourceIndex, 1);
+        selectedResourceIndex = Math.max(0, selectedResourceIndex - 1);
+        renderResources();
+      };
+      row.appendChild(del);
+
+      list.appendChild(row);
+    }
+
+    function renderAgenticTabVisibility() {
+      const focus = getFocusedNode();
+      const isAgentic = focus?.type === 'agentic';
+
+      if (agenticTabBtn) agenticTabBtn.style.display = isAgentic ? '' : 'none';
+      if (agenticTabContent) agenticTabContent.style.display = isAgentic ? '' : 'none';
+
+      const activePill = document.querySelector('.tab-pill.active');
+      const activeTab = activePill?.getAttribute('data-tab');
+      if (!isAgentic && activeTab === 'agentic') {
+        setActiveTab('resources', { allowCloseDesktop: false });
+      }
+    }
+
+    function renderAgenticParams() {
+      const focus = getFocusedNode();
+      const scope = document.getElementById('agenticScope');
+      const role = document.getElementById('agenticRole');
+      const model = document.getElementById('agenticModel');
+      const temp = document.getElementById('agenticTemp');
+      if (!scope || !role || !model || !temp) return;
+
+      if (!focus || focus.type !== 'agentic') {
+        scope.textContent = 'Select an agentic node to edit parameters.';
+        role.value = '';
+        model.value = '';
+        temp.value = '';
+        return;
+      }
+
+      if (!focus.agenticParams || typeof focus.agenticParams !== 'object') {
+        focus.agenticParams = { role: '', model: '', temperature: '' };
+      }
+
+      scope.textContent = `Parameters for: ${focus.label}`;
+      role.value = focus.agenticParams.role || '';
+      model.value = focus.agenticParams.model || '';
+      temp.value = focus.agenticParams.temperature || '';
+    }
+
+    function render() {
+      hideNodeContextMenu();
+      const focus = getFocusedNode();
+      if (flowchartActive && focus?.id !== flowchartFocusNodeId) {
+        hideFlowchartAsset();
+      }
+      focusName.textContent = focus?.label || currentMindmap.focusId;
+      if (renameInput) {
+        renameInput.placeholder = focus?.label ? `Rename "${focus.label}"` : 'Rename focused node';
+      }
+
+      svg.innerHTML = '';
+      
+      // Add all color scheme defs
+      for (let d = 0; d <= Math.min(currentDepth + 1, colorSchemes.length); d++) {
+        svg.appendChild(defs(getColorScheme(d), d));
+      }
+
+      const currentSignature = layoutSignature(currentMindmap, currentDepth);
+      const currentTargetPos = place(currentMindmap.focusId, currentMindmap);
+      const currentAnimatedPos = resolveAnimatedPositions(currentTargetPos, currentSignature);
+
+      // Determine what to render based on scale
+      if (scale >= TRANSITION_END && enterArmed && !aboveEnterThreshold && !entryUsedThisGesture) {
+        // Fully zoomed in: trigger once per threshold crossing and once per gesture
+        const focusedNode = getFocusedNode();
+        if (focusedNode) {
+          if (!focusedNode.nested) ensureNestedMindmap(focusedNode);
+          aboveEnterThreshold = true;
+          enterNode(focusedNode.id);
+          return;
+        }
+      }
+      if (scale < (TRANSITION_END - 0.35)) {
+        aboveEnterThreshold = false;
+      }
+
+      if (scale <= EXIT_THRESHOLD) {
+        // Commit exit at lower threshold after reverse preview band.
+        exitNode();
+        return;
+      }
+
+      // Reverse transition while zooming out: smoothly preview container level
+      if (navStack.length > 0 && scale < EXIT_PREVIEW_START) {
+        const reverse = (EXIT_PREVIEW_START - scale) / (EXIT_PREVIEW_START - EXIT_THRESHOLD);
+        const childOpacity = Math.max(0, 1 - reverse);
+        const containerOpacity = Math.min(1, reverse);
+
+        // Current nested level fades out
+        const childLayer = renderMindmapLayer(currentMindmap, currentDepth, Math.max(0.55, scale), childOpacity, center, currentAnimatedPos);
+        svg.appendChild(childLayer);
+
+        // Container level fades in and scales toward its click-in zoom range
+        const prev = navStack[navStack.length - 1];
+        const containerMindmap = prev.mindmap;
+        const containerScale = TRANSITION_START + reverse * (TRANSITION_END - TRANSITION_START);
+        const containerLayer = renderMindmapLayer(containerMindmap, currentDepth - 1, containerScale, containerOpacity);
+        svg.appendChild(containerLayer);
+
+      // Render current level
+      } else if (scale < TRANSITION_START) {
+        // Below forward transition - show current level
+        const layer = renderMindmapLayer(currentMindmap, currentDepth, scale, 1.0, center, currentAnimatedPos);
+        svg.appendChild(layer);
+      } else {
+        // Forward transition zone - show current + nested preview crossfade
+        const progress = (scale - TRANSITION_START) / (TRANSITION_END - TRANSITION_START);
+        const parentOpacity = Math.max(0, 1 - progress);
+        const childOpacity = Math.min(1, progress);
+
+        // Render current level - fading out
+        const parentLayer = renderMindmapLayer(currentMindmap, currentDepth, scale, parentOpacity, center, currentAnimatedPos);
+        svg.appendChild(parentLayer);
+
+        // Render nested preview; auto-create only near boundary threshold
+        const focusedNode = getFocusedNode();
+        if (focusedNode) {
+          if (!focusedNode.nested && scale >= AUTO_CREATE_NESTED_AT) {
+            ensureNestedMindmap(focusedNode);
+          }
+          if (focusedNode.nested) {
+            const nested = focusedNode.nested;
+            const childScale = 0.08 + (progress * 0.42); // ~0.08 -> ~0.50
+            const childLayer = renderMindmapLayer(nested, currentDepth + 1, childScale, childOpacity);
+            svg.appendChild(childLayer);
+          }
+        }
+      }
+
+      if (layoutAnimActive) {
+        requestAnimationFrame(render);
+      }
+
+      renderQuick();
+      updateStats();
+      renderResources();
+      renderAgenticTabVisibility();
+      renderAgenticParams();
+      refreshRelationshipBuilder();
+      updateExportScopeSummary();
+    }
+
+    // ===== ZOOM CONTROLS =====
+    function setScale(next) {
+      const MAX_SCALE = Math.max(8.0, TRANSITION_END + 1.0);
+      scale = Math.max(0.3, Math.min(MAX_SCALE, next));
+      if (flowchartActive && scale <= 0.85) {
+        exitNode();
+        return;
+      }
+      render();
+    }
+
+    document.getElementById('zoomIn').onclick = () => setScale(scale + 0.15);
+    document.getElementById('zoomOut').onclick = () => setScale(scale - 0.15);
+    document.getElementById('zoomReset').onclick = () => { scale = 1; enterArmed = true; aboveEnterThreshold = false; entryUsedThisGesture = false; render(); };
+    document.getElementById('enterNode').onclick = () => {
+      const focused = getFocusedNode();
+      if (focused) enterNode(focused.id);
+    };
+    document.getElementById('exitNode').onclick = () => exitNode();
+
+    let wheelGestureTimer = null;
+    let wheelGestureActive = false;
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (!wheelGestureActive) {
+        wheelGestureActive = true;
+        entryUsedThisGesture = false;
+      }
+      const delta = e.deltaY < 0 ? 0.1 : -0.1;
+      setScale(scale + delta);
+
+      if (wheelGestureTimer) clearTimeout(wheelGestureTimer);
+      wheelGestureTimer = setTimeout(() => {
+        wheelGestureActive = false;
+        entryUsedThisGesture = false;
+      }, 180);
+    }, { passive: false });
+
+    // Free-pan drag (desktop)
+    let panDragging = false;
+    let panStartX = 0;
+    let panStartY = 0;
+
+    svg.addEventListener('mousedown', (e) => {
+      if (cameraMode !== 'free') return;
+      panDragging = true;
+      panStartX = e.clientX - panX;
+      panStartY = e.clientY - panY;
+      svg.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!panDragging || cameraMode !== 'free') return;
+      panX = e.clientX - panStartX;
+      panY = e.clientY - panStartY;
+      render();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!panDragging) return;
+      panDragging = false;
+      svg.style.cursor = 'default';
+    });
+
+    // ===== TOUCH NAVIGATION (PINCH + FREE-PAN) =====
+    let pinchLastDistance = null;
+    let pinchGestureActive = false;
+    let touchPanActive = false;
+    let touchPanStartX = 0;
+    let touchPanStartY = 0;
+
+    function getTouchDistance(touch1, touch2) {
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function focusClosestNodeAtClientPoint(clientX, clientY) {
+      if (!lastNodeHitTargets.length) return false;
+
+      let winner = null;
+      for (const t of lastNodeHitTargets) {
+        const dx = clientX - t.x;
+        const dy = clientY - t.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > t.r) continue;
+        const score = dist + (t.focused ? 14 : 0); // slight bias away from re-selecting focused node
+        if (!winner || score < winner.score) winner = { id: t.id, score };
+      }
+
+      if (!winner || winner.id === currentMindmap.focusId) return false;
+      currentMindmap.focusId = winner.id;
+      render();
+      return true;
+    }
+
+    svg.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        touchPanActive = false;
+        if (!pinchGestureActive) {
+          pinchGestureActive = true;
+          entryUsedThisGesture = false;
+        }
+        pinchLastDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        return;
+      }
+
+      if (e.touches.length === 1 && cameraMode === 'free') {
+        touchPanActive = true;
+        touchPanStartX = e.touches[0].clientX - panX;
+        touchPanStartY = e.touches[0].clientY - panY;
+      }
+    }, { passive: false });
+
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && pinchLastDistance !== null) {
+        e.preventDefault();
+        const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+        if (pinchLastDistance > 0) {
+          const ratio = currentDistance / pinchLastDistance;
+          setScale(scale * ratio);
+        }
+        pinchLastDistance = currentDistance;
+        return;
+      }
+
+      if (e.touches.length === 1 && cameraMode === 'free' && touchPanActive) {
+        e.preventDefault();
+        panX = e.touches[0].clientX - touchPanStartX;
+        panY = e.touches[0].clientY - touchPanStartY;
+        render();
+      }
+    }, { passive: false });
+
+    svg.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        pinchLastDistance = null;
+        pinchGestureActive = false;
+        entryUsedThisGesture = false;
+      }
+      if (e.touches.length === 0) {
+        touchPanActive = false;
+      }
+    }, { passive: false });
+
+    // Mobile fallback: ensure a tap near a node still focuses it even when click dispatch is flaky.
+    svg.addEventListener('pointerup', (e) => {
+      if (!(e.pointerType === 'touch' || e.pointerType === 'pen')) return;
+      if (Date.now() < suppressNodeClickUntil) return;
+      if (pinchGestureActive || touchPanActive || dragState?.moved) return;
+      focusClosestNodeAtClientPoint(e.clientX, e.clientY);
+    });
+
+    // ===== NODE ACTIONS =====
+    document.getElementById('addChild').onclick = () => addNodeWith('child');
+    document.getElementById('addParent').onclick = () => addNodeWith('parent');
+    document.getElementById('addJump').onclick = () => addNodeWith('jump');
+    document.getElementById('renameNode').onclick = () => renameFocusedNode();
+    document.getElementById('createRelation').onclick = () => createRelationship();
+    document.getElementById('followXJump')?.addEventListener('click', () => {
+      const fid = currentMindmap.focusId;
+      const linksOut = (currentMindmap.links || []).filter(l => l.type === 'xjump' && l.from === fid);
+      if (!linksOut.length) {
+        showZoomHint('No XJump from focused node');
+        return;
+      }
+      const target = linksOut[0];
+      const ok = navigateToNodeGlobal(target.to, target.toStackIds || null);
+      showZoomHint(ok ? 'XJump followed' : 'XJump target not found');
+    });
+    document.getElementById('focusRoot').onclick = () => {
+      currentMindmap.focusId = currentMindmap.nodes[0].id;
+      render();
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addNodeWith('child');
+    });
+
+    renameInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') renameFocusedNode();
+    });
+
+    quickSearchInput?.addEventListener('input', () => {
+      renderQuick();
+    });
+
+    layoutModeSelect.addEventListener('change', (e) => {
+      layoutMode = e.target.value;
+      render();
+    });
+
+    levelsVisibleSelect.addEventListener('change', (e) => {
+      hierarchyLevelsVisible = Math.max(1, Math.min(4, Number(e.target.value) || 1));
+      render();
+    });
+
+    relTypeSelect?.addEventListener('change', () => {
+      refreshRelationshipBuilder();
+    });
+
+    cameraModeSelect.addEventListener('change', (e) => {
+      cameraMode = e.target.value === 'free' ? 'free' : 'focus';
+      if (cameraMode === 'focus') {
+        panX = 0;
+        panY = 0;
+      }
+      render();
+    });
+
+    activeEditorSelect?.addEventListener('change', () => {
+      try { localStorage.setItem('gc.activeEditor', getActiveEditor()); } catch (_) {}
+    });
+
+    // ===== NODE-RESOURCE LIBRARY (FOCUSED NODE) =====
+    function runAiAssist(mode, note, focus) {
+      const clean = (note || '').trim();
+      const nodeName = focus?.label || focus?.id || 'focused node';
+      if (!clean) {
+        return `Context: ${nodeName}\n\nSuggestion: Start with one sentence on why this node exists, then one sentence on what action is needed.`;
+      }
+
+      if (mode === 'summary') {
+        return `Summary for ${nodeName}:\n${clean.split(/\s+/).slice(0, 45).join(' ')}${clean.split(/\s+/).length > 45 ? '…' : ''}`;
+      }
+      if (mode === 'actions') {
+        const bullets = clean.split(/[.!?]\s+/).filter(Boolean).slice(0, 5).map((s, i) => `- [ ] ${i + 1}. ${s.trim()}`);
+        return `Action list for ${nodeName}:\n${bullets.join('\n')}`;
+      }
+      if (mode === 'nextnodes') {
+        return `Suggested next nodes from ${nodeName}:\n- Decision log\n- Risks & blockers\n- Resources to gather\n- Owner + due date\n- Validation criteria\n\nSuggested links:\n- child: Risks & blockers\n- jump: Related project / skill node`;
+      }
+      return `Rewritten note for ${nodeName}:\nWhy this exists: ${clean}\nAction needed: Define next concrete step and owner.\nContext: Keep this aligned with map version + approval flow.`;
+    }
+
+    document.getElementById('runAiAssist')?.addEventListener('click', () => {
+      const focus = getFocusedNode();
+      if (!focus) return;
+      const mode = document.getElementById('aiAssistMode')?.value || 'rewrite';
+      const note = (document.getElementById('resourceNote')?.value || '');
+      const out = runAiAssist(mode, note, focus);
+      const outEl = document.getElementById('aiAssistOutput');
+      if (outEl) outEl.value = out;
+      showZoomHint('AI suggestion generated');
+    });
+
+    document.getElementById('insertAiAssist')?.addEventListener('click', () => {
+      const outEl = document.getElementById('aiAssistOutput');
+      const noteEl = document.getElementById('resourceNote');
+      if (!outEl || !noteEl) return;
+      const out = (outEl.value || '').trim();
+      if (!out) {
+        showZoomHint('No suggestion to insert');
+        return;
+      }
+      noteEl.value = noteEl.value ? `${noteEl.value}\n\n${out}` : out;
+      showZoomHint('Suggestion inserted into note');
+    });
+
+    document.getElementById('addResource').onclick = () => {
+      const focus = getFocusedNode();
+      if (!focus) return;
+
+      const titleEl = document.getElementById('resourceTitle');
+      const urlEl = document.getElementById('resourceUrl');
+      const noteEl = document.getElementById('resourceNote');
+
+      const title = (titleEl.value || '').trim();
+      const url = (urlEl.value || '').trim();
+      const note = (noteEl.value || '').trim();
+
+      if (!title) {
+        alert('Please add a resource title.');
+        return;
+      }
+
+      const nowIso = new Date().toISOString();
+      const stampedNote = note ? `[${formatTimestamp(nowIso)}] ${note}` : `[${formatTimestamp(nowIso)}]`;
+
+      if (!Array.isArray(focus.resources)) focus.resources = [];
+      focus.resources.push({ id: `r${Date.now()}`, title, url, note: stampedNote, addedAt: nowIso });
+      logNodeEdit(focus, 'resource_add', { title, hasUrl: Boolean(url), noteLength: note.length, stampedAt: nowIso });
+
+      const preferredTitle = (focus.label || focus.id || '').trim();
+      titleEl.value = preferredTitle;
+      lastAutoResourceTitle = preferredTitle;
+      urlEl.value = '';
+      noteEl.value = '';
+      const outEl = document.getElementById('aiAssistOutput');
+      if (outEl) outEl.value = '';
+      selectedResourceIndex = Math.max(0, (focus.resources?.length || 1) - 1);
+      renderResources();
+      showZoomHint('Resource added to focused node');
+    };
+
+    document.getElementById('saveAgenticParams')?.addEventListener('click', () => {
+      const focus = getFocusedNode();
+      if (!focus || focus.type !== 'agentic') {
+        showZoomHint('Select an agentic node first');
+        return;
+      }
+      const role = (document.getElementById('agenticRole')?.value || '').trim();
+      const model = (document.getElementById('agenticModel')?.value || '').trim();
+      const temperature = (document.getElementById('agenticTemp')?.value || '').trim();
+      const prev = focus.agenticParams || {};
+      focus.agenticParams = { role, model, temperature };
+      logNodeEdit(focus, 'agentic_params_update', {
+        from: prev,
+        to: { role, model, temperature }
+      });
+      showZoomHint('Agentic parameters saved');
+      renderAgenticParams();
+    });
+
+    // ===== SAVE / LOAD =====
+    function computeSeqFromNodes(nodes = []) {
+      return nodes.reduce((max, n) => {
+        const m = /^n(\d+)$/.exec(n.id || '');
+        return Math.max(max, m ? Number(m[1]) : 0);
+      }, 1);
+    }
+
+    function collectDownstreamNodeIds(mindmap, startId) {
+      const ids = new Set();
+      const queue = [startId];
+
+      while (queue.length) {
+        const id = queue.shift();
+        if (!id || ids.has(id)) continue;
+        ids.add(id);
+
+        const childIds = mindmap.links
+          .filter(l => (l.type === 'child' || l.type === 'parent') && l.from === id)
+          .map(l => l.to);
+
+        childIds.forEach(cid => {
+          if (!ids.has(cid)) queue.push(cid);
+        });
+      }
+
+      return ids;
+    }
+
+    function buildDownstreamMindmap(mindmap, startId) {
+      if (!startId) return cloneMindmap(mindmap);
+
+      const nodeIds = collectDownstreamNodeIds(mindmap, startId);
+      const nodes = mindmap.nodes
+        .filter(n => nodeIds.has(n.id))
+        .map(n => cloneMindmap(n));
+
+      const links = mindmap.links
+        .filter(l => (l.type === 'child' || l.type === 'parent') && nodeIds.has(l.from) && nodeIds.has(l.to))
+        .map(l => cloneMindmap(l));
+
+      return sanitizeMindmap({
+        nodes,
+        links,
+        focusId: startId,
+        seq: computeSeqFromNodes(nodes)
+      });
+    }
+
+    function getExportPayload() {
+      const scope = document.getElementById('exportScope')?.value || 'current';
+
+      if (scope === 'all') {
+        return cloneMindmap(rootMindmap);
+      }
+
+      if (scope === 'downstream') {
+        return buildDownstreamMindmap(currentMindmap, currentMindmap.focusId);
+      }
+
+      // Option 1: current map level as-is
+      return cloneMindmap(currentMindmap);
+    }
+
+    function countMindmapTree(mindmap) {
+      if (!mindmap || !Array.isArray(mindmap.nodes) || !Array.isArray(mindmap.links)) {
+        return { nodes: 0, links: 0, nestedMaps: 0 };
+      }
+
+      let nodes = mindmap.nodes.length;
+      let links = mindmap.links.length;
+      let nestedMaps = 0;
+
+      for (const n of mindmap.nodes) {
+        if (n && n.nested && Array.isArray(n.nested.nodes) && Array.isArray(n.nested.links)) {
+          nestedMaps += 1;
+          const childCounts = countMindmapTree(n.nested);
+          nodes += childCounts.nodes;
+          links += childCounts.links;
+          nestedMaps += childCounts.nestedMaps;
+        }
+      }
+
+      return { nodes, links, nestedMaps };
+    }
+
+    function updateExportScopeSummary() {
+      const summaryEl = document.getElementById('exportScopeSummary');
+      if (!summaryEl) return;
+      const payload = getExportPayload();
+      const c = countMindmapTree(payload);
+      summaryEl.textContent = `Will export: ${c.nodes} nodes, ${c.links} links, ${c.nestedMaps} nested maps`;
+    }
+
+    function exportCurrentMapJson() {
+      return JSON.stringify(getExportPayload(), null, 2);
+    }
+
+    function replaceMindmapInPlace(target, incoming) {
+      target.nodes = Array.isArray(incoming.nodes) ? incoming.nodes : [];
+      target.links = Array.isArray(incoming.links) ? incoming.links : [];
+      target.focusId = incoming.focusId || (target.nodes[0] && target.nodes[0].id) || null;
+      target.seq = typeof incoming.seq === 'number' ? incoming.seq : target.nodes.reduce((max, n) => {
+        const m = /^n(\d+)$/.exec(n.id || '');
+        return Math.max(max, m ? Number(m[1]) : 0);
+      }, 1);
+    }
+
+    function importSubsequentIntoFocused(targetMindmap, incomingMindmap) {
+      const focusedId = targetMindmap.focusId;
+      if (!focusedId) return { ok: false, reason: 'noFocus' };
+
+      const incomingNodes = Array.isArray(incomingMindmap?.nodes) ? incomingMindmap.nodes : [];
+      const incomingLinks = Array.isArray(incomingMindmap?.links) ? incomingMindmap.links : [];
+      if (incomingNodes.length === 0) return { ok: false, reason: 'empty' };
+
+      const idMap = new Map();
+      const remappedNodes = incomingNodes.map(n => {
+        const newId = nextId();
+        idMap.set(n.id, newId);
+        return { ...cloneMindmap(n), id: newId };
+      });
+
+      const remappedLinks = incomingLinks
+        .map(l => ({
+          ...cloneMindmap(l),
+          from: idMap.get(l.from),
+          to: idMap.get(l.to)
+        }))
+        .filter(l => l.from && l.to);
+
+      targetMindmap.nodes.push(...remappedNodes);
+      targetMindmap.links.push(...remappedLinks);
+
+      const incomingRootOldId = incomingMindmap.focusId || incomingNodes[0].id;
+      const importedRootId = idMap.get(incomingRootOldId) || remappedNodes[0].id;
+      targetMindmap.links.push({ from: focusedId, to: importedRootId, type: 'child' });
+
+      return { ok: true, importedRootId };
+    }
+
+    function downloadTextFile(filename, text) {
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('exportJson').onclick = () => {
+      const scope = document.getElementById('exportScope')?.value || 'current';
+      const safeLabel = (getFocusedNode()?.label || 'map').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const level = `level-${currentDepth}`;
+      downloadTextFile(`global-configurator-${scope}-${level}-${safeLabel || 'map'}.json`, exportCurrentMapJson());
+      showZoomHint(`JSON exported (${scope})`);
+    };
+
+    document.getElementById('copyJson').onclick = async () => {
+      const scope = document.getElementById('exportScope')?.value || 'current';
+      await navigator.clipboard.writeText(exportCurrentMapJson());
+      showZoomHint(`JSON copied (${scope})`);
+    };
+
+    document.getElementById('exportScope')?.addEventListener('change', () => {
+      updateExportScopeSummary();
+    });
+
+    document.getElementById('importJsonBtn').onclick = () => {
+      document.getElementById('importJsonFile').click();
+    };
+
+    document.getElementById('importJsonFile').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const incoming = sanitizeMindmap(JSON.parse(text));
+        const importScope = document.getElementById('importScope')?.value || 'currentOnly';
+
+        if (importScope === 'global') {
+          rootMindmap = cloneMindmap(incoming);
+          navStack = [];
+          currentMindmap = rootMindmap;
+          currentDepth = 0;
+          scale = 1;
+          render();
+          updateBreadcrumb();
+          showZoomHint('Global map imported');
+        } else if (importScope === 'focusNode') {
+          const focused = getFocusedNode();
+          if (!focused) {
+            showZoomHint('No focused node to import into');
+          } else {
+            focused.nested = cloneMindmap(incoming);
+            enterNode(focused.id);
+            showZoomHint('Imported into focused node map');
+          }
+        } else if (importScope === 'subsequent') {
+          const result = importSubsequentIntoFocused(currentMindmap, incoming);
+          if (!result.ok) {
+            showZoomHint(result.reason === 'empty' ? 'Import skipped (empty map)' : 'No focused node to import into');
+          } else {
+            render();
+            updateBreadcrumb();
+            showZoomHint('Imported as subsequent to focused node');
+          }
+        } else {
+          // Option 1: current level ONLY (ignore incoming nested maps)
+          const flatIncoming = cloneMindmap(incoming);
+          flatIncoming.nodes = (flatIncoming.nodes || []).map(n => ({ ...n, nested: null }));
+          replaceMindmapInPlace(currentMindmap, flatIncoming);
+          render();
+          updateBreadcrumb();
+          showZoomHint('Current level map imported (only)');
+        }
+      } catch (err) {
+        alert(`Import failed: ${err.message}`);
+      } finally {
+        e.target.value = '';
+      }
+    });
+
+    // ===== NODE CONTEXT MENU =====
+    document.getElementById('ctxRename')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      promptRenameNode(contextNodeId);
+      hideNodeContextMenu();
+    });
+
+    document.getElementById('ctxTypeStandard')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      setNodeType(contextNodeId, 'standard');
+      hideNodeContextMenu();
+    });
+
+    document.getElementById('ctxTypeAgentic')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      setNodeType(contextNodeId, 'agentic');
+      hideNodeContextMenu();
+    });
+
+    document.getElementById('ctxDeleteNode')?.addEventListener('click', () => {
+      if (!contextNodeId) return;
+      const node = getNode(contextNodeId);
+      const name = node?.label || contextNodeId;
+      const ok = window.confirm(`Delete "${name}" and downstream nodes?`);
+      if (ok) deleteNodeWithDownstream(contextNodeId);
+      hideNodeContextMenu();
+    });
+
+    document.addEventListener('click', (evt) => {
+      if (!nodeContextMenu) return;
+      // Mobile long-press can emit a trailing click right after opening the menu.
+      if (Date.now() - contextMenuOpenedAt < 420) return;
+      if (!nodeContextMenu.contains(evt.target)) hideNodeContextMenu();
+    });
+
+    document.addEventListener('scroll', () => {
+      if (Date.now() - contextMenuOpenedAt < 420) return;
+      hideNodeContextMenu();
+    }, true);
+
+    // ===== TAB NAVIGATION =====
+    function isDesktopLayout() {
+      return window.matchMedia('(min-width: 1024px)').matches;
+    }
+
+    function setActiveTab(tabName, { allowCloseDesktop = true } = {}) {
+      const pills = Array.from(document.querySelectorAll('.tab-pill'));
+      const contents = Array.from(document.querySelectorAll('.tab-content'));
+      const activePill = pills.find(p => p.classList.contains('active'));
+      const activeTab = activePill?.getAttribute('data-tab') || null;
+
+      let nextTab = tabName;
+      if (isDesktopLayout() && allowCloseDesktop && activeTab === tabName) {
+        nextTab = null; // Toggle closed on desktop when clicking active tab
+      }
+
+      pills.forEach(p => p.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+
+      if (nextTab) {
+        const pill = pills.find(p => p.getAttribute('data-tab') === nextTab);
+        const panel = contents.find(c => c.getAttribute('data-tab') === nextTab);
+        pill?.classList.add('active');
+        panel?.classList.add('active');
+      }
+
+      if (isDesktopLayout()) {
+        mindmapContainerEl?.classList.toggle('controls-open', !!nextTab);
+      } else {
+        mindmapContainerEl?.classList.add('controls-open');
+        if (!nextTab) {
+          // Mobile always keeps one visible tab
+          setActiveTab('save', { allowCloseDesktop: false });
+          return;
+        }
+      }
+    }
+
+    document.querySelectorAll('.tab-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const targetTab = pill.getAttribute('data-tab');
+        setActiveTab(targetTab, { allowCloseDesktop: true });
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      const activePill = document.querySelector('.tab-pill.active');
+      const activeTab = activePill?.getAttribute('data-tab') || null;
+      if (isDesktopLayout()) {
+        if (activeTab) {
+          mindmapContainerEl?.classList.add('controls-open');
+        } else {
+          mindmapContainerEl?.classList.remove('controls-open');
+        }
+      } else {
+        if (!activeTab) setActiveTab('save', { allowCloseDesktop: false });
+      }
+    });
+
+    // ===== NODE DRAG EVENTS =====
+    window.addEventListener('pointermove', onNodeDragMove);
+    window.addEventListener('pointerup', onNodeDragEnd);
+    window.addEventListener('pointercancel', onNodeDragEnd);
+
+    // ===== DRAWER RESIZE =====
+    let dragging = false;
+    let startY = 0;
+    let startHeight = 0;
+
+    const graphPane = document.getElementById('graphPane');
+    const dragHandle = document.getElementById('dragHandle');
+
+    dragHandle.addEventListener('mousedown', startDrag);
+    dragHandle.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+      dragging = true;
+      startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      startHeight = graphPane.offsetHeight;
+      document.body.style.userSelect = 'none';
+    }
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+
+    function drag(e) {
+      if (!dragging) return;
+      const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      const deltaY = currentY - startY;
+      const newHeight = startHeight + deltaY;
+      const minHeight = window.innerHeight * 0.15;
+      const maxHeight = window.innerHeight * 0.80;
+      
+      if (newHeight >= minHeight && newHeight <= maxHeight) {
+        graphPane.style.height = `${newHeight}px`;
+      }
+    }
+
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+
+    function stopDrag() {
+      dragging = false;
+      document.body.style.userSelect = '';
+    }
+
+    document.getElementById('collapseUp').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.25}px`;
+    });
+
+    document.getElementById('expandDown').addEventListener('click', () => {
+      graphPane.style.height = `${window.innerHeight * 0.70}px`;
+    });
+
+    // ===== INITIAL RENDER =====
+    async function init() {
+      rootMindmap = await loadRootMindmap();
+      navStack = [];
+      currentMindmap = rootMindmap;
+      currentDepth = 0;
+      render();
+      updateBreadcrumb();
+      if (isDesktopLayout()) {
+        setActiveTab(null, { allowCloseDesktop: false });
+      } else {
+        setActiveTab('save', { allowCloseDesktop: false });
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
