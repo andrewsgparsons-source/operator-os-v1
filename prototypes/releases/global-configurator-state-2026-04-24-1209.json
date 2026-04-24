@@ -6676,15 +6676,15 @@
     },
     {
       "id": "n105",
-      "label": "egentic development",
+      "label": "agentic development",
       "type": "standard",
       "nested": null,
       "resources": [
         {
           "id": "r1777028971174147",
-          "title": "egentic development",
+          "title": "agentic development",
           "url": "",
-          "note": "Umbrella node for agentic/egentic development lifecycle: idea capture, prototyping, and control/distribution governance.",
+          "note": "Umbrella node for agentic development lifecycle: idea capture, prototyping, and control/distribution governance.",
           "addedAt": "2026-04-24T11:09:31.174Z"
         }
       ],
@@ -6697,7 +6697,7 @@
             "by": "andy",
             "action": "create",
             "change": {
-              "label": "egentic development"
+              "label": "agentic development"
             }
           }
         ]
