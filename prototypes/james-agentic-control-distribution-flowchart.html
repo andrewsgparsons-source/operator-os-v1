@@ -3,88 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agentic Development — Control & Distribution Flowchart</title>
+  <title>James — Agentic Development Control & Distribution (Improved)</title>
   <style>
-    :root {
-      --bg:#fff; --text:#22384d; --muted:#5f7589; --line:#b8c9da;
-      --shadow:0 6px 22px rgba(61,101,138,.12);
-      --p1:#eef7ff; --s1:#79a8d5;
-      --p2:#f2edff; --s2:#9b87d0;
-      --p3:#fff4df; --s3:#d3ab61;
-      --p4:#eaf9f0; --s4:#78bc92;
-      --p5:#ffeaf0; --s5:#ce8ea1;
-    }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 36px}
-    .head{border:1.5px solid #d8e6f2;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
-    h1{margin:0;font-size:20px;color:#1f4f88}.sub{margin-top:6px;font-size:13px;color:var(--muted)}
-    .canvas{margin-top:14px;border:1.5px solid #d8e6f2;border-radius:14px;box-shadow:var(--shadow);padding:14px;overflow:auto}
-    svg{width:100%;max-width:1120px;height:auto;display:block;margin:0 auto}.edge{stroke:var(--line);stroke-width:2.2;fill:none;marker-end:url(#a)}
-    text{font-size:13px;fill:#22384d;font-weight:560}.small{font-size:11.5px;fill:#5e7387;font-weight:500}
+    :root{--bg:#f7fbff;--panel:#fff;--text:#22384d;--muted:#5f7589;--line:#b8c9da;--ring:#d8e6f2;--shadow:0 8px 24px rgba(42,84,122,.12);--p1:#eef7ff;--s1:#79a8d5;--p2:#f2edff;--s2:#9b87d0;--p3:#fff4df;--s3:#d3ab61;--p4:#eaf9f0;--s4:#78bc92;--p5:#ffeaf0;--s5:#ce8ea1;--p6:#e8f7f7;--s6:#74b7b7}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at 20% 10%,#ffffff 0,#f7fbff 60%,#f3f8fd 100%);color:var(--text)}
+    .wrap{max-width:1260px;margin:0 auto;padding:24px 20px 40px}.head{border:1.5px solid var(--ring);border-radius:14px;padding:14px 16px;background:var(--panel);box-shadow:var(--shadow)}
+    h1{margin:0;font-size:21px;color:#1f4f88}.sub{margin-top:6px;font-size:13px;color:var(--muted)}
+    .canvas{margin-top:14px;border:1.5px solid var(--ring);border-radius:14px;box-shadow:var(--shadow);background:#fff;padding:14px;overflow:auto}
+    svg{width:1180px;height:980px;display:block}.lane{fill:#fbfdff;stroke:#e1ecf5;stroke-width:1.2}.lane-title{font-size:11px;font-weight:700;letter-spacing:.08em;fill:#6a8399}
+    .edge{stroke:var(--line);stroke-width:2.2;fill:none;marker-end:url(#a)} text{font-size:13px;fill:#22384d;font-weight:560}.small{font-size:11.5px;fill:#5e7387;font-weight:500}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="head">
-      <h1>Agentic Development — Ideas, Prototyping, Control & Distribution</h1>
-      <div class="sub">Pastel configurator-style flow of how concepts move from capture to issued agent documentation.</div>
-    </div>
+    <div class="head"><h1>Agentic Development — Ideas, Control & Distribution (James improved)</h1><div class="sub">Upgrades: clearer entry criteria, approval gates, canary release, telemetry feedback loop.</div></div>
     <div class="canvas">
-      <svg viewBox="0 0 1120 900" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 1180 980" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Improved agentic development control and distribution flowchart">
         <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#9ab1c6"/></marker></defs>
-
-        <path class="edge" d="M560 80 L560 130"/>
-        <path class="edge" d="M560 200 L360 270"/>
-        <path class="edge" d="M560 200 L760 270"/>
-        <path class="edge" d="M360 340 L560 410"/>
-        <path class="edge" d="M760 340 L560 410"/>
-        <path class="edge" d="M560 480 L560 535"/>
-        <path class="edge" d="M560 600 L360 675"/>
-        <path class="edge" d="M560 600 L760 675"/>
-        <path class="edge" d="M760 742 L760 812"/>
-        <path class="edge" d="M360 742 L360 812"/>
-
-        <ellipse cx="560" cy="55" rx="185" ry="26" fill="var(--p4)" stroke="var(--s4)" stroke-width="2.3"/>
-        <text x="560" y="59" text-anchor="middle">Agents Node Context</text>
-
-        <rect x="360" y="130" width="400" height="70" rx="13" fill="var(--p1)" stroke="var(--s1)" stroke-width="2.2"/>
-        <text x="560" y="158" text-anchor="middle">Agentic Development</text>
-        <text x="560" y="178" class="small" text-anchor="middle">Umbrella for capability evolution and governance</text>
-
-        <rect x="150" y="270" width="420" height="70" rx="13" fill="var(--p2)" stroke="var(--s2)" stroke-width="2.2"/>
-        <text x="360" y="298" text-anchor="middle">Ideas</text>
-        <text x="360" y="318" class="small" text-anchor="middle">Capture concepts, requirements, and architecture options</text>
-
-        <rect x="550" y="270" width="420" height="70" rx="13" fill="var(--p2)" stroke="var(--s2)" stroke-width="2.2"/>
-        <text x="760" y="298" text-anchor="middle">Prototyping</text>
-        <text x="760" y="318" class="small" text-anchor="middle">Build/validate quickly before standardizing</text>
-
-        <rect x="350" y="410" width="420" height="70" rx="13" fill="var(--p1)" stroke="var(--s1)" stroke-width="2.2"/>
-        <text x="560" y="438" text-anchor="middle">Control and Distribution</text>
-        <text x="560" y="458" class="small" text-anchor="middle">Single source of truth + versioned publishing</text>
-
-        <polygon points="560,535 700,567 560,600 420,567" fill="var(--p3)" stroke="var(--s3)" stroke-width="2.2"/>
-        <text x="560" y="564" text-anchor="middle">Approved for issuance?</text>
-        <text x="560" y="580" class="small" text-anchor="middle">(currently Andrew as final approver)</text>
-
-        <rect x="150" y="675" width="420" height="67" rx="12" fill="var(--p5)" stroke="var(--s5)" stroke-width="2.2"/>
-        <text x="360" y="703" text-anchor="middle">Conflict / Incompatibility Resolution</text>
-        <text x="360" y="723" class="small" text-anchor="middle">Log issue, ticket it, transform/retarget/reject</text>
-
-        <rect x="550" y="675" width="420" height="67" rx="12" fill="var(--p4)" stroke="var(--s4)" stroke-width="2.2"/>
-        <text x="760" y="703" text-anchor="middle">Issued Global Version</text>
-        <text x="760" y="723" class="small" text-anchor="middle">Published lock served to all agents</text>
-
-        <rect x="550" y="812" width="420" height="60" rx="12" fill="var(--p1)" stroke="var(--s1)" stroke-width="2.1"/>
-        <text x="760" y="836" text-anchor="middle">Agent Consumption Layer</text>
-        <text x="760" y="855" class="small" text-anchor="middle">Agents read issued docs only (or explicit working deck)</text>
-
-        <rect x="150" y="812" width="420" height="60" rx="12" fill="var(--p2)" stroke="var(--s2)" stroke-width="2.1"/>
-        <text x="360" y="836" text-anchor="middle">Return to Ideas / Prototyping</text>
-        <text x="360" y="855" class="small" text-anchor="middle">Iteration loop with traceability preserved</text>
-
-        <text x="708" y="665" class="small">YES</text>
-        <text x="470" y="665" class="small">NO</text>
+        <rect x="40" y="78" width="1100" height="190" rx="12" class="lane"/><rect x="40" y="280" width="1100" height="205" rx="12" class="lane"/><rect x="40" y="497" width="1100" height="210" rx="12" class="lane"/><rect x="40" y="719" width="1100" height="220" rx="12" class="lane"/>
+        <text x="56" y="102" class="lane-title">DISCOVERY</text><text x="56" y="304" class="lane-title">PROTOTYPE + EVALUATE</text><text x="56" y="521" class="lane-title">CONTROL + RELEASE</text><text x="56" y="743" class="lane-title">DISTRIBUTION + FEEDBACK</text>
+        <path class="edge" d="M590 70 L590 118"/><path class="edge" d="M590 188 L380 320"/><path class="edge" d="M590 188 L800 320"/><path class="edge" d="M380 390 L590 460"/><path class="edge" d="M800 390 L590 460"/><path class="edge" d="M590 530 L590 578"/><path class="edge" d="M590 648 L380 748"/><path class="edge" d="M590 648 L800 748"/><path class="edge" d="M800 818 L800 866"/><path class="edge" d="M800 936 L590 936 L590 960"/><path class="edge" d="M380 818 L380 866 L590 866"/>
+        <ellipse cx="590" cy="46" rx="196" ry="26" fill="var(--p4)" stroke="var(--s4)" stroke-width="2.3"/><text x="590" y="50" text-anchor="middle">Agents / operators identify candidate capability</text>
+        <rect x="370" y="118" width="440" height="70" rx="13" fill="var(--p1)" stroke="var(--s1)" stroke-width="2.2"/><text x="590" y="146" text-anchor="middle">Agentic Development backlog entry</text><text x="590" y="166" class="small" text-anchor="middle">Objective, owner, success metric, risk level, timebox</text>
+        <rect x="170" y="320" width="420" height="70" rx="13" fill="var(--p2)" stroke="var(--s2)" stroke-width="2.2"/><text x="380" y="348" text-anchor="middle">Ideas track</text><text x="380" y="368" class="small" text-anchor="middle">Research assumptions and rank options by expected impact</text>
+        <rect x="590" y="320" width="420" height="70" rx="13" fill="var(--p2)" stroke="var(--s2)" stroke-width="2.2"/><text x="800" y="348" text-anchor="middle">Prototyping track</text><text x="800" y="368" class="small" text-anchor="middle">Build smallest useful prototype with acceptance criteria</text>
+        <rect x="370" y="460" width="440" height="70" rx="13" fill="var(--p1)" stroke="var(--s1)" stroke-width="2.2"/><text x="590" y="488" text-anchor="middle">Control & Distribution readiness review</text><text x="590" y="508" class="small" text-anchor="middle">Docs, reproducibility, test evidence, handoff clarity</text>
+        <polygon points="590,578 732,613 590,648 448,613" fill="var(--p3)" stroke="var(--s3)" stroke-width="2.2"/><text x="590" y="610" text-anchor="middle">Approved for issuance?</text><text x="590" y="627" class="small" text-anchor="middle">Gate currently requires Andrew sign-off</text>
+        <rect x="170" y="748" width="420" height="70" rx="12" fill="var(--p5)" stroke="var(--s5)" stroke-width="2.2"/><text x="380" y="776" text-anchor="middle">Resolve incompatibility / gap</text><text x="380" y="796" class="small" text-anchor="middle">Ticket issue, patch design, rerun verification loop</text>
+        <rect x="590" y="748" width="420" height="70" rx="12" fill="var(--p4)" stroke="var(--s4)" stroke-width="2.2"/><text x="800" y="776" text-anchor="middle">Issued global version (canary first)</text><text x="800" y="796" class="small" text-anchor="middle">Publish lock + small-scope rollout before broad distribution</text>
+        <rect x="590" y="866" width="420" height="70" rx="12" fill="var(--p6)" stroke="var(--s6)" stroke-width="2.2"/><text x="800" y="894" text-anchor="middle">Consumption + telemetry</text><text x="800" y="914" class="small" text-anchor="middle">Monitor quality, speed, failures, and drift</text>
+        <rect x="370" y="866" width="220" height="70" rx="12" fill="var(--p2)" stroke="var(--s2)" stroke-width="2.2"/><text x="480" y="894" text-anchor="middle">Iteration loop</text><text x="480" y="914" class="small" text-anchor="middle">feeds back to backlog</text>
       </svg>
     </div>
   </div>

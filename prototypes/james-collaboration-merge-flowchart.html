@@ -3,195 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Collaboration Merge Protocol — Flowchart</title>
+  <title>James — Collaboration Merge Protocol (Improved)</title>
   <style>
     :root {
-      --bg: #ffffff;
-      --panel: #ffffff;
-      --text: #243447;
-      --muted: #637487;
-      --line: #b8c9da;
-      --shadow: 0 6px 22px rgba(61, 101, 138, 0.12);
-
-      --start: #e8f6ee;
-      --process: #eaf3ff;
-      --queue: #f2edff;
-      --decision: #fff4df;
-      --conflict: #ffe9ee;
-      --success: #eaf9f0;
-      --publish: #e8f7f7;
-
-      --stroke-start: #7cbc94;
-      --stroke-process: #7da8d8;
-      --stroke-queue: #9a88d2;
-      --stroke-decision: #d3ac62;
-      --stroke-conflict: #d28a98;
-      --stroke-success: #78bc92;
-      --stroke-publish: #72b4b4;
+      --bg:#f7fbff; --panel:#ffffff; --text:#22384d; --muted:#5f7589; --line:#b7c8d9; --ring:#d8e6f2;
+      --shadow:0 8px 24px rgba(42,84,122,.12);
+      --start:#e9f8ef; --s-start:#76b88f;
+      --proc:#eaf3ff; --s-proc:#7aa8d8;
+      --queue:#f2edff; --s-queue:#9a88d2;
+      --decision:#fff3dd; --s-decision:#cfab61;
+      --risk:#ffe8ee; --s-risk:#d18698;
+      --publish:#e9f7f7; --s-publish:#70b3b3;
     }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .wrap {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 22px 20px 36px;
-    }
-
-    .header {
-      background: var(--panel);
-      border: 1.5px solid #d8e6f2;
-      border-radius: 14px;
-      padding: 14px 16px;
-      box-shadow: var(--shadow);
-      margin-bottom: 14px;
-    }
-    h1 { margin: 0; font-size: 20px; color: #1f4f88; }
-    .sub { margin-top: 6px; font-size: 13px; color: var(--muted); }
-
-    .key {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin: 12px 0 18px;
-    }
-    .key-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #deebf6;
-      border-radius: 10px;
-      padding: 8px 10px;
-      background: #fff;
-      font-size: 12px;
-      color: #44596d;
-    }
-    .shape { width: 22px; height: 22px; display:inline-block; }
-    .oval { border-radius: 999px; border: 2px solid var(--stroke-start); background: var(--start); }
-    .rect { border-radius: 8px; border: 2px solid var(--stroke-process); background: var(--process); }
-    .hex {
-      width: 24px; height: 20px;
-      background: var(--decision);
-      border: 2px solid var(--stroke-decision);
-      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-    }
-    .alert { border-radius: 4px; border: 2px dashed var(--stroke-conflict); background: var(--conflict); }
-
-    .canvas {
-      background: #fff;
-      border: 1.5px solid #d8e6f2;
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      overflow: auto;
-      padding: 18px;
-    }
-
-    svg { width: 1120px; height: 1060px; display: block; }
-    .node text { font-size: 13px; fill: #22384d; font-weight: 560; }
-    .small { font-size: 11.5px; fill: #5e7387; font-weight: 500; }
-    .edge { stroke: var(--line); stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
-    .edge-dashed { stroke-dasharray: 6 5; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at 20% 10%,#ffffff 0,#f7fbff 60%,#f3f8fd 100%);color:var(--text)}
+    .wrap{max-width:1260px;margin:0 auto;padding:24px 20px 40px}
+    .head{background:var(--panel);border:1.5px solid var(--ring);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:14px}
+    h1{margin:0;font-size:21px;color:#1f4f88}.sub{margin-top:6px;color:var(--muted);font-size:13px}
+    .canvas{background:#fff;border:1.5px solid var(--ring);border-radius:14px;box-shadow:var(--shadow);padding:14px;overflow:auto}
+    svg{width:1180px;height:1180px;display:block}
+    .lane{fill:#fbfdff;stroke:#e1ecf5;stroke-width:1.2}.lane-title{font-size:11px;font-weight:700;letter-spacing:.08em;fill:#6a8399}
+    .node text{font-size:13px;font-weight:560;fill:#22384d}.small{font-size:11.5px;font-weight:500;fill:#5d7388}
+    .edge{stroke:var(--line);stroke-width:2.2;fill:none;marker-end:url(#arrow)} .edge-d{stroke-dasharray:6 6}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="header">
-      <h1>Collaboration Merge Protocol</h1>
-      <div class="sub">Configurator-style visual map · white/pastel theme · approval-gated collaborative persistence</div>
-    </div>
-
-    <div class="key">
-      <div class="key-item"><span class="shape oval"></span> Start / Trigger</div>
-      <div class="key-item"><span class="shape rect"></span> Process / System action</div>
-      <div class="key-item"><span class="shape hex"></span> Decision gate</div>
-      <div class="key-item"><span class="shape alert"></span> Conflict / Exception path</div>
+    <div class="head">
+      <h1>Collaboration Merge Protocol (James improved)</h1>
+      <div class="sub">Upgrades: risk triage, stronger validation, explicit failure loop, conflict ticketing, rollback-safe publish.</div>
     </div>
 
     <div class="canvas">
-      <svg viewBox="0 0 1120 1060" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Collaboration merge protocol flowchart">
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ab1c6"/>
-          </marker>
-        </defs>
+      <svg viewBox="0 0 1180 1180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Improved collaboration merge protocol flowchart">
+        <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#95adbf"/></marker></defs>
+        <rect x="40" y="86" width="1100" height="230" rx="12" class="lane"/><rect x="40" y="328" width="1100" height="250" rx="12" class="lane"/><rect x="40" y="592" width="1100" height="270" rx="12" class="lane"/><rect x="40" y="874" width="1100" height="250" rx="12" class="lane"/>
+        <text x="56" y="110" class="lane-title">CAPTURE</text><text x="56" y="352" class="lane-title">VALIDATE</text><text x="56" y="616" class="lane-title">APPROVE + MERGE</text><text x="56" y="898" class="lane-title">PUBLISH + LEARN</text>
 
-        <!-- edges -->
-        <path class="edge" d="M560 92 L560 138"/>
-        <path class="edge" d="M560 214 L560 260"/>
-        <path class="edge" d="M560 336 L560 382"/>
-        <path class="edge" d="M560 458 L560 504"/>
-        <path class="edge" d="M560 580 L560 626"/>
+        <path class="edge" d="M590 70 L590 118"/><path class="edge" d="M590 188 L590 236"/><path class="edge" d="M590 306 L590 354"/><path class="edge" d="M590 426 L590 474"/><path class="edge" d="M590 542 L360 620"/><path class="edge" d="M590 542 L820 620"/><path class="edge" d="M820 690 L820 738"/><path class="edge" d="M820 806 L820 854"/><path class="edge" d="M820 922 L820 970"/><path class="edge" d="M820 1040 L820 1084"/><path class="edge" d="M360 690 L360 760 L590 760 L590 854"/><path class="edge edge-d" d="M360 922 L360 1084 L590 1084"/>
 
-        <path class="edge" d="M560 688 L330 748"/>
-        <path class="edge" d="M560 688 L790 748"/>
-
-        <path class="edge" d="M790 824 L790 870"/>
-        <path class="edge" d="M790 946 L790 988"/>
-
-        <path class="edge edge-dashed" d="M330 824 L330 900 L560 900 L560 988"/>
-
-        <path class="edge" d="M560 1030 L560 1048"/>
-
-        <!-- nodes -->
         <g class="node">
-          <ellipse cx="560" cy="64" rx="160" ry="28" fill="var(--start)" stroke="var(--stroke-start)" stroke-width="2.4"/>
-          <text x="560" y="60" text-anchor="middle">User / Agent makes small change</text>
-          <text x="560" y="78" class="small" text-anchor="middle">(e.g. add xjump, rename, add note)</text>
-
-          <rect x="355" y="138" width="410" height="76" rx="14" fill="var(--process)" stroke="var(--stroke-process)" stroke-width="2.2"/>
-          <text x="560" y="167" text-anchor="middle">One-click Capture</text>
-          <text x="560" y="187" class="small" text-anchor="middle">Write durable change-set event (not direct global overwrite)</text>
-
-          <rect x="355" y="260" width="410" height="76" rx="14" fill="var(--queue)" stroke="var(--stroke-queue)" stroke-width="2.2"/>
-          <text x="560" y="289" text-anchor="middle">Shared Pending Queue</text>
-          <text x="560" y="309" class="small" text-anchor="middle">Human + agent submissions, append-only + auditable</text>
-
-          <rect x="355" y="382" width="410" height="76" rx="14" fill="var(--process)" stroke="var(--stroke-process)" stroke-width="2.2"/>
-          <text x="560" y="411" text-anchor="middle">Validation Layer</text>
-          <text x="560" y="431" class="small" text-anchor="middle">Schema / references / permissions / operation integrity</text>
-
-          <polygon points="560,504 700,542 560,580 420,542" fill="var(--decision)" stroke="var(--stroke-decision)" stroke-width="2.2"/>
-          <text x="560" y="537" text-anchor="middle">Validation pass?</text>
-          <text x="560" y="554" class="small" text-anchor="middle">safe to route to approval</text>
-
-          <rect x="355" y="626" width="410" height="62" rx="12" fill="var(--process)" stroke="var(--stroke-process)" stroke-width="2.2"/>
-          <text x="560" y="652" text-anchor="middle">Approval Workflow</text>
-          <text x="560" y="671" class="small" text-anchor="middle">Now: Andrew final approver · Later: delegated approval lanes</text>
-
-          <polygon points="560,748 700,786 560,824 420,786" fill="var(--decision)" stroke="var(--stroke-decision)" stroke-width="2.2"/>
-          <text x="560" y="781" text-anchor="middle">Approved?</text>
-
-          <rect x="145" y="748" width="370" height="76" rx="12" fill="var(--conflict)" stroke="var(--stroke-conflict)" stroke-width="2.2"/>
-          <text x="330" y="777" text-anchor="middle">Not approved / revise</text>
-          <text x="330" y="797" class="small" text-anchor="middle">Return for edits or hold in queue</text>
-
-          <rect x="585" y="748" width="410" height="76" rx="12" fill="var(--process)" stroke="var(--stroke-process)" stroke-width="2.2"/>
-          <text x="790" y="777" text-anchor="middle">Merge Engine</text>
-          <text x="790" y="797" class="small" text-anchor="middle">Replay approved ops on latest accepted global state</text>
-
-          <polygon points="790,870 930,908 790,946 650,908" fill="var(--decision)" stroke="var(--stroke-decision)" stroke-width="2.2"/>
-          <text x="790" y="903" text-anchor="middle">Conflict detected?</text>
-
-          <rect x="590" y="988" width="400" height="62" rx="12" fill="var(--publish)" stroke="var(--stroke-publish)" stroke-width="2.2"/>
-          <text x="790" y="1013" text-anchor="middle">Publish & Persist</text>
-          <text x="790" y="1033" class="small" text-anchor="middle">Update global state, append chronology, generate latest lock</text>
-
-          <rect x="145" y="900" width="370" height="76" rx="12" fill="var(--conflict)" stroke="var(--stroke-conflict)" stroke-width="2.2" stroke-dasharray="7 5"/>
-          <text x="330" y="929" text-anchor="middle">Conflict Ticket</text>
-          <text x="330" y="949" class="small" text-anchor="middle">Resolve: keep A / keep B / transform / reject</text>
+          <ellipse cx="590" cy="44" rx="185" ry="26" fill="var(--start)" stroke="var(--s-start)" stroke-width="2.4"/><text x="590" y="48" text-anchor="middle">Change request captured</text>
+          <rect x="375" y="118" width="430" height="70" rx="12" fill="var(--proc)" stroke="var(--s-proc)" stroke-width="2.2"/><text x="590" y="146" text-anchor="middle">One-click change-set event</text><text x="590" y="166" class="small" text-anchor="middle">Immutable event: actor, target, operation, rationale, timestamp</text>
+          <rect x="375" y="236" width="430" height="70" rx="12" fill="var(--queue)" stroke="var(--s-queue)" stroke-width="2.2"/><text x="590" y="264" text-anchor="middle">Pending queue + risk triage</text><text x="590" y="284" class="small" text-anchor="middle">Auto-tag low / medium / high impact and route approval lane</text>
+          <rect x="375" y="354" width="430" height="72" rx="12" fill="var(--proc)" stroke="var(--s-proc)" stroke-width="2.2"/><text x="590" y="382" text-anchor="middle">Validation pipeline</text><text x="590" y="402" class="small" text-anchor="middle">Schema, resources, permissions, link health, policy checks</text>
+          <polygon points="590,474 730,508 590,542 450,508" fill="var(--decision)" stroke="var(--s-decision)" stroke-width="2.2"/><text x="590" y="505" text-anchor="middle">Validation + policy pass?</text><text x="590" y="522" class="small" text-anchor="middle">safe to move into approval</text>
+          <rect x="150" y="620" width="420" height="70" rx="12" fill="var(--risk)" stroke="var(--s-risk)" stroke-width="2.2"/><text x="360" y="648" text-anchor="middle">Fail path: fix ticket</text><text x="360" y="668" class="small" text-anchor="middle">Pinpoint issue, suggest repair, resubmit change-set</text>
+          <rect x="605" y="620" width="430" height="70" rx="12" fill="var(--proc)" stroke="var(--s-proc)" stroke-width="2.2"/><text x="820" y="648" text-anchor="middle">Approval gate</text><text x="820" y="668" class="small" text-anchor="middle">Current: Andrew final approval; future: delegated risk lanes</text>
+          <polygon points="820,738 960,772 820,806 680,772" fill="var(--decision)" stroke="var(--s-decision)" stroke-width="2.2"/><text x="820" y="770" text-anchor="middle">Approved?</text>
+          <rect x="605" y="854" width="430" height="68" rx="12" fill="var(--proc)" stroke="var(--s-proc)" stroke-width="2.2"/><text x="820" y="882" text-anchor="middle">Merge engine replay</text><text x="820" y="902" class="small" text-anchor="middle">Apply approved ops to latest accepted global state</text>
+          <polygon points="820,970 960,1004 820,1040 680,1004" fill="var(--decision)" stroke="var(--s-decision)" stroke-width="2.2"/><text x="820" y="1002" text-anchor="middle">Conflict detected?</text>
+          <rect x="605" y="1084" width="430" height="70" rx="12" fill="var(--publish)" stroke="var(--s-publish)" stroke-width="2.2"/><text x="820" y="1112" text-anchor="middle">Publish + rollback point</text><text x="820" y="1132" class="small" text-anchor="middle">Lock state, append chronology, emit latest pointer + rollback hash</text>
+          <rect x="375" y="854" width="210" height="68" rx="10" fill="var(--risk)" stroke="var(--s-risk)" stroke-width="2.2" stroke-dasharray="7 5"/><text x="480" y="881" text-anchor="middle">Reject / revise</text><text x="480" y="901" class="small" text-anchor="middle">returns to queue</text>
         </g>
-
-        <!-- side labels -->
-        <text x="710" y="739" class="small">YES</text>
-        <text x="468" y="739" class="small">NO</text>
-        <text x="706" y="862" class="small">NO</text>
-        <text x="884" y="862" class="small">YES</text>
       </svg>
     </div>
   </div>
