@@ -2106,7 +2106,8 @@
 
       g.appendChild(shape);
       text.style.pointerEvents = 'none';
-      g.appendChild(text);
+      const hideSecondaryLabel = isSmallScreen() && (scale < 0.8) && !focused;
+      if (!hideSecondaryLabel) g.appendChild(text);
 
       // Nested indicator
       if (showNested && hasNestedContent(n.id)) {
@@ -2163,6 +2164,7 @@
       layer.setAttribute('opacity', layerOpacity);
 
       // Draw links (attach at node boundaries for clarity)
+      const mobileDeclutter = isSmallScreen() && layerScale < 0.85;
       mindmap.links.forEach(l => {
         const a = pos[l.from], b = pos[l.to];
         if (!a || !b) return;
@@ -2175,6 +2177,8 @@
         const mb = nodeVisualMetrics(nb, l.to === mindmap.focusId);
         const aEdge = edgeAnchor(a, b, ma);
         const bEdge = edgeAnchor(b, a, mb);
+
+        if (mobileDeclutter && l.from !== mindmap.focusId && l.to !== mindmap.focusId) return;
 
         const color = layoutMode === 'organic'
           ? (l.type === 'jump' ? '#4bb4ce' : '#8fd3e4')
@@ -2206,7 +2210,7 @@
         layer.appendChild(nodeShape(n, p.x, p.y, isFocused, colors, showNested, dragMeta));
 
         if (shouldTrackHits) {
-          const hitRadius = Math.max(30, nodeCollisionRadius(n, isFocused) * layerScale * 0.92);
+          const hitRadius = Math.max(44, nodeCollisionRadius(n, isFocused) * layerScale * 0.98);
           lastNodeHitTargets.push({
             id,
             x: (p.x * layerScale) + tx,
