@@ -2052,6 +2052,11 @@
       text.setAttribute('font-size', fontSize);
       text.setAttribute('font-weight', organicMode ? (focused ? '650' : '520') : (focused ? '700' : '600'));
       text.setAttribute('fill', organicMode ? (focused ? '#154A6F' : '#286F92') : (focused ? '#143D6F' : '#1E5BA8'));
+      // Keep node label text readable at all zoom levels by cancelling map zoom on text.
+      // (Text stays screen-space constant while node geometry still zooms.)
+      const safeScale = Math.max(scale || 1, 0.0001);
+      const invScale = 1 / safeScale;
+      text.setAttribute('transform', `translate(${x} ${y}) scale(${invScale}) translate(${-x} ${-y})`);
       text.textContent = n.label;
 
       const isAgentic = n.type === 'agentic';
