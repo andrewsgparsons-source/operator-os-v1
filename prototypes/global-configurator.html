@@ -184,6 +184,39 @@
       opacity: 1;
     }
 
+    #globalSettingsBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 20;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    #globalSettingsPanel {
+      position: absolute;
+      top: 62px;
+      right: 12px;
+      z-index: 21;
+      width: min(320px, calc(100vw - 24px));
+      max-height: min(70vh, 520px);
+      overflow: auto;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      padding: 12px;
+      display: none;
+    }
+
+    #globalSettingsPanel.show { display: block; }
+
     .node-context-menu {
       position: fixed;
       z-index: 9999;
@@ -637,6 +670,16 @@
           <button id="exitNode">Return Nest</button>
         </div>
       </div>
+      <button id="globalSettingsBtn" aria-label="Open global settings" title="Global settings">☰</button>
+      <div id="globalSettingsPanel" aria-label="Global settings">
+        <div style="font-weight:700;margin-bottom:8px;">Global Settings</div>
+        <label for="textScaleSlider" class="subtitle" style="display:block;margin-bottom:6px;">Text size</label>
+        <input id="textScaleSlider" type="range" min="0.75" max="2.5" step="0.05" value="1" style="width:100%;" />
+        <div class="subtitle" id="textScaleValue" style="margin-bottom:10px;">1.00x</div>
+        <label for="labelDeclutterSlider" class="subtitle" style="display:block;margin-bottom:6px;">Label declutter zoom threshold</label>
+        <input id="labelDeclutterSlider" type="range" min="0.5" max="1.2" step="0.05" value="0.8" style="width:100%;" />
+        <div class="subtitle" id="labelDeclutterValue" style="margin-bottom:10px;">0.80</div>
+      </div>
       <div class="zoom-hint" id="zoomHint"></div>
     </section>
 
@@ -886,6 +929,8 @@
     const W = 1200, H = 760;
     const center = { x: W / 2, y: H / 2 };
     let scale = 1;
+    let globalTextScale = Number(localStorage.getItem('gcTextScale') || 1);
+    let labelDeclutterZoom = Number(localStorage.getItem('gcLabelDeclutterZoom') || 0.8);
     let layoutMode = 'topdown';
     let hierarchyLevelsVisible = 1;
     let cameraMode = 'focus'; // focus|free
@@ -949,6 +994,12 @@
     const breadcrumb = document.getElementById('breadcrumb');
     const zoomHint = document.getElementById('zoomHint');
     const nodeContextMenu = document.getElementById('nodeContextMenu');
+    const globalSettingsBtn = document.getElementById('globalSettingsBtn');
+    const globalSettingsPanel = document.getElementById('globalSettingsPanel');
+    const textScaleSlider = document.getElementById('textScaleSlider');
+    const textScaleValue = document.getElementById('textScaleValue');
+    const labelDeclutterSlider = document.getElementById('labelDeclutterSlider');
+    const labelDeclutterValue = document.getElementById('labelDeclutterValue');
     let contextNodeId = null;
     let contextMenuOpenedAt = 0;
     let lastAutoResourceTitle = '';
@@ -2046,10 +2097,11 @@
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('dominant-baseline', 'middle');
       const organicMode = layoutMode === 'organic';
-      const fontSize = isSmallScreen()
-        ? (organicMode ? (focused ? '32' : '28') : (focused ? '34' : '30'))
-        : (organicMode ? (focused ? '28' : '24') : (focused ? '30' : '26'));
-      text.setAttribute('font-size', fontSize);
+      const baseFontSize = isSmallScreen()
+        ? (organicMode ? (focused ? 32 : 28) : (focused ? 34 : 30))
+        : (organicMode ? (focused ? 28 : 24) : (focused ? 30 : 26));
+      const fontSize = Math.max(10, Math.round(baseFontSize * globalTextScale));
+      text.setAttribute('font-size', String(fontSize));
       text.setAttribute('font-weight', organicMode ? (focused ? '650' : '520') : (focused ? '700' : '600'));
       text.setAttribute('fill', organicMode ? (focused ? '#154A6F' : '#286F92') : (focused ? '#143D6F' : '#1E5BA8'));
       // Keep node label text readable at all zoom levels by cancelling map zoom on text.
@@ -2106,7 +2158,7 @@
 
       g.appendChild(shape);
       text.style.pointerEvents = 'none';
-      const hideSecondaryLabel = isSmallScreen() && (scale < 0.8) && !focused;
+      const hideSecondaryLabel = isSmallScreen() && (scale < labelDeclutterZoom) && !focused;
       if (!hideSecondaryLabel) g.appendChild(text);
 
       // Nested indicator
@@ -3109,6 +3161,40 @@
       if (Date.now() - contextMenuOpenedAt < 420) return;
       hideNodeContextMenu();
     }, true);
+
+    function applyGlobalSettingsUI() {
+      if (textScaleSlider) textScaleSlider.value = String(globalTextScale);
+      if (textScaleValue) textScaleValue.textContent = `${globalTextScale.toFixed(2)}x`;
+      if (labelDeclutterSlider) labelDeclutterSlider.value = String(labelDeclutterZoom);
+      if (labelDeclutterValue) labelDeclutterValue.textContent = labelDeclutterZoom.toFixed(2);
+    }
+
+    globalSettingsBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      globalSettingsPanel?.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!globalSettingsPanel?.classList.contains('show')) return;
+      if (globalSettingsPanel.contains(e.target) || globalSettingsBtn?.contains(e.target)) return;
+      globalSettingsPanel.classList.remove('show');
+    });
+
+    textScaleSlider?.addEventListener('input', () => {
+      globalTextScale = Number(textScaleSlider.value || 1);
+      localStorage.setItem('gcTextScale', String(globalTextScale));
+      applyGlobalSettingsUI();
+      render();
+    });
+
+    labelDeclutterSlider?.addEventListener('input', () => {
+      labelDeclutterZoom = Number(labelDeclutterSlider.value || 0.8);
+      localStorage.setItem('gcLabelDeclutterZoom', String(labelDeclutterZoom));
+      applyGlobalSettingsUI();
+      render();
+    });
+
+    applyGlobalSettingsUI();
 
     // ===== TAB NAVIGATION =====
     function isDesktopLayout() {
