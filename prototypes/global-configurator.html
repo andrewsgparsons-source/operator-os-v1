@@ -2047,8 +2047,8 @@
       text.setAttribute('dominant-baseline', 'middle');
       const organicMode = layoutMode === 'organic';
       const fontSize = isSmallScreen()
-        ? (organicMode ? (focused ? '16' : '14') : (focused ? '17' : '15'))
-        : (organicMode ? (focused ? '14' : '12') : (focused ? '15' : '13'));
+        ? (organicMode ? (focused ? '32' : '28') : (focused ? '34' : '30'))
+        : (organicMode ? (focused ? '28' : '24') : (focused ? '30' : '26'));
       text.setAttribute('font-size', fontSize);
       text.setAttribute('font-weight', organicMode ? (focused ? '650' : '520') : (focused ? '700' : '600'));
       text.setAttribute('fill', organicMode ? (focused ? '#154A6F' : '#286F92') : (focused ? '#143D6F' : '#1E5BA8'));
