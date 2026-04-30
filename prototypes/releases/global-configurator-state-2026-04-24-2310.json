@@ -8549,6 +8549,30 @@
       "resources": [],
       "createdAt": "2026-04-30T09:31:00+01:00",
       "createdBy": "andrew"
+    },
+    {
+      "id": "n35",
+      "label": "spider web knowledge topology",
+      "notes": "Use spider web geometry to represent high-tension relationship structures across complex datasets. Threads represent weighted links; hubs represent convergence points.",
+      "resources": [],
+      "createdAt": "2026-04-30T09:36:00+01:00",
+      "createdBy": "andrew"
+    },
+    {
+      "id": "n36",
+      "label": "web captures seeds interaction",
+      "notes": "Model capture events where drifting dandelion-seed nodes are intercepted by web threads, triggering thread illumination and path resolution to an anchor/root.",
+      "resources": [],
+      "createdAt": "2026-04-30T09:36:00+01:00",
+      "createdBy": "andrew"
+    },
+    {
+      "id": "n37",
+      "label": "creative visual metaphor stack",
+      "notes": "Purpose: develop creative, comprehensible visual languages for complex datasets using dandelion dispersal + spider web structure + capture dynamics.",
+      "resources": [],
+      "createdAt": "2026-04-30T09:36:00+01:00",
+      "createdBy": "andrew"
     }
   ],
   "links": [
@@ -9247,6 +9271,41 @@
     {
       "from": "n106",
       "to": "n34",
+      "type": "child"
+    },
+    {
+      "from": "n106",
+      "to": "n35",
+      "type": "child"
+    },
+    {
+      "from": "n106",
+      "to": "n36",
+      "type": "child"
+    },
+    {
+      "from": "n106",
+      "to": "n37",
+      "type": "child"
+    },
+    {
+      "from": "n35",
+      "to": "n36",
+      "type": "jump"
+    },
+    {
+      "from": "n36",
+      "to": "n35",
+      "type": "jump"
+    },
+    {
+      "from": "n37",
+      "to": "n35",
+      "type": "child"
+    },
+    {
+      "from": "n37",
+      "to": "n36",
       "type": "child"
     }
   ],
